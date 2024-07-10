@@ -7,7 +7,7 @@ import { allowAll } from "@keystone-6/core/access";
 
 // see https://keystonejs.com/docs/fields/overview for the full list of fields
 //   this is a few common fields for an example
-import { text, relationship, password, timestamp, select } from "@keystone-6/core/fields";
+import { text, relationship, password, timestamp, select, float } from "@keystone-6/core/fields";
 
 // when using Typescript, you can refine your types to a stricter subset by importing
 // the generated types from '.keystone/types'
@@ -21,9 +21,8 @@ export const lists: Lists = {
     //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: allowAll,
     fields: {
-      name: text({ validation: { isRequired: true } }),
+      username: text({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: text({
-        validation: { isRequired: true },
         isIndexed: "unique",
       }),
       phone: text({ validation: { isRequired: false } }),
@@ -40,6 +39,14 @@ export const lists: Lists = {
       ssid: text({ validation: { isRequired: false } }),
       password: password({ validation: { isRequired: true } }),
       workOrders: relationship({ ref: "WorkOrder.creator", many: true }),
+      applicationsToApply: relationship({
+        ref: "Application.applicant",
+        many: true,
+      }),
+      applications: relationship({
+        ref: "Application.creator",
+        many: true,
+      }),
     },
   }),
   WorkOrder: list({
@@ -49,6 +56,7 @@ export const lists: Lists = {
         ref: "User.workOrders",
         many: false,
       }),
+
       createdAt: timestamp({
         defaultValue: { kind: "now" },
       }),
@@ -71,9 +79,55 @@ export const lists: Lists = {
         ref: "WorkOrder.applications",
         many: false,
       }),
+      startedAt: timestamp(),
+      finishedAt: timestamp(),
       name: text({ validation: { isRequired: true } }),
       description: text({}),
-      price: text({ validation: { isRequired: true } }),
+      price: float({ validation: { isRequired: true, min: 0 } }),
+      amount: float({ validation: { isRequired: true, min: 0 } }),
+      product: relationship({
+        ref: "Product.applications",
+        many: false,
+      }),
+      applicant: relationship({
+        ref: "User.applicationsToApply",
+        many: false,
+      }),
+      creator: relationship({
+        ref: "User.applications",
+        many: false,
+      }),
+    },
+  }),
+  Product: list({
+    access: allowAll,
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      description: text({}),
+      price: float({ validation: { isRequired: true, min: 0 } }),
+      inStock: float({ validation: { isRequired: true, min: 0 } }),
+      productBrand: relationship({
+        ref: "ProductBrand.products",
+        many: false,
+      }),
+      pricedBy: select({
+        type: "string",
+        options: ["amount", "length"],
+        defaultValue: "amount",
+        validation: { isRequired: true },
+      }),
+      applications: relationship({
+        ref: "Application.product",
+        many: true,
+      }),
+      warrantyTime: float({ validation: { isRequired: false, min: 0 } }),
+    },
+  }),
+  ProductBrand: list({
+    access: allowAll,
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      products: relationship({ ref: "Product.productBrand", many: true }),
     },
   }),
   Car: list({
@@ -84,6 +138,10 @@ export const lists: Lists = {
         many: false,
       }),
       vin: text(),
+      carModel: relationship({
+        ref: "CarModel.cars",
+        many: false,
+      }),
       licensePlate: text({ validation: { isRequired: true } }),
       workOrders: relationship({ ref: "WorkOrder.car", many: true }),
     },
@@ -97,6 +155,7 @@ export const lists: Lists = {
     fields: {
       name: text({ validation: { isRequired: true } }),
       cars: relationship({ ref: "Car.carModel", many: true }),
+      carBrand: relationship({ ref: "CarBrand.carModels", many: false }),
     },
   }),
   CarBrand: list({
@@ -114,6 +173,7 @@ export const lists: Lists = {
       phone: text({ validation: { isRequired: false } }),
       firstname: text({ validation: { isRequired: true } }),
       lastname: text({ validation: { isRequired: false } }),
+      carModel: relationship({ ref: "CarModel.carBrand", many: true }),
       role: select({
         type: "string",
         options: ["admin", "customer", "employee", "manager"],

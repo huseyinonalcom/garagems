@@ -1,7 +1,11 @@
 {
-  "name": "keystone-app",
+  "name": "garagems",
   "version": "1.0.2",
   "private": true,
+  "author": {
+    "name": "Hüseyin Önal",
+    "email": "contact@huseyiononal.com"
+  },
   "scripts": {
     "dev": "keystone dev",
     "start": "keystone start",
