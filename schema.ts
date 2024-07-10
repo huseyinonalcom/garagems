@@ -166,24 +166,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       name: text({ validation: { isRequired: true } }),
-      email: text({
-        validation: { isRequired: true },
-        isIndexed: "unique",
-      }),
-      phone: text({ validation: { isRequired: false } }),
-      firstname: text({ validation: { isRequired: true } }),
-      lastname: text({ validation: { isRequired: false } }),
-      carModel: relationship({ ref: "CarModel.carBrand", many: true }),
-      role: select({
-        type: "string",
-        options: ["admin", "customer", "employee", "manager"],
-        defaultValue: "customer",
-        validation: { isRequired: true },
-        isIndexed: true,
-      }),
-      ssid: text({ validation: { isRequired: false } }),
-      password: password({ validation: { isRequired: true } }),
-      workOrders: relationship({ ref: "WorkOrder.creator", many: true }),
+      carModels: relationship({ ref: "CarModel.carBrand", many: true }),
     },
   }),
 };

@@ -3,22 +3,31 @@
 
 type User {
   id: ID!
-  name: String
+  username: String
   email: String
+  phone: String
+  firstname: String
+  lastname: String
+  role: String
+  cars(where: CarWhereInput! = {}, orderBy: [CarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarWhereUniqueInput): [Car!]
+  carsCount(where: CarWhereInput! = {}): Int
+  ssid: String
   password: PasswordState
-  posts(where: PostWhereInput! = {}, orderBy: [PostOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PostWhereUniqueInput): [Post!]
-  postsCount(where: PostWhereInput! = {}): Int
-  createdAt: DateTime
+  workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
+  workOrdersCount(where: WorkOrderWhereInput! = {}): Int
+  applicationsToApply(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  applicationsToApplyCount(where: ApplicationWhereInput! = {}): Int
+  applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  applicationsCount(where: ApplicationWhereInput! = {}): Int
 }
 
 type PasswordState {
   isSet: Boolean!
 }
 
-scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
-
 input UserWhereUniqueInput {
   id: ID
+  username: String
   email: String
 }
 
@@ -27,10 +36,17 @@ input UserWhereInput {
   OR: [UserWhereInput!]
   NOT: [UserWhereInput!]
   id: IDFilter
-  name: StringFilter
+  username: StringFilter
   email: StringFilter
-  posts: PostManyRelationFilter
-  createdAt: DateTimeNullableFilter
+  phone: StringFilter
+  firstname: StringFilter
+  lastname: StringFilter
+  role: StringFilter
+  cars: CarManyRelationFilter
+  ssid: StringFilter
+  workOrders: WorkOrderManyRelationFilter
+  applicationsToApply: ApplicationManyRelationFilter
+  applications: ApplicationManyRelationFilter
 }
 
 input IDFilter {
@@ -72,10 +88,139 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input PostManyRelationFilter {
-  every: PostWhereInput
-  some: PostWhereInput
-  none: PostWhereInput
+input CarManyRelationFilter {
+  every: CarWhereInput
+  some: CarWhereInput
+  none: CarWhereInput
+}
+
+input WorkOrderManyRelationFilter {
+  every: WorkOrderWhereInput
+  some: WorkOrderWhereInput
+  none: WorkOrderWhereInput
+}
+
+input ApplicationManyRelationFilter {
+  every: ApplicationWhereInput
+  some: ApplicationWhereInput
+  none: ApplicationWhereInput
+}
+
+input UserOrderByInput {
+  id: OrderDirection
+  username: OrderDirection
+  email: OrderDirection
+  phone: OrderDirection
+  firstname: OrderDirection
+  lastname: OrderDirection
+  role: OrderDirection
+  ssid: OrderDirection
+}
+
+enum OrderDirection {
+  asc
+  desc
+}
+
+input UserUpdateInput {
+  username: String
+  email: String
+  phone: String
+  firstname: String
+  lastname: String
+  role: String
+  cars: CarRelateToManyForUpdateInput
+  ssid: String
+  password: String
+  workOrders: WorkOrderRelateToManyForUpdateInput
+  applicationsToApply: ApplicationRelateToManyForUpdateInput
+  applications: ApplicationRelateToManyForUpdateInput
+}
+
+input CarRelateToManyForUpdateInput {
+  disconnect: [CarWhereUniqueInput!]
+  set: [CarWhereUniqueInput!]
+  create: [CarCreateInput!]
+  connect: [CarWhereUniqueInput!]
+}
+
+input WorkOrderRelateToManyForUpdateInput {
+  disconnect: [WorkOrderWhereUniqueInput!]
+  set: [WorkOrderWhereUniqueInput!]
+  create: [WorkOrderCreateInput!]
+  connect: [WorkOrderWhereUniqueInput!]
+}
+
+input ApplicationRelateToManyForUpdateInput {
+  disconnect: [ApplicationWhereUniqueInput!]
+  set: [ApplicationWhereUniqueInput!]
+  create: [ApplicationCreateInput!]
+  connect: [ApplicationWhereUniqueInput!]
+}
+
+input UserUpdateArgs {
+  where: UserWhereUniqueInput!
+  data: UserUpdateInput!
+}
+
+input UserCreateInput {
+  username: String
+  email: String
+  phone: String
+  firstname: String
+  lastname: String
+  role: String
+  cars: CarRelateToManyForCreateInput
+  ssid: String
+  password: String
+  workOrders: WorkOrderRelateToManyForCreateInput
+  applicationsToApply: ApplicationRelateToManyForCreateInput
+  applications: ApplicationRelateToManyForCreateInput
+}
+
+input CarRelateToManyForCreateInput {
+  create: [CarCreateInput!]
+  connect: [CarWhereUniqueInput!]
+}
+
+input WorkOrderRelateToManyForCreateInput {
+  create: [WorkOrderCreateInput!]
+  connect: [WorkOrderWhereUniqueInput!]
+}
+
+input ApplicationRelateToManyForCreateInput {
+  create: [ApplicationCreateInput!]
+  connect: [ApplicationWhereUniqueInput!]
+}
+
+type WorkOrder {
+  id: ID!
+  creator: User
+  createdAt: DateTime
+  startedAt: DateTime
+  finishedAt: DateTime
+  car: Car
+  applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  applicationsCount(where: ApplicationWhereInput! = {}): Int
+}
+
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
+
+input WorkOrderWhereUniqueInput {
+  id: ID
+}
+
+input WorkOrderWhereInput {
+  AND: [WorkOrderWhereInput!]
+  OR: [WorkOrderWhereInput!]
+  NOT: [WorkOrderWhereInput!]
+  id: IDFilter
+  creator: UserWhereInput
+  createdAt: DateTimeNullableFilter
+  startedAt: DateTimeNullableFilter
+  finishedAt: DateTimeNullableFilter
+  car: CarWhereInput
+  applications: ApplicationManyRelationFilter
 }
 
 input DateTimeNullableFilter {
@@ -89,94 +234,20 @@ input DateTimeNullableFilter {
   not: DateTimeNullableFilter
 }
 
-input UserOrderByInput {
+input WorkOrderOrderByInput {
   id: OrderDirection
-  name: OrderDirection
-  email: OrderDirection
   createdAt: OrderDirection
+  startedAt: OrderDirection
+  finishedAt: OrderDirection
 }
 
-enum OrderDirection {
-  asc
-  desc
-}
-
-input UserUpdateInput {
-  name: String
-  email: String
-  password: String
-  posts: PostRelateToManyForUpdateInput
+input WorkOrderUpdateInput {
+  creator: UserRelateToOneForUpdateInput
   createdAt: DateTime
-}
-
-input PostRelateToManyForUpdateInput {
-  disconnect: [PostWhereUniqueInput!]
-  set: [PostWhereUniqueInput!]
-  create: [PostCreateInput!]
-  connect: [PostWhereUniqueInput!]
-}
-
-input UserUpdateArgs {
-  where: UserWhereUniqueInput!
-  data: UserUpdateInput!
-}
-
-input UserCreateInput {
-  name: String
-  email: String
-  password: String
-  posts: PostRelateToManyForCreateInput
-  createdAt: DateTime
-}
-
-input PostRelateToManyForCreateInput {
-  create: [PostCreateInput!]
-  connect: [PostWhereUniqueInput!]
-}
-
-type Post {
-  id: ID!
-  title: String
-  content: Post_content_Document
-  author: User
-  tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
-  tagsCount(where: TagWhereInput! = {}): Int
-}
-
-type Post_content_Document {
-  document(hydrateRelationships: Boolean! = false): JSON!
-}
-
-input PostWhereUniqueInput {
-  id: ID
-}
-
-input PostWhereInput {
-  AND: [PostWhereInput!]
-  OR: [PostWhereInput!]
-  NOT: [PostWhereInput!]
-  id: IDFilter
-  title: StringFilter
-  author: UserWhereInput
-  tags: TagManyRelationFilter
-}
-
-input TagManyRelationFilter {
-  every: TagWhereInput
-  some: TagWhereInput
-  none: TagWhereInput
-}
-
-input PostOrderByInput {
-  id: OrderDirection
-  title: OrderDirection
-}
-
-input PostUpdateInput {
-  title: String
-  content: JSON
-  author: UserRelateToOneForUpdateInput
-  tags: TagRelateToManyForUpdateInput
+  startedAt: DateTime
+  finishedAt: DateTime
+  car: CarRelateToOneForUpdateInput
+  applications: ApplicationRelateToManyForUpdateInput
 }
 
 input UserRelateToOneForUpdateInput {
@@ -185,23 +256,24 @@ input UserRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input TagRelateToManyForUpdateInput {
-  disconnect: [TagWhereUniqueInput!]
-  set: [TagWhereUniqueInput!]
-  create: [TagCreateInput!]
-  connect: [TagWhereUniqueInput!]
+input CarRelateToOneForUpdateInput {
+  create: CarCreateInput
+  connect: CarWhereUniqueInput
+  disconnect: Boolean
 }
 
-input PostUpdateArgs {
-  where: PostWhereUniqueInput!
-  data: PostUpdateInput!
+input WorkOrderUpdateArgs {
+  where: WorkOrderWhereUniqueInput!
+  data: WorkOrderUpdateInput!
 }
 
-input PostCreateInput {
-  title: String
-  content: JSON
-  author: UserRelateToOneForCreateInput
-  tags: TagRelateToManyForCreateInput
+input WorkOrderCreateInput {
+  creator: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  startedAt: DateTime
+  finishedAt: DateTime
+  car: CarRelateToOneForCreateInput
+  applications: ApplicationRelateToManyForCreateInput
 }
 
 input UserRelateToOneForCreateInput {
@@ -209,49 +281,444 @@ input UserRelateToOneForCreateInput {
   connect: UserWhereUniqueInput
 }
 
-input TagRelateToManyForCreateInput {
-  create: [TagCreateInput!]
-  connect: [TagWhereUniqueInput!]
+input CarRelateToOneForCreateInput {
+  create: CarCreateInput
+  connect: CarWhereUniqueInput
 }
 
-type Tag {
+type Application {
   id: ID!
+  workOrder: WorkOrder
+  startedAt: DateTime
+  finishedAt: DateTime
   name: String
-  posts(where: PostWhereInput! = {}, orderBy: [PostOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PostWhereUniqueInput): [Post!]
-  postsCount(where: PostWhereInput! = {}): Int
+  description: String
+  price: Float
+  amount: Float
+  product: Product
+  applicant: User
+  creator: User
 }
 
-input TagWhereUniqueInput {
+input ApplicationWhereUniqueInput {
   id: ID
 }
 
-input TagWhereInput {
-  AND: [TagWhereInput!]
-  OR: [TagWhereInput!]
-  NOT: [TagWhereInput!]
+input ApplicationWhereInput {
+  AND: [ApplicationWhereInput!]
+  OR: [ApplicationWhereInput!]
+  NOT: [ApplicationWhereInput!]
   id: IDFilter
+  workOrder: WorkOrderWhereInput
+  startedAt: DateTimeNullableFilter
+  finishedAt: DateTimeNullableFilter
   name: StringFilter
-  posts: PostManyRelationFilter
+  description: StringFilter
+  price: FloatFilter
+  amount: FloatFilter
+  product: ProductWhereInput
+  applicant: UserWhereInput
+  creator: UserWhereInput
 }
 
-input TagOrderByInput {
+input FloatFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatFilter
+}
+
+input ApplicationOrderByInput {
+  id: OrderDirection
+  startedAt: OrderDirection
+  finishedAt: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  price: OrderDirection
+  amount: OrderDirection
+}
+
+input ApplicationUpdateInput {
+  workOrder: WorkOrderRelateToOneForUpdateInput
+  startedAt: DateTime
+  finishedAt: DateTime
+  name: String
+  description: String
+  price: Float
+  amount: Float
+  product: ProductRelateToOneForUpdateInput
+  applicant: UserRelateToOneForUpdateInput
+  creator: UserRelateToOneForUpdateInput
+}
+
+input WorkOrderRelateToOneForUpdateInput {
+  create: WorkOrderCreateInput
+  connect: WorkOrderWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ProductRelateToOneForUpdateInput {
+  create: ProductCreateInput
+  connect: ProductWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ApplicationUpdateArgs {
+  where: ApplicationWhereUniqueInput!
+  data: ApplicationUpdateInput!
+}
+
+input ApplicationCreateInput {
+  workOrder: WorkOrderRelateToOneForCreateInput
+  startedAt: DateTime
+  finishedAt: DateTime
+  name: String
+  description: String
+  price: Float
+  amount: Float
+  product: ProductRelateToOneForCreateInput
+  applicant: UserRelateToOneForCreateInput
+  creator: UserRelateToOneForCreateInput
+}
+
+input WorkOrderRelateToOneForCreateInput {
+  create: WorkOrderCreateInput
+  connect: WorkOrderWhereUniqueInput
+}
+
+input ProductRelateToOneForCreateInput {
+  create: ProductCreateInput
+  connect: ProductWhereUniqueInput
+}
+
+type Product {
+  id: ID!
+  name: String
+  description: String
+  price: Float
+  inStock: Float
+  productBrand: ProductBrand
+  pricedBy: String
+  applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  applicationsCount(where: ApplicationWhereInput! = {}): Int
+  warrantyTime: Float
+}
+
+input ProductWhereUniqueInput {
+  id: ID
+}
+
+input ProductWhereInput {
+  AND: [ProductWhereInput!]
+  OR: [ProductWhereInput!]
+  NOT: [ProductWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  description: StringFilter
+  price: FloatFilter
+  inStock: FloatFilter
+  productBrand: ProductBrandWhereInput
+  pricedBy: StringFilter
+  applications: ApplicationManyRelationFilter
+  warrantyTime: FloatNullableFilter
+}
+
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
+}
+
+input ProductOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  price: OrderDirection
+  inStock: OrderDirection
+  pricedBy: OrderDirection
+  warrantyTime: OrderDirection
+}
+
+input ProductUpdateInput {
+  name: String
+  description: String
+  price: Float
+  inStock: Float
+  productBrand: ProductBrandRelateToOneForUpdateInput
+  pricedBy: String
+  applications: ApplicationRelateToManyForUpdateInput
+  warrantyTime: Float
+}
+
+input ProductBrandRelateToOneForUpdateInput {
+  create: ProductBrandCreateInput
+  connect: ProductBrandWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ProductUpdateArgs {
+  where: ProductWhereUniqueInput!
+  data: ProductUpdateInput!
+}
+
+input ProductCreateInput {
+  name: String
+  description: String
+  price: Float
+  inStock: Float
+  productBrand: ProductBrandRelateToOneForCreateInput
+  pricedBy: String
+  applications: ApplicationRelateToManyForCreateInput
+  warrantyTime: Float
+}
+
+input ProductBrandRelateToOneForCreateInput {
+  create: ProductBrandCreateInput
+  connect: ProductBrandWhereUniqueInput
+}
+
+type ProductBrand {
+  id: ID!
+  name: String
+  products(where: ProductWhereInput! = {}, orderBy: [ProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductWhereUniqueInput): [Product!]
+  productsCount(where: ProductWhereInput! = {}): Int
+}
+
+input ProductBrandWhereUniqueInput {
+  id: ID
+}
+
+input ProductBrandWhereInput {
+  AND: [ProductBrandWhereInput!]
+  OR: [ProductBrandWhereInput!]
+  NOT: [ProductBrandWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  products: ProductManyRelationFilter
+}
+
+input ProductManyRelationFilter {
+  every: ProductWhereInput
+  some: ProductWhereInput
+  none: ProductWhereInput
+}
+
+input ProductBrandOrderByInput {
   id: OrderDirection
   name: OrderDirection
 }
 
-input TagUpdateInput {
+input ProductBrandUpdateInput {
   name: String
-  posts: PostRelateToManyForUpdateInput
+  products: ProductRelateToManyForUpdateInput
 }
 
-input TagUpdateArgs {
-  where: TagWhereUniqueInput!
-  data: TagUpdateInput!
+input ProductRelateToManyForUpdateInput {
+  disconnect: [ProductWhereUniqueInput!]
+  set: [ProductWhereUniqueInput!]
+  create: [ProductCreateInput!]
+  connect: [ProductWhereUniqueInput!]
 }
 
-input TagCreateInput {
+input ProductBrandUpdateArgs {
+  where: ProductBrandWhereUniqueInput!
+  data: ProductBrandUpdateInput!
+}
+
+input ProductBrandCreateInput {
   name: String
-  posts: PostRelateToManyForCreateInput
+  products: ProductRelateToManyForCreateInput
+}
+
+input ProductRelateToManyForCreateInput {
+  create: [ProductCreateInput!]
+  connect: [ProductWhereUniqueInput!]
+}
+
+type Car {
+  id: ID!
+  owner: User
+  vin: String
+  carModel: CarModel
+  licensePlate: String
+  workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
+  workOrdersCount(where: WorkOrderWhereInput! = {}): Int
+}
+
+input CarWhereUniqueInput {
+  id: ID
+}
+
+input CarWhereInput {
+  AND: [CarWhereInput!]
+  OR: [CarWhereInput!]
+  NOT: [CarWhereInput!]
+  id: IDFilter
+  owner: UserWhereInput
+  vin: StringFilter
+  carModel: CarModelWhereInput
+  licensePlate: StringFilter
+  workOrders: WorkOrderManyRelationFilter
+}
+
+input CarOrderByInput {
+  id: OrderDirection
+  vin: OrderDirection
+  licensePlate: OrderDirection
+}
+
+input CarUpdateInput {
+  owner: UserRelateToOneForUpdateInput
+  vin: String
+  carModel: CarModelRelateToOneForUpdateInput
+  licensePlate: String
+  workOrders: WorkOrderRelateToManyForUpdateInput
+}
+
+input CarModelRelateToOneForUpdateInput {
+  create: CarModelCreateInput
+  connect: CarModelWhereUniqueInput
+  disconnect: Boolean
+}
+
+input CarUpdateArgs {
+  where: CarWhereUniqueInput!
+  data: CarUpdateInput!
+}
+
+input CarCreateInput {
+  owner: UserRelateToOneForCreateInput
+  vin: String
+  carModel: CarModelRelateToOneForCreateInput
+  licensePlate: String
+  workOrders: WorkOrderRelateToManyForCreateInput
+}
+
+input CarModelRelateToOneForCreateInput {
+  create: CarModelCreateInput
+  connect: CarModelWhereUniqueInput
+}
+
+type CarModel {
+  id: ID!
+  name: String
+  cars(where: CarWhereInput! = {}, orderBy: [CarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarWhereUniqueInput): [Car!]
+  carsCount(where: CarWhereInput! = {}): Int
+  carBrand: CarBrand
+}
+
+input CarModelWhereUniqueInput {
+  id: ID
+}
+
+input CarModelWhereInput {
+  AND: [CarModelWhereInput!]
+  OR: [CarModelWhereInput!]
+  NOT: [CarModelWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  cars: CarManyRelationFilter
+  carBrand: CarBrandWhereInput
+}
+
+input CarModelOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+}
+
+input CarModelUpdateInput {
+  name: String
+  cars: CarRelateToManyForUpdateInput
+  carBrand: CarBrandRelateToOneForUpdateInput
+}
+
+input CarBrandRelateToOneForUpdateInput {
+  create: CarBrandCreateInput
+  connect: CarBrandWhereUniqueInput
+  disconnect: Boolean
+}
+
+input CarModelUpdateArgs {
+  where: CarModelWhereUniqueInput!
+  data: CarModelUpdateInput!
+}
+
+input CarModelCreateInput {
+  name: String
+  cars: CarRelateToManyForCreateInput
+  carBrand: CarBrandRelateToOneForCreateInput
+}
+
+input CarBrandRelateToOneForCreateInput {
+  create: CarBrandCreateInput
+  connect: CarBrandWhereUniqueInput
+}
+
+type CarBrand {
+  id: ID!
+  name: String
+  carModels(where: CarModelWhereInput! = {}, orderBy: [CarModelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarModelWhereUniqueInput): [CarModel!]
+  carModelsCount(where: CarModelWhereInput! = {}): Int
+}
+
+input CarBrandWhereUniqueInput {
+  id: ID
+}
+
+input CarBrandWhereInput {
+  AND: [CarBrandWhereInput!]
+  OR: [CarBrandWhereInput!]
+  NOT: [CarBrandWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  carModels: CarModelManyRelationFilter
+}
+
+input CarModelManyRelationFilter {
+  every: CarModelWhereInput
+  some: CarModelWhereInput
+  none: CarModelWhereInput
+}
+
+input CarBrandOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+}
+
+input CarBrandUpdateInput {
+  name: String
+  carModels: CarModelRelateToManyForUpdateInput
+}
+
+input CarModelRelateToManyForUpdateInput {
+  disconnect: [CarModelWhereUniqueInput!]
+  set: [CarModelWhereUniqueInput!]
+  create: [CarModelCreateInput!]
+  connect: [CarModelWhereUniqueInput!]
+}
+
+input CarBrandUpdateArgs {
+  where: CarBrandWhereUniqueInput!
+  data: CarBrandUpdateInput!
+}
+
+input CarBrandCreateInput {
+  name: String
+  carModels: CarModelRelateToManyForCreateInput
+}
+
+input CarModelRelateToManyForCreateInput {
+  create: [CarModelCreateInput!]
+  connect: [CarModelWhereUniqueInput!]
 }
 
 """
@@ -266,20 +733,50 @@ type Mutation {
   updateUsers(data: [UserUpdateArgs!]!): [User]
   deleteUser(where: UserWhereUniqueInput!): User
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
-  createPost(data: PostCreateInput!): Post
-  createPosts(data: [PostCreateInput!]!): [Post]
-  updatePost(where: PostWhereUniqueInput!, data: PostUpdateInput!): Post
-  updatePosts(data: [PostUpdateArgs!]!): [Post]
-  deletePost(where: PostWhereUniqueInput!): Post
-  deletePosts(where: [PostWhereUniqueInput!]!): [Post]
-  createTag(data: TagCreateInput!): Tag
-  createTags(data: [TagCreateInput!]!): [Tag]
-  updateTag(where: TagWhereUniqueInput!, data: TagUpdateInput!): Tag
-  updateTags(data: [TagUpdateArgs!]!): [Tag]
-  deleteTag(where: TagWhereUniqueInput!): Tag
-  deleteTags(where: [TagWhereUniqueInput!]!): [Tag]
+  createWorkOrder(data: WorkOrderCreateInput!): WorkOrder
+  createWorkOrders(data: [WorkOrderCreateInput!]!): [WorkOrder]
+  updateWorkOrder(where: WorkOrderWhereUniqueInput!, data: WorkOrderUpdateInput!): WorkOrder
+  updateWorkOrders(data: [WorkOrderUpdateArgs!]!): [WorkOrder]
+  deleteWorkOrder(where: WorkOrderWhereUniqueInput!): WorkOrder
+  deleteWorkOrders(where: [WorkOrderWhereUniqueInput!]!): [WorkOrder]
+  createApplication(data: ApplicationCreateInput!): Application
+  createApplications(data: [ApplicationCreateInput!]!): [Application]
+  updateApplication(where: ApplicationWhereUniqueInput!, data: ApplicationUpdateInput!): Application
+  updateApplications(data: [ApplicationUpdateArgs!]!): [Application]
+  deleteApplication(where: ApplicationWhereUniqueInput!): Application
+  deleteApplications(where: [ApplicationWhereUniqueInput!]!): [Application]
+  createProduct(data: ProductCreateInput!): Product
+  createProducts(data: [ProductCreateInput!]!): [Product]
+  updateProduct(where: ProductWhereUniqueInput!, data: ProductUpdateInput!): Product
+  updateProducts(data: [ProductUpdateArgs!]!): [Product]
+  deleteProduct(where: ProductWhereUniqueInput!): Product
+  deleteProducts(where: [ProductWhereUniqueInput!]!): [Product]
+  createProductBrand(data: ProductBrandCreateInput!): ProductBrand
+  createProductBrands(data: [ProductBrandCreateInput!]!): [ProductBrand]
+  updateProductBrand(where: ProductBrandWhereUniqueInput!, data: ProductBrandUpdateInput!): ProductBrand
+  updateProductBrands(data: [ProductBrandUpdateArgs!]!): [ProductBrand]
+  deleteProductBrand(where: ProductBrandWhereUniqueInput!): ProductBrand
+  deleteProductBrands(where: [ProductBrandWhereUniqueInput!]!): [ProductBrand]
+  createCar(data: CarCreateInput!): Car
+  createCars(data: [CarCreateInput!]!): [Car]
+  updateCar(where: CarWhereUniqueInput!, data: CarUpdateInput!): Car
+  updateCars(data: [CarUpdateArgs!]!): [Car]
+  deleteCar(where: CarWhereUniqueInput!): Car
+  deleteCars(where: [CarWhereUniqueInput!]!): [Car]
+  createCarModel(data: CarModelCreateInput!): CarModel
+  createCarModels(data: [CarModelCreateInput!]!): [CarModel]
+  updateCarModel(where: CarModelWhereUniqueInput!, data: CarModelUpdateInput!): CarModel
+  updateCarModels(data: [CarModelUpdateArgs!]!): [CarModel]
+  deleteCarModel(where: CarModelWhereUniqueInput!): CarModel
+  deleteCarModels(where: [CarModelWhereUniqueInput!]!): [CarModel]
+  createCarBrand(data: CarBrandCreateInput!): CarBrand
+  createCarBrands(data: [CarBrandCreateInput!]!): [CarBrand]
+  updateCarBrand(where: CarBrandWhereUniqueInput!, data: CarBrandUpdateInput!): CarBrand
+  updateCarBrands(data: [CarBrandUpdateArgs!]!): [CarBrand]
+  deleteCarBrand(where: CarBrandWhereUniqueInput!): CarBrand
+  deleteCarBrands(where: [CarBrandWhereUniqueInput!]!): [CarBrand]
   endSession: Boolean!
-  authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
+  authenticateUserWithPassword(username: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
 }
 
@@ -295,8 +792,10 @@ type UserAuthenticationWithPasswordFailure {
 }
 
 input CreateInitialUserInput {
-  name: String
+  username: String
   email: String
+  firstname: String
+  role: String
   password: String
 }
 
@@ -304,12 +803,27 @@ type Query {
   users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   user(where: UserWhereUniqueInput!): User
   usersCount(where: UserWhereInput! = {}): Int
-  posts(where: PostWhereInput! = {}, orderBy: [PostOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PostWhereUniqueInput): [Post!]
-  post(where: PostWhereUniqueInput!): Post
-  postsCount(where: PostWhereInput! = {}): Int
-  tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
-  tag(where: TagWhereUniqueInput!): Tag
-  tagsCount(where: TagWhereInput! = {}): Int
+  workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
+  workOrder(where: WorkOrderWhereUniqueInput!): WorkOrder
+  workOrdersCount(where: WorkOrderWhereInput! = {}): Int
+  applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  application(where: ApplicationWhereUniqueInput!): Application
+  applicationsCount(where: ApplicationWhereInput! = {}): Int
+  products(where: ProductWhereInput! = {}, orderBy: [ProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductWhereUniqueInput): [Product!]
+  product(where: ProductWhereUniqueInput!): Product
+  productsCount(where: ProductWhereInput! = {}): Int
+  productBrands(where: ProductBrandWhereInput! = {}, orderBy: [ProductBrandOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductBrandWhereUniqueInput): [ProductBrand!]
+  productBrand(where: ProductBrandWhereUniqueInput!): ProductBrand
+  productBrandsCount(where: ProductBrandWhereInput! = {}): Int
+  cars(where: CarWhereInput! = {}, orderBy: [CarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarWhereUniqueInput): [Car!]
+  car(where: CarWhereUniqueInput!): Car
+  carsCount(where: CarWhereInput! = {}): Int
+  carModels(where: CarModelWhereInput! = {}, orderBy: [CarModelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarModelWhereUniqueInput): [CarModel!]
+  carModel(where: CarModelWhereUniqueInput!): CarModel
+  carModelsCount(where: CarModelWhereInput! = {}): Int
+  carBrands(where: CarBrandWhereInput! = {}, orderBy: [CarBrandOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarBrandWhereUniqueInput): [CarBrand!]
+  carBrand(where: CarBrandWhereUniqueInput!): CarBrand
+  carBrandsCount(where: CarBrandWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

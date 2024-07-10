@@ -29,7 +29,6 @@ var import_core2 = require("@keystone-6/core");
 var import_core = require("@keystone-6/core");
 var import_access = require("@keystone-6/core/access");
 var import_fields = require("@keystone-6/core/fields");
-var import_fields_document = require("@keystone-6/fields-document");
 var lists = {
   User: (0, import_core.list)({
     // WARNING
@@ -37,100 +36,152 @@ var lists = {
     //   if you want to prevent random people on the internet from accessing your data,
     //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: import_access.allowAll,
-    // this is the fields for our User list
     fields: {
-      // by adding isRequired, we enforce that every User should have a name
-      //   if no name is provided, an error will be displayed
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      username: (0, import_fields.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: (0, import_fields.text)({
-        validation: { isRequired: true },
-        // by adding isIndexed: 'unique', we're saying that no user can have the same
-        // email as another user - this may or may not be a good idea for your project
         isIndexed: "unique"
       }),
+      phone: (0, import_fields.text)({ validation: { isRequired: false } }),
+      firstname: (0, import_fields.text)({ validation: { isRequired: true } }),
+      lastname: (0, import_fields.text)({ validation: { isRequired: false } }),
+      role: (0, import_fields.select)({
+        type: "string",
+        options: ["admin", "customer", "employee", "manager"],
+        defaultValue: "customer",
+        validation: { isRequired: true },
+        isIndexed: true
+      }),
+      cars: (0, import_fields.relationship)({ ref: "Car.owner", many: true }),
+      ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
       password: (0, import_fields.password)({ validation: { isRequired: true } }),
-      // we can use this field to see what Posts this User has authored
-      //   more on that in the Post list below
-      posts: (0, import_fields.relationship)({ ref: "Post.author", many: true }),
-      createdAt: (0, import_fields.timestamp)({
-        // this sets the timestamp to Date.now() when the user is first created
-        defaultValue: { kind: "now" }
+      workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
+      applicationsToApply: (0, import_fields.relationship)({
+        ref: "Application.applicant",
+        many: true
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.creator",
+        many: true
       })
     }
   }),
-  Post: (0, import_core.list)({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
+  WorkOrder: (0, import_core.list)({
     access: import_access.allowAll,
-    // this is the fields for our Post list
     fields: {
-      title: (0, import_fields.text)({ validation: { isRequired: true } }),
-      // the document field can be used for making rich editable content
-      //   you can find out more at https://keystonejs.com/docs/guides/document-fields
-      content: (0, import_fields_document.document)({
-        formatting: true,
-        layouts: [
-          [1, 1],
-          [1, 1, 1],
-          [2, 1],
-          [1, 2],
-          [1, 2, 1]
-        ],
-        links: true,
-        dividers: true
-      }),
-      // with this field, you can set a User as the author for a Post
-      author: (0, import_fields.relationship)({
-        // we could have used 'User', but then the relationship would only be 1-way
-        ref: "User.posts",
-        // this is some customisations for changing how this will look in the AdminUI
-        ui: {
-          displayMode: "cards",
-          cardFields: ["name", "email"],
-          inlineEdit: { fields: ["name", "email"] },
-          linkToItem: true,
-          inlineConnect: true
-        },
-        // a Post can only have one author
-        //   this is the default, but we show it here for verbosity
+      creator: (0, import_fields.relationship)({
+        ref: "User.workOrders",
         many: false
       }),
-      // with this field, you can add some Tags to Posts
-      tags: (0, import_fields.relationship)({
-        // we could have used 'Tag', but then the relationship would only be 1-way
-        ref: "Tag.posts",
-        // a Post can have many Tags, not just one
-        many: true,
-        // this is some customisations for changing how this will look in the AdminUI
-        ui: {
-          displayMode: "cards",
-          cardFields: ["name"],
-          inlineEdit: { fields: ["name"] },
-          linkToItem: true,
-          inlineConnect: true,
-          inlineCreate: { fields: ["name"] }
-        }
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" }
+      }),
+      startedAt: (0, import_fields.timestamp)(),
+      finishedAt: (0, import_fields.timestamp)(),
+      car: (0, import_fields.relationship)({
+        ref: "Car.workOrders",
+        many: false
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.workOrder",
+        many: true
       })
     }
   }),
-  // this last list is our Tag list, it only has a name field for now
-  Tag: (0, import_core.list)({
+  Application: (0, import_core.list)({
+    access: import_access.allowAll,
+    fields: {
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.applications",
+        many: false
+      }),
+      startedAt: (0, import_fields.timestamp)(),
+      finishedAt: (0, import_fields.timestamp)(),
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      description: (0, import_fields.text)({}),
+      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      product: (0, import_fields.relationship)({
+        ref: "Product.applications",
+        many: false
+      }),
+      applicant: (0, import_fields.relationship)({
+        ref: "User.applicationsToApply",
+        many: false
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.applications",
+        many: false
+      })
+    }
+  }),
+  Product: (0, import_core.list)({
+    access: import_access.allowAll,
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      description: (0, import_fields.text)({}),
+      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      inStock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      productBrand: (0, import_fields.relationship)({
+        ref: "ProductBrand.products",
+        many: false
+      }),
+      pricedBy: (0, import_fields.select)({
+        type: "string",
+        options: ["amount", "length"],
+        defaultValue: "amount",
+        validation: { isRequired: true }
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.product",
+        many: true
+      }),
+      warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } })
+    }
+  }),
+  ProductBrand: (0, import_core.list)({
+    access: import_access.allowAll,
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      products: (0, import_fields.relationship)({ ref: "Product.productBrand", many: true })
+    }
+  }),
+  Car: (0, import_core.list)({
+    access: import_access.allowAll,
+    fields: {
+      owner: (0, import_fields.relationship)({
+        ref: "User.cars",
+        many: false
+      }),
+      vin: (0, import_fields.text)(),
+      carModel: (0, import_fields.relationship)({
+        ref: "CarModel.cars",
+        many: false
+      }),
+      licensePlate: (0, import_fields.text)({ validation: { isRequired: true } }),
+      workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.car", many: true })
+    }
+  }),
+  CarModel: (0, import_core.list)({
     // WARNING
     //   for this starter project, anyone can create, query, update and delete anything
     //   if you want to prevent random people on the internet from accessing your data,
     //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: import_access.allowAll,
-    // setting this to isHidden for the user interface prevents this list being visible in the Admin UI
-    ui: {
-      isHidden: true
-    },
-    // this is the fields for our Tag list
     fields: {
-      name: (0, import_fields.text)(),
-      // this can be helpful to find out all the Posts associated with a Tag
-      posts: (0, import_fields.relationship)({ ref: "Post.tags", many: true })
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      cars: (0, import_fields.relationship)({ ref: "Car.carModel", many: true }),
+      carBrand: (0, import_fields.relationship)({ ref: "CarBrand.carModels", many: false })
+    }
+  }),
+  CarBrand: (0, import_core.list)({
+    // WARNING
+    //   for this starter project, anyone can create, query, update and delete anything
+    //   if you want to prevent random people on the internet from accessing your data,
+    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
+    access: import_access.allowAll,
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
     }
   })
 };
@@ -145,11 +196,11 @@ if (!sessionSecret && process.env.NODE_ENV !== "production") {
 }
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
-  identityField: "email",
+  identityField: "username",
   // this is a GraphQL query fragment for fetching what data will be attached to a context.session
   //   this can be helpful for when you are writing your access control functions
   //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
-  sessionData: "name createdAt",
+  sessionData: "username role",
   secretField: "password",
   // WARNING: remove initFirstItem functionality in production
   //   see https://keystonejs.com/docs/config/auth#init-first-item for more
@@ -157,7 +208,7 @@ var { withAuth } = (0, import_auth.createAuth)({
     // if there are no items in the database, by configuring this field
     //   you are asking the Keystone AdminUI to create a new user
     //   providing inputs for these fields
-    fields: ["name", "email", "password"]
+    fields: ["username", "firstname", "role", "email", "password"]
     // it uses context.sudo() to do this, which bypasses any access control you might have
     //   you shouldn't use this in production
   }

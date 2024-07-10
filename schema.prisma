@@ -12,27 +12,108 @@ generator client {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String    @default("")
-  email     String    @unique @default("")
-  password  String
-  posts     Post[]    @relation("Post_author")
-  createdAt DateTime? @default(now())
+  id                  String        @id @default(cuid())
+  username            String        @unique @default("")
+  email               String        @unique @default("")
+  phone               String        @default("")
+  firstname           String        @default("")
+  lastname            String        @default("")
+  role                String        @default("customer")
+  cars                Car[]         @relation("Car_owner")
+  ssid                String        @default("")
+  password            String
+  workOrders          WorkOrder[]   @relation("WorkOrder_creator")
+  applicationsToApply Application[] @relation("Application_applicant")
+  applications        Application[] @relation("Application_creator")
+
+  @@index([role])
 }
 
-model Post {
-  id       String  @id @default(cuid())
-  title    String  @default("")
-  content  String  @default("[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"}]}]")
-  author   User?   @relation("Post_author", fields: [authorId], references: [id])
-  authorId String? @map("author")
-  tags     Tag[]   @relation("Post_tags")
+model WorkOrder {
+  id           String        @id @default(cuid())
+  creator      User?         @relation("WorkOrder_creator", fields: [creatorId], references: [id])
+  creatorId    String?       @map("creator")
+  createdAt    DateTime?     @default(now())
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
+  carId        String?       @map("car")
+  applications Application[] @relation("Application_workOrder")
 
-  @@index([authorId])
+  @@index([creatorId])
+  @@index([carId])
 }
 
-model Tag {
-  id    String @id @default(cuid())
-  name  String @default("")
-  posts Post[] @relation("Post_tags")
+model Application {
+  id          String     @id @default(cuid())
+  workOrder   WorkOrder? @relation("Application_workOrder", fields: [workOrderId], references: [id])
+  workOrderId String?    @map("workOrder")
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  name        String     @default("")
+  description String     @default("")
+  price       Float
+  amount      Float
+  product     Product?   @relation("Application_product", fields: [productId], references: [id])
+  productId   String?    @map("product")
+  applicant   User?      @relation("Application_applicant", fields: [applicantId], references: [id])
+  applicantId String?    @map("applicant")
+  creator     User?      @relation("Application_creator", fields: [creatorId], references: [id])
+  creatorId   String?    @map("creator")
+
+  @@index([workOrderId])
+  @@index([productId])
+  @@index([applicantId])
+  @@index([creatorId])
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  name           String        @default("")
+  description    String        @default("")
+  price          Float
+  inStock        Float
+  productBrand   ProductBrand? @relation("Product_productBrand", fields: [productBrandId], references: [id])
+  productBrandId String?       @map("productBrand")
+  pricedBy       String        @default("amount")
+  applications   Application[] @relation("Application_product")
+  warrantyTime   Float?
+
+  @@index([productBrandId])
+}
+
+model ProductBrand {
+  id       String    @id @default(cuid())
+  name     String    @default("")
+  products Product[] @relation("Product_productBrand")
+}
+
+model Car {
+  id           String      @id @default(cuid())
+  owner        User?       @relation("Car_owner", fields: [ownerId], references: [id])
+  ownerId      String?     @map("owner")
+  vin          String      @default("")
+  carModel     CarModel?   @relation("Car_carModel", fields: [carModelId], references: [id])
+  carModelId   String?     @map("carModel")
+  licensePlate String      @default("")
+  workOrders   WorkOrder[] @relation("WorkOrder_car")
+
+  @@index([ownerId])
+  @@index([carModelId])
+}
+
+model CarModel {
+  id         String    @id @default(cuid())
+  name       String    @default("")
+  cars       Car[]     @relation("Car_carModel")
+  carBrand   CarBrand? @relation("CarModel_carBrand", fields: [carBrandId], references: [id])
+  carBrandId String?   @map("carBrand")
+
+  @@index([carBrandId])
+}
+
+model CarBrand {
+  id        String     @id @default(cuid())
+  name      String     @default("")
+  carModels CarModel[] @relation("CarModel_carBrand")
 }
