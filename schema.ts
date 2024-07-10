@@ -1,24 +1,18 @@
-// This file is where we define the lists, fields and hooks for our data.
-// If you want to learn more about how lists are configured, please read
 // - https://keystonejs.com/docs/config/lists
+// see https://keystonejs.com/docs/fields/overview for the full list of fields
 
 import { list } from "@keystone-6/core";
+import type { Lists } from ".keystone/types";
 import { allowAll } from "@keystone-6/core/access";
-
-// see https://keystonejs.com/docs/fields/overview for the full list of fields
-//   this is a few common fields for an example
 import { text, relationship, password, timestamp, select, float } from "@keystone-6/core/fields";
 
-// when using Typescript, you can refine your types to a stricter subset by importing
-// the generated types from '.keystone/types'
-import type { Lists } from ".keystone/types";
+// WARNING
+//   for this starter project, anyone can create, query, update and delete anything
+//   if you want to prevent random people on the internet from accessing your data,
+//   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
 
 export const lists: Lists = {
   User: list({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: allowAll,
     fields: {
       username: text({ validation: { isRequired: true }, isIndexed: "unique" }),
@@ -56,9 +50,15 @@ export const lists: Lists = {
         ref: "User.workOrders",
         many: false,
       }),
-
       createdAt: timestamp({
         defaultValue: { kind: "now" },
+        isOrderable: true,
+      }),
+      status: select({
+        type: "string",
+        options: ["active", "inactive", "finished", "canceled"],
+        defaultValue: "inactive",
+        validation: { isRequired: true },
       }),
       startedAt: timestamp(),
       finishedAt: timestamp(),
@@ -66,6 +66,8 @@ export const lists: Lists = {
         ref: "Car.workOrders",
         many: false,
       }),
+      notes: text({}),
+      reduction: float({ validation: { isRequired: false, min: 0 } }),
       applications: relationship({
         ref: "Application.workOrder",
         many: true,
@@ -97,6 +99,20 @@ export const lists: Lists = {
         ref: "User.applications",
         many: false,
       }),
+      type: relationship({
+        ref: "ApplicationType.applications",
+        many: false,
+      }),
+    },
+  }),
+  ApplicationType: list({
+    access: allowAll,
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      applications: relationship({
+        ref: "Application.type",
+        many: true,
+      }),
     },
   }),
   Product: list({
@@ -105,7 +121,15 @@ export const lists: Lists = {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
-      inStock: float({ validation: { isRequired: true, min: 0 } }),
+      stock: float({ validation: { isRequired: true, min: 0 } }),
+      status: select({
+        type: "string",
+        options: ["active", "inactive", "discontinued"],
+        defaultValue: "active",
+        validation: { isRequired: true },
+      }),
+      code: text({}),
+      ean: text({}),
       productBrand: relationship({
         ref: "ProductBrand.products",
         many: false,
@@ -147,10 +171,6 @@ export const lists: Lists = {
     },
   }),
   CarModel: list({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: allowAll,
     fields: {
       name: text({ validation: { isRequired: true } }),
@@ -159,10 +179,6 @@ export const lists: Lists = {
     },
   }),
   CarBrand: list({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: allowAll,
     fields: {
       name: text({ validation: { isRequired: true } }),

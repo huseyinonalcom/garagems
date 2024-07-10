@@ -31,10 +31,6 @@ var import_access = require("@keystone-6/core/access");
 var import_fields = require("@keystone-6/core/fields");
 var lists = {
   User: (0, import_core.list)({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: import_access.allowAll,
     fields: {
       username: (0, import_fields.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
@@ -73,7 +69,14 @@ var lists = {
         many: false
       }),
       createdAt: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" }
+        defaultValue: { kind: "now" },
+        isOrderable: true
+      }),
+      status: (0, import_fields.select)({
+        type: "string",
+        options: ["active", "inactive", "finished", "canceled"],
+        defaultValue: "inactive",
+        validation: { isRequired: true }
       }),
       startedAt: (0, import_fields.timestamp)(),
       finishedAt: (0, import_fields.timestamp)(),
@@ -81,6 +84,8 @@ var lists = {
         ref: "Car.workOrders",
         many: false
       }),
+      notes: (0, import_fields.text)({}),
+      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       applications: (0, import_fields.relationship)({
         ref: "Application.workOrder",
         many: true
@@ -111,6 +116,20 @@ var lists = {
       creator: (0, import_fields.relationship)({
         ref: "User.applications",
         many: false
+      }),
+      type: (0, import_fields.relationship)({
+        ref: "ApplicationType.applications",
+        many: false
+      })
+    }
+  }),
+  ApplicationType: (0, import_core.list)({
+    access: import_access.allowAll,
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.type",
+        many: true
       })
     }
   }),
@@ -120,7 +139,15 @@ var lists = {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      inStock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      stock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      status: (0, import_fields.select)({
+        type: "string",
+        options: ["active", "inactive", "discontinued"],
+        defaultValue: "active",
+        validation: { isRequired: true }
+      }),
+      code: (0, import_fields.text)({}),
+      ean: (0, import_fields.text)({}),
       productBrand: (0, import_fields.relationship)({
         ref: "ProductBrand.products",
         many: false
@@ -162,10 +189,6 @@ var lists = {
     }
   }),
   CarModel: (0, import_core.list)({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: import_access.allowAll,
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
@@ -174,10 +197,6 @@ var lists = {
     }
   }),
   CarBrand: (0, import_core.list)({
-    // WARNING
-    //   for this starter project, anyone can create, query, update and delete anything
-    //   if you want to prevent random people on the internet from accessing your data,
-    //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
     access: import_access.allowAll,
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),

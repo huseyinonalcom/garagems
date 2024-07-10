@@ -197,9 +197,12 @@ type WorkOrder {
   id: ID!
   creator: User
   createdAt: DateTime
+  status: String
   startedAt: DateTime
   finishedAt: DateTime
   car: Car
+  notes: String
+  reduction: Float
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
 }
@@ -217,9 +220,12 @@ input WorkOrderWhereInput {
   id: IDFilter
   creator: UserWhereInput
   createdAt: DateTimeNullableFilter
+  status: StringFilter
   startedAt: DateTimeNullableFilter
   finishedAt: DateTimeNullableFilter
   car: CarWhereInput
+  notes: StringFilter
+  reduction: FloatNullableFilter
   applications: ApplicationManyRelationFilter
 }
 
@@ -234,19 +240,36 @@ input DateTimeNullableFilter {
   not: DateTimeNullableFilter
 }
 
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
+}
+
 input WorkOrderOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
+  status: OrderDirection
   startedAt: OrderDirection
   finishedAt: OrderDirection
+  notes: OrderDirection
+  reduction: OrderDirection
 }
 
 input WorkOrderUpdateInput {
   creator: UserRelateToOneForUpdateInput
   createdAt: DateTime
+  status: String
   startedAt: DateTime
   finishedAt: DateTime
   car: CarRelateToOneForUpdateInput
+  notes: String
+  reduction: Float
   applications: ApplicationRelateToManyForUpdateInput
 }
 
@@ -270,9 +293,12 @@ input WorkOrderUpdateArgs {
 input WorkOrderCreateInput {
   creator: UserRelateToOneForCreateInput
   createdAt: DateTime
+  status: String
   startedAt: DateTime
   finishedAt: DateTime
   car: CarRelateToOneForCreateInput
+  notes: String
+  reduction: Float
   applications: ApplicationRelateToManyForCreateInput
 }
 
@@ -298,6 +324,7 @@ type Application {
   product: Product
   applicant: User
   creator: User
+  type: ApplicationType
 }
 
 input ApplicationWhereUniqueInput {
@@ -319,6 +346,7 @@ input ApplicationWhereInput {
   product: ProductWhereInput
   applicant: UserWhereInput
   creator: UserWhereInput
+  type: ApplicationTypeWhereInput
 }
 
 input FloatFilter {
@@ -353,6 +381,7 @@ input ApplicationUpdateInput {
   product: ProductRelateToOneForUpdateInput
   applicant: UserRelateToOneForUpdateInput
   creator: UserRelateToOneForUpdateInput
+  type: ApplicationTypeRelateToOneForUpdateInput
 }
 
 input WorkOrderRelateToOneForUpdateInput {
@@ -364,6 +393,12 @@ input WorkOrderRelateToOneForUpdateInput {
 input ProductRelateToOneForUpdateInput {
   create: ProductCreateInput
   connect: ProductWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ApplicationTypeRelateToOneForUpdateInput {
+  create: ApplicationTypeCreateInput
+  connect: ApplicationTypeWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -383,6 +418,7 @@ input ApplicationCreateInput {
   product: ProductRelateToOneForCreateInput
   applicant: UserRelateToOneForCreateInput
   creator: UserRelateToOneForCreateInput
+  type: ApplicationTypeRelateToOneForCreateInput
 }
 
 input WorkOrderRelateToOneForCreateInput {
@@ -395,12 +431,60 @@ input ProductRelateToOneForCreateInput {
   connect: ProductWhereUniqueInput
 }
 
+input ApplicationTypeRelateToOneForCreateInput {
+  create: ApplicationTypeCreateInput
+  connect: ApplicationTypeWhereUniqueInput
+}
+
+type ApplicationType {
+  id: ID!
+  name: String
+  applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
+  applicationsCount(where: ApplicationWhereInput! = {}): Int
+}
+
+input ApplicationTypeWhereUniqueInput {
+  id: ID
+}
+
+input ApplicationTypeWhereInput {
+  AND: [ApplicationTypeWhereInput!]
+  OR: [ApplicationTypeWhereInput!]
+  NOT: [ApplicationTypeWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  applications: ApplicationManyRelationFilter
+}
+
+input ApplicationTypeOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+}
+
+input ApplicationTypeUpdateInput {
+  name: String
+  applications: ApplicationRelateToManyForUpdateInput
+}
+
+input ApplicationTypeUpdateArgs {
+  where: ApplicationTypeWhereUniqueInput!
+  data: ApplicationTypeUpdateInput!
+}
+
+input ApplicationTypeCreateInput {
+  name: String
+  applications: ApplicationRelateToManyForCreateInput
+}
+
 type Product {
   id: ID!
   name: String
   description: String
   price: Float
-  inStock: Float
+  stock: Float
+  status: String
+  code: String
+  ean: String
   productBrand: ProductBrand
   pricedBy: String
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
@@ -420,22 +504,14 @@ input ProductWhereInput {
   name: StringFilter
   description: StringFilter
   price: FloatFilter
-  inStock: FloatFilter
+  stock: FloatFilter
+  status: StringFilter
+  code: StringFilter
+  ean: StringFilter
   productBrand: ProductBrandWhereInput
   pricedBy: StringFilter
   applications: ApplicationManyRelationFilter
   warrantyTime: FloatNullableFilter
-}
-
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
 }
 
 input ProductOrderByInput {
@@ -443,7 +519,10 @@ input ProductOrderByInput {
   name: OrderDirection
   description: OrderDirection
   price: OrderDirection
-  inStock: OrderDirection
+  stock: OrderDirection
+  status: OrderDirection
+  code: OrderDirection
+  ean: OrderDirection
   pricedBy: OrderDirection
   warrantyTime: OrderDirection
 }
@@ -452,7 +531,10 @@ input ProductUpdateInput {
   name: String
   description: String
   price: Float
-  inStock: Float
+  stock: Float
+  status: String
+  code: String
+  ean: String
   productBrand: ProductBrandRelateToOneForUpdateInput
   pricedBy: String
   applications: ApplicationRelateToManyForUpdateInput
@@ -474,7 +556,10 @@ input ProductCreateInput {
   name: String
   description: String
   price: Float
-  inStock: Float
+  stock: Float
+  status: String
+  code: String
+  ean: String
   productBrand: ProductBrandRelateToOneForCreateInput
   pricedBy: String
   applications: ApplicationRelateToManyForCreateInput
@@ -745,6 +830,12 @@ type Mutation {
   updateApplications(data: [ApplicationUpdateArgs!]!): [Application]
   deleteApplication(where: ApplicationWhereUniqueInput!): Application
   deleteApplications(where: [ApplicationWhereUniqueInput!]!): [Application]
+  createApplicationType(data: ApplicationTypeCreateInput!): ApplicationType
+  createApplicationTypes(data: [ApplicationTypeCreateInput!]!): [ApplicationType]
+  updateApplicationType(where: ApplicationTypeWhereUniqueInput!, data: ApplicationTypeUpdateInput!): ApplicationType
+  updateApplicationTypes(data: [ApplicationTypeUpdateArgs!]!): [ApplicationType]
+  deleteApplicationType(where: ApplicationTypeWhereUniqueInput!): ApplicationType
+  deleteApplicationTypes(where: [ApplicationTypeWhereUniqueInput!]!): [ApplicationType]
   createProduct(data: ProductCreateInput!): Product
   createProducts(data: [ProductCreateInput!]!): [Product]
   updateProduct(where: ProductWhereUniqueInput!, data: ProductUpdateInput!): Product
@@ -809,6 +900,9 @@ type Query {
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   application(where: ApplicationWhereUniqueInput!): Application
   applicationsCount(where: ApplicationWhereInput! = {}): Int
+  applicationTypes(where: ApplicationTypeWhereInput! = {}, orderBy: [ApplicationTypeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationTypeWhereUniqueInput): [ApplicationType!]
+  applicationType(where: ApplicationTypeWhereUniqueInput!): ApplicationType
+  applicationTypesCount(where: ApplicationTypeWhereInput! = {}): Int
   products(where: ProductWhereInput! = {}, orderBy: [ProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductWhereUniqueInput): [Product!]
   product(where: ProductWhereUniqueInput!): Product
   productsCount(where: ProductWhereInput! = {}): Int

@@ -34,10 +34,13 @@ model WorkOrder {
   creator      User?         @relation("WorkOrder_creator", fields: [creatorId], references: [id])
   creatorId    String?       @map("creator")
   createdAt    DateTime?     @default(now())
+  status       String        @default("inactive")
   startedAt    DateTime?
   finishedAt   DateTime?
   car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
   carId        String?       @map("car")
+  notes        String        @default("")
+  reduction    Float?
   applications Application[] @relation("Application_workOrder")
 
   @@index([creatorId])
@@ -45,26 +48,35 @@ model WorkOrder {
 }
 
 model Application {
-  id          String     @id @default(cuid())
-  workOrder   WorkOrder? @relation("Application_workOrder", fields: [workOrderId], references: [id])
-  workOrderId String?    @map("workOrder")
+  id          String           @id @default(cuid())
+  workOrder   WorkOrder?       @relation("Application_workOrder", fields: [workOrderId], references: [id])
+  workOrderId String?          @map("workOrder")
   startedAt   DateTime?
   finishedAt  DateTime?
-  name        String     @default("")
-  description String     @default("")
+  name        String           @default("")
+  description String           @default("")
   price       Float
   amount      Float
-  product     Product?   @relation("Application_product", fields: [productId], references: [id])
-  productId   String?    @map("product")
-  applicant   User?      @relation("Application_applicant", fields: [applicantId], references: [id])
-  applicantId String?    @map("applicant")
-  creator     User?      @relation("Application_creator", fields: [creatorId], references: [id])
-  creatorId   String?    @map("creator")
+  product     Product?         @relation("Application_product", fields: [productId], references: [id])
+  productId   String?          @map("product")
+  applicant   User?            @relation("Application_applicant", fields: [applicantId], references: [id])
+  applicantId String?          @map("applicant")
+  creator     User?            @relation("Application_creator", fields: [creatorId], references: [id])
+  creatorId   String?          @map("creator")
+  type        ApplicationType? @relation("Application_type", fields: [typeId], references: [id])
+  typeId      String?          @map("type")
 
   @@index([workOrderId])
   @@index([productId])
   @@index([applicantId])
   @@index([creatorId])
+  @@index([typeId])
+}
+
+model ApplicationType {
+  id           String        @id @default(cuid())
+  name         String        @default("")
+  applications Application[] @relation("Application_type")
 }
 
 model Product {
@@ -72,7 +84,10 @@ model Product {
   name           String        @default("")
   description    String        @default("")
   price          Float
-  inStock        Float
+  stock          Float
+  status         String        @default("active")
+  code           String        @default("")
+  ean            String        @default("")
   productBrand   ProductBrand? @relation("Product_productBrand", fields: [productBrandId], references: [id])
   productBrandId String?       @map("productBrand")
   pricedBy       String        @default("amount")
