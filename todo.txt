@@ -1,6 +1,5 @@
 TCKN zorunlu olsun
 Plaka arama her türlü bulsun (ayrı birleşik yazılmış önemi olmadan)
-Araba ve müşteri ayrı
 Garanti operasyonu
 Ekran resmi çekilmesin
 Yetki yönetimi

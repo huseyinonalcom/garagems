@@ -23,6 +23,31 @@ __export(keystone_exports, {
   default: () => keystone_default
 });
 module.exports = __toCommonJS(keystone_exports);
+
+// auth.ts
+var import_crypto = require("crypto");
+var import_auth = require("@keystone-6/auth");
+var import_session = require("@keystone-6/core/session");
+var sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && process.env.NODE_ENV !== "production") {
+  sessionSecret = (0, import_crypto.randomBytes)(32).toString("hex");
+}
+var { withAuth } = (0, import_auth.createAuth)({
+  listKey: "User",
+  identityField: "username",
+  sessionData: "username role permissions",
+  secretField: "password",
+  initFirstItem: {
+    fields: ["username", "firstname", "role", "email", "password"]
+  }
+});
+var sessionMaxAge = 60 * 60 * 24 * 30;
+var session = (0, import_session.statelessSessions)({
+  maxAge: sessionMaxAge,
+  secret: sessionSecret
+});
+
+// keystone.ts
 var import_core2 = require("@keystone-6/core");
 
 // schema.ts
@@ -293,43 +318,10 @@ var lists = {
   })
 };
 
-// auth.ts
-var import_crypto = require("crypto");
-var import_auth = require("@keystone-6/auth");
-var import_session = require("@keystone-6/core/session");
-var sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret && process.env.NODE_ENV !== "production") {
-  sessionSecret = (0, import_crypto.randomBytes)(32).toString("hex");
-}
-var { withAuth } = (0, import_auth.createAuth)({
-  listKey: "User",
-  identityField: "username",
-  sessionData: "username role permissions",
-  secretField: "password",
-  // WARNING: remove initFirstItem functionality in production
-  //   see https://keystonejs.com/docs/config/auth#init-first-item for more
-  initFirstItem: {
-    // if there are no items in the database, by configuring this field
-    //   you are asking the Keystone AdminUI to create a new user
-    //   providing inputs for these fields
-    fields: ["username", "firstname", "role", "email", "password"]
-    // it uses context.sudo() to do this, which bypasses any access control you might have
-    //   you shouldn't use this in production
-  }
-});
-var sessionMaxAge = 60 * 60 * 24 * 30;
-var session = (0, import_session.statelessSessions)({
-  maxAge: sessionMaxAge,
-  secret: sessionSecret
-});
-
 // keystone.ts
 var keystone_default = withAuth(
   (0, import_core2.config)({
     db: {
-      // we're using sqlite for the fastest startup experience
-      //   for more information on what database might be appropriate for you
-      //   see https://keystonejs.com/docs/guides/choosing-a-database#title
       provider: "sqlite",
       url: "file:./keystone.db"
     },
