@@ -1,27 +1,39 @@
-// - https://keystonejs.com/docs/config/lists
-// see https://keystonejs.com/docs/fields/overview for the full list of fields
-
 import { list } from "@keystone-6/core";
 import type { Lists } from ".keystone/types";
-import { allowAll } from "@keystone-6/core/access";
-import {
-  text,
-  relationship,
-  password,
-  timestamp,
-  select,
-  float,
-  multiselect,
-} from "@keystone-6/core/fields";
+import { allowAll, denyAll } from "@keystone-6/core/access";
+import { text, relationship, password, timestamp, select, float, multiselect } from "@keystone-6/core/fields";
+import { AuthSession } from "@keystone-6/auth";
+import { KeystoneContext, SessionStrategy } from "@keystone-6/core/types";
 
-// WARNING
-//   for this starter project, anyone can create, query, update and delete anything
-//   if you want to prevent random people on the internet from accessing your data,
-//   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
+export type Session = {
+  itemId: string;
+  data: {
+    username: string;
+    role: string;
+    permissions: any;
+  };
+};
+
+function isAdmin({ session }: { session?: Session }) {
+  // you need to have a session to do this
+  if (!session) return false;
+
+  // admins can do anything
+  if (session.data.role == "admin") return true;
+
+  return false;
+}
 
 export const lists: Lists = {
   User: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: allowAll,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       username: text({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: text({
@@ -68,8 +80,11 @@ export const lists: Lists = {
       createdAt: timestamp({
         defaultValue: { kind: "now" },
         isOrderable: true,
+        access: {
+          create: denyAll,
+          update: denyAll,
+        },
       }),
-
       status: select({
         type: "string",
         options: ["active", "inactive", "finished", "canceled", "offer"],

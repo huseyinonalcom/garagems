@@ -29,9 +29,23 @@ var import_core2 = require("@keystone-6/core");
 var import_core = require("@keystone-6/core");
 var import_access = require("@keystone-6/core/access");
 var import_fields = require("@keystone-6/core/fields");
+function isAdmin({ session: session2 }) {
+  if (!session2)
+    return false;
+  if (session2.data.role == "admin")
+    return true;
+  return false;
+}
 var lists = {
   User: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: import_access.allowAll,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       username: (0, import_fields.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: (0, import_fields.text)({
@@ -77,7 +91,11 @@ var lists = {
       }),
       createdAt: (0, import_fields.timestamp)({
         defaultValue: { kind: "now" },
-        isOrderable: true
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
       }),
       status: (0, import_fields.select)({
         type: "string",
@@ -223,10 +241,7 @@ if (!sessionSecret && process.env.NODE_ENV !== "production") {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "username",
-  // this is a GraphQL query fragment for fetching what data will be attached to a context.session
-  //   this can be helpful for when you are writing your access control functions
-  //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
-  sessionData: "username role",
+  sessionData: "username role permissions",
   secretField: "password",
   // WARNING: remove initFirstItem functionality in production
   //   see https://keystonejs.com/docs/config/auth#init-first-item for more

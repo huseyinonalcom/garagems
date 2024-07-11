@@ -30,11 +30,7 @@ if (!sessionSecret && process.env.NODE_ENV !== "production") {
 const { withAuth } = createAuth({
   listKey: "User",
   identityField: "username",
-
-  // this is a GraphQL query fragment for fetching what data will be attached to a context.session
-  //   this can be helpful for when you are writing your access control functions
-  //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
-  sessionData: "username role",
+  sessionData: "username role permissions",
   secretField: "password",
 
   // WARNING: remove initFirstItem functionality in production
