@@ -11,6 +11,7 @@ import {
   timestamp,
   select,
   float,
+  multiselect,
 } from "@keystone-6/core/fields";
 
 // WARNING
@@ -35,6 +36,13 @@ export const lists: Lists = {
         defaultValue: "customer",
         validation: { isRequired: true },
         isIndexed: true,
+      }),
+      permissions: multiselect({
+        type: "enum",
+        options: [
+          { label: "Warranty", value: "warranty" },
+          { label: "Price", value: "price" },
+        ],
       }),
       ssid: text({ validation: { isRequired: false } }),
       password: password({ validation: { isRequired: true } }),
@@ -61,9 +69,10 @@ export const lists: Lists = {
         defaultValue: { kind: "now" },
         isOrderable: true,
       }),
+
       status: select({
         type: "string",
-        options: ["active", "inactive", "finished", "canceled"],
+        options: ["active", "inactive", "finished", "canceled", "offer"],
         defaultValue: "inactive",
         validation: { isRequired: true },
       }),

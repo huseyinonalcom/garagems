@@ -47,6 +47,10 @@ var lists = {
         validation: { isRequired: true },
         isIndexed: true
       }),
+      permissions: (0, import_fields.multiselect)({
+        type: "enum",
+        options: [{ label: "Warranty", value: "warranty" }]
+      }),
       ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
       password: (0, import_fields.password)({ validation: { isRequired: true } }),
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
@@ -74,7 +78,7 @@ var lists = {
       }),
       status: (0, import_fields.select)({
         type: "string",
-        options: ["active", "inactive", "finished", "canceled"],
+        options: ["active", "inactive", "finished", "canceled", "offer"],
         defaultValue: "inactive",
         validation: { isRequired: true }
       }),
