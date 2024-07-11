@@ -2,14 +2,12 @@ import { list } from "@keystone-6/core";
 import type { Lists } from ".keystone/types";
 import { allowAll, denyAll } from "@keystone-6/core/access";
 import { text, relationship, password, timestamp, select, float, multiselect } from "@keystone-6/core/fields";
-import { AuthSession } from "@keystone-6/auth";
-import { KeystoneContext, SessionStrategy } from "@keystone-6/core/types";
 
 export type Session = {
   itemId: string;
   data: {
     username: string;
-    role: string;
+    role: "admin" | "customer" | "employee" | "manager";
     permissions: any;
   };
 };
@@ -20,6 +18,16 @@ function isAdmin({ session }: { session?: Session }) {
 
   // admins can do anything
   if (session.data.role == "admin") return true;
+
+  return false;
+}
+
+function isEmployee({ session }: { session?: Session }) {
+  // you need to have a session to do this
+  if (!session) return false;
+
+  // admins can do anything
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
 
   return false;
 }
@@ -71,7 +79,14 @@ export const lists: Lists = {
     },
   }),
   WorkOrder: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: denyAll,
+      },
+    },
     fields: {
       creator: relationship({
         ref: "User.workOrders",
@@ -110,7 +125,14 @@ export const lists: Lists = {
     },
   }),
   Application: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: denyAll,
+      },
+    },
     fields: {
       workOrder: relationship({
         ref: "WorkOrder.applications",
@@ -141,7 +163,14 @@ export const lists: Lists = {
     },
   }),
   ApplicationType: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       applications: relationship({
@@ -151,7 +180,14 @@ export const lists: Lists = {
     },
   }),
   Product: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
@@ -183,14 +219,28 @@ export const lists: Lists = {
     },
   }),
   ProductBrand: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       products: relationship({ ref: "Product.productBrand", many: true }),
     },
   }),
   Car: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: denyAll,
+      },
+    },
     fields: {
       vin: text(),
       carModel: relationship({
@@ -202,7 +252,14 @@ export const lists: Lists = {
     },
   }),
   CarModel: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       cars: relationship({ ref: "Car.carModel", many: true }),
@@ -210,7 +267,14 @@ export const lists: Lists = {
     },
   }),
   CarBrand: list({
-    access: allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       carModels: relationship({ ref: "CarModel.carBrand", many: true }),

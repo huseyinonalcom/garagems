@@ -36,6 +36,13 @@ function isAdmin({ session: session2 }) {
     return true;
   return false;
 }
+function isEmployee({ session: session2 }) {
+  if (!session2)
+    return false;
+  if (session2.data.role == "employee" || session2.data.role == "admin" || session2.data.role == "manager")
+    return true;
+  return false;
+}
 var lists = {
   User: (0, import_core.list)({
     access: {
@@ -83,7 +90,14 @@ var lists = {
     }
   }),
   WorkOrder: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       creator: (0, import_fields.relationship)({
         ref: "User.workOrders",
@@ -122,7 +136,14 @@ var lists = {
     }
   }),
   Application: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       workOrder: (0, import_fields.relationship)({
         ref: "WorkOrder.applications",
@@ -153,7 +174,14 @@ var lists = {
     }
   }),
   ApplicationType: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       applications: (0, import_fields.relationship)({
@@ -163,7 +191,14 @@ var lists = {
     }
   }),
   Product: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
@@ -195,14 +230,28 @@ var lists = {
     }
   }),
   ProductBrand: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       products: (0, import_fields.relationship)({ ref: "Product.productBrand", many: true })
     }
   }),
   Car: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       vin: (0, import_fields.text)(),
       carModel: (0, import_fields.relationship)({
@@ -214,7 +263,14 @@ var lists = {
     }
   }),
   CarModel: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       cars: (0, import_fields.relationship)({ ref: "Car.carModel", many: true }),
@@ -222,7 +278,14 @@ var lists = {
     }
   }),
   CarBrand: (0, import_core.list)({
-    access: import_access.allowAll,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
