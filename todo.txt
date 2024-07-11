@@ -1,0 +1,19 @@
+TCKN zorunlu olsun
+Plaka arama her türlü bulsun (ayrı birleşik yazılmış önemi olmadan)
+Araba ve müşteri ayrı
+Garanti operasyonu
+Ekran resmi çekilmesin
+Yetki yönetimi
+Herkes işlere not bırakabilsin
+Fason uygulama takipleri
+Fiyat teklifi
+Ödeme türüne göre fiyat farkları
+Özel indirim
+Kalite kontrol
+Yazdırılabilir formlar
+Dijital imza
+Garanti sorgulama yetki
+Bazı adımlar/kurallar kesin olacak (yöneticinin bile atlamaması gereken adımlar olacak)
+Uygulama fire (ek ürün kullanma…)
+Raporlama
+İşcilik fiyatlandırması şu an gerekli değil
