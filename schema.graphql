@@ -9,6 +9,7 @@ type User {
   firstname: String
   lastname: String
   role: String
+  permissions: [UserPermissionType!]
   ssid: String
   password: PasswordState
   workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
@@ -19,6 +20,11 @@ type User {
   applicationsToApplyCount(where: ApplicationWhereInput! = {}): Int
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
+}
+
+enum UserPermissionType {
+  warranty
+  price
 }
 
 type PasswordState {
@@ -123,6 +129,7 @@ input UserUpdateInput {
   firstname: String
   lastname: String
   role: String
+  permissions: [UserPermissionType!]
   ssid: String
   password: String
   workOrders: WorkOrderRelateToManyForUpdateInput
@@ -157,6 +164,7 @@ input UserCreateInput {
   firstname: String
   lastname: String
   role: String
+  permissions: [UserPermissionType!]
   ssid: String
   password: String
   workOrders: WorkOrderRelateToManyForCreateInput

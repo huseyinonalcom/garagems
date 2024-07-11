@@ -19,6 +19,7 @@ model User {
   firstname           String        @default("")
   lastname            String        @default("")
   role                String        @default("customer")
+  permissions         String        @default("[]")
   ssid                String        @default("")
   password            String
   workOrders          WorkOrder[]   @relation("WorkOrder_creator")

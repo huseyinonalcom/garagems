@@ -49,7 +49,10 @@ var lists = {
       }),
       permissions: (0, import_fields.multiselect)({
         type: "enum",
-        options: [{ label: "Warranty", value: "warranty" }]
+        options: [
+          { label: "Warranty", value: "warranty" },
+          { label: "Price", value: "price" }
+        ]
       }),
       ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
       password: (0, import_fields.password)({ validation: { isRequired: true } }),
