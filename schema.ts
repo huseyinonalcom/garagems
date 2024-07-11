@@ -21,6 +21,15 @@ function isAdmin({ session }: { session?: Session }) {
 
   return false;
 }
+function isManager({ session }: { session?: Session }) {
+  // you need to have a session to do this
+  if (!session) return false;
+
+  // admins can do anything
+  if (session.data.role == "admin" || session.data.role == "manager") return true;
+
+  return false;
+}
 
 function isEmployee({ session }: { session?: Session }) {
   // you need to have a session to do this
@@ -66,6 +75,9 @@ export const lists: Lists = {
         defaultValue: "customer",
         validation: { isRequired: true },
         isIndexed: true,
+        access: {
+          update: isAdmin,
+        },
       }),
       permissions: multiselect({
         type: "enum",
@@ -73,6 +85,9 @@ export const lists: Lists = {
           { label: "Warranty", value: "warranty" },
           { label: "Price", value: "price" },
         ],
+        access: {
+          update: isAdmin,
+        },
       }),
       ssid: text({ validation: { isRequired: false } }),
       password: password({ validation: { isRequired: true } }),
@@ -115,6 +130,9 @@ export const lists: Lists = {
         options: ["active", "inactive", "finished", "canceled", "offer"],
         defaultValue: "inactive",
         validation: { isRequired: true },
+        access: {
+          update: isManager,
+        },
       }),
       startedAt: timestamp(),
       finishedAt: timestamp(),

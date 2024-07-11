@@ -61,6 +61,13 @@ function isAdmin({ session: session2 }) {
     return true;
   return false;
 }
+function isManager({ session: session2 }) {
+  if (!session2)
+    return false;
+  if (session2.data.role == "admin" || session2.data.role == "manager")
+    return true;
+  return false;
+}
 function isEmployee({ session: session2 }) {
   if (!session2)
     return false;
@@ -98,14 +105,20 @@ var lists = {
         options: ["admin", "customer", "employee", "manager"],
         defaultValue: "customer",
         validation: { isRequired: true },
-        isIndexed: true
+        isIndexed: true,
+        access: {
+          update: isAdmin
+        }
       }),
       permissions: (0, import_fields.multiselect)({
         type: "enum",
         options: [
           { label: "Warranty", value: "warranty" },
           { label: "Price", value: "price" }
-        ]
+        ],
+        access: {
+          update: isAdmin
+        }
       }),
       ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
       password: (0, import_fields.password)({ validation: { isRequired: true } }),
@@ -147,7 +160,10 @@ var lists = {
         type: "string",
         options: ["active", "inactive", "finished", "canceled", "offer"],
         defaultValue: "inactive",
-        validation: { isRequired: true }
+        validation: { isRequired: true },
+        access: {
+          update: isManager
+        }
       }),
       startedAt: (0, import_fields.timestamp)(),
       finishedAt: (0, import_fields.timestamp)(),
