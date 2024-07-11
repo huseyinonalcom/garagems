@@ -32,12 +32,22 @@ function isEmployee({ session }: { session?: Session }) {
   return false;
 }
 
+function isUser({ session }: { session?: Session }) {
+  // you need to have a session to do this
+  if (!session) return false;
+
+  // admins can do anything
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
+
+  return false;
+}
+
 export const lists: Lists = {
   User: list({
     access: {
       operation: {
         create: isAdmin,
-        query: allowAll,
+        query: isUser,
         update: isAdmin,
         delete: denyAll,
       },
