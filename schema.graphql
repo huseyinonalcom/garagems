@@ -9,12 +9,12 @@ type User {
   firstname: String
   lastname: String
   role: String
-  cars(where: CarWhereInput! = {}, orderBy: [CarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarWhereUniqueInput): [Car!]
-  carsCount(where: CarWhereInput! = {}): Int
   ssid: String
   password: PasswordState
   workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
   workOrdersCount(where: WorkOrderWhereInput! = {}): Int
+  clientOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
+  clientOrdersCount(where: WorkOrderWhereInput! = {}): Int
   applicationsToApply(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsToApplyCount(where: ApplicationWhereInput! = {}): Int
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
@@ -42,9 +42,9 @@ input UserWhereInput {
   firstname: StringFilter
   lastname: StringFilter
   role: StringFilter
-  cars: CarManyRelationFilter
   ssid: StringFilter
   workOrders: WorkOrderManyRelationFilter
+  clientOrders: WorkOrderManyRelationFilter
   applicationsToApply: ApplicationManyRelationFilter
   applications: ApplicationManyRelationFilter
 }
@@ -88,12 +88,6 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input CarManyRelationFilter {
-  every: CarWhereInput
-  some: CarWhereInput
-  none: CarWhereInput
-}
-
 input WorkOrderManyRelationFilter {
   every: WorkOrderWhereInput
   some: WorkOrderWhereInput
@@ -129,19 +123,12 @@ input UserUpdateInput {
   firstname: String
   lastname: String
   role: String
-  cars: CarRelateToManyForUpdateInput
   ssid: String
   password: String
   workOrders: WorkOrderRelateToManyForUpdateInput
+  clientOrders: WorkOrderRelateToManyForUpdateInput
   applicationsToApply: ApplicationRelateToManyForUpdateInput
   applications: ApplicationRelateToManyForUpdateInput
-}
-
-input CarRelateToManyForUpdateInput {
-  disconnect: [CarWhereUniqueInput!]
-  set: [CarWhereUniqueInput!]
-  create: [CarCreateInput!]
-  connect: [CarWhereUniqueInput!]
 }
 
 input WorkOrderRelateToManyForUpdateInput {
@@ -170,17 +157,12 @@ input UserCreateInput {
   firstname: String
   lastname: String
   role: String
-  cars: CarRelateToManyForCreateInput
   ssid: String
   password: String
   workOrders: WorkOrderRelateToManyForCreateInput
+  clientOrders: WorkOrderRelateToManyForCreateInput
   applicationsToApply: ApplicationRelateToManyForCreateInput
   applications: ApplicationRelateToManyForCreateInput
-}
-
-input CarRelateToManyForCreateInput {
-  create: [CarCreateInput!]
-  connect: [CarWhereUniqueInput!]
 }
 
 input WorkOrderRelateToManyForCreateInput {
@@ -201,6 +183,7 @@ type WorkOrder {
   startedAt: DateTime
   finishedAt: DateTime
   car: Car
+  customer: User
   notes: String
   reduction: Float
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
@@ -224,6 +207,7 @@ input WorkOrderWhereInput {
   startedAt: DateTimeNullableFilter
   finishedAt: DateTimeNullableFilter
   car: CarWhereInput
+  customer: UserWhereInput
   notes: StringFilter
   reduction: FloatNullableFilter
   applications: ApplicationManyRelationFilter
@@ -268,6 +252,7 @@ input WorkOrderUpdateInput {
   startedAt: DateTime
   finishedAt: DateTime
   car: CarRelateToOneForUpdateInput
+  customer: UserRelateToOneForUpdateInput
   notes: String
   reduction: Float
   applications: ApplicationRelateToManyForUpdateInput
@@ -297,6 +282,7 @@ input WorkOrderCreateInput {
   startedAt: DateTime
   finishedAt: DateTime
   car: CarRelateToOneForCreateInput
+  customer: UserRelateToOneForCreateInput
   notes: String
   reduction: Float
   applications: ApplicationRelateToManyForCreateInput
@@ -342,7 +328,7 @@ input ApplicationWhereInput {
   name: StringFilter
   description: StringFilter
   price: FloatFilter
-  amount: FloatFilter
+  amount: FloatNullableFilter
   product: ProductWhereInput
   applicant: UserWhereInput
   creator: UserWhereInput
@@ -631,7 +617,6 @@ input ProductRelateToManyForCreateInput {
 
 type Car {
   id: ID!
-  owner: User
   vin: String
   carModel: CarModel
   licensePlate: String
@@ -648,7 +633,6 @@ input CarWhereInput {
   OR: [CarWhereInput!]
   NOT: [CarWhereInput!]
   id: IDFilter
-  owner: UserWhereInput
   vin: StringFilter
   carModel: CarModelWhereInput
   licensePlate: StringFilter
@@ -662,7 +646,6 @@ input CarOrderByInput {
 }
 
 input CarUpdateInput {
-  owner: UserRelateToOneForUpdateInput
   vin: String
   carModel: CarModelRelateToOneForUpdateInput
   licensePlate: String
@@ -681,7 +664,6 @@ input CarUpdateArgs {
 }
 
 input CarCreateInput {
-  owner: UserRelateToOneForCreateInput
   vin: String
   carModel: CarModelRelateToOneForCreateInput
   licensePlate: String
@@ -715,6 +697,12 @@ input CarModelWhereInput {
   carBrand: CarBrandWhereInput
 }
 
+input CarManyRelationFilter {
+  every: CarWhereInput
+  some: CarWhereInput
+  none: CarWhereInput
+}
+
 input CarModelOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -724,6 +712,13 @@ input CarModelUpdateInput {
   name: String
   cars: CarRelateToManyForUpdateInput
   carBrand: CarBrandRelateToOneForUpdateInput
+}
+
+input CarRelateToManyForUpdateInput {
+  disconnect: [CarWhereUniqueInput!]
+  set: [CarWhereUniqueInput!]
+  create: [CarCreateInput!]
+  connect: [CarWhereUniqueInput!]
 }
 
 input CarBrandRelateToOneForUpdateInput {
@@ -741,6 +736,11 @@ input CarModelCreateInput {
   name: String
   cars: CarRelateToManyForCreateInput
   carBrand: CarBrandRelateToOneForCreateInput
+}
+
+input CarRelateToManyForCreateInput {
+  create: [CarCreateInput!]
+  connect: [CarWhereUniqueInput!]
 }
 
 input CarBrandRelateToOneForCreateInput {

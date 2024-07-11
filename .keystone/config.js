@@ -47,10 +47,10 @@ var lists = {
         validation: { isRequired: true },
         isIndexed: true
       }),
-      cars: (0, import_fields.relationship)({ ref: "Car.owner", many: true }),
       ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
       password: (0, import_fields.password)({ validation: { isRequired: true } }),
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
+      clientOrders: (0, import_fields.relationship)({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: (0, import_fields.relationship)({
         ref: "Application.applicant",
         many: true
@@ -84,6 +84,10 @@ var lists = {
         ref: "Car.workOrders",
         many: false
       }),
+      customer: (0, import_fields.relationship)({
+        ref: "User.clientOrders",
+        many: false
+      }),
       notes: (0, import_fields.text)({}),
       reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       applications: (0, import_fields.relationship)({
@@ -104,7 +108,7 @@ var lists = {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      amount: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       product: (0, import_fields.relationship)({
         ref: "Product.applications",
         many: false
@@ -175,10 +179,6 @@ var lists = {
   Car: (0, import_core.list)({
     access: import_access.allowAll,
     fields: {
-      owner: (0, import_fields.relationship)({
-        ref: "User.cars",
-        many: false
-      }),
       vin: (0, import_fields.text)(),
       carModel: (0, import_fields.relationship)({
         ref: "CarModel.cars",

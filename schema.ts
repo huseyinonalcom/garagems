@@ -4,7 +4,14 @@
 import { list } from "@keystone-6/core";
 import type { Lists } from ".keystone/types";
 import { allowAll } from "@keystone-6/core/access";
-import { text, relationship, password, timestamp, select, float } from "@keystone-6/core/fields";
+import {
+  text,
+  relationship,
+  password,
+  timestamp,
+  select,
+  float,
+} from "@keystone-6/core/fields";
 
 // WARNING
 //   for this starter project, anyone can create, query, update and delete anything
@@ -29,10 +36,10 @@ export const lists: Lists = {
         validation: { isRequired: true },
         isIndexed: true,
       }),
-      cars: relationship({ ref: "Car.owner", many: true }),
       ssid: text({ validation: { isRequired: false } }),
       password: password({ validation: { isRequired: true } }),
       workOrders: relationship({ ref: "WorkOrder.creator", many: true }),
+      clientOrders: relationship({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: relationship({
         ref: "Application.applicant",
         many: true,
@@ -66,6 +73,10 @@ export const lists: Lists = {
         ref: "Car.workOrders",
         many: false,
       }),
+      customer: relationship({
+        ref: "User.clientOrders",
+        many: false,
+      }),
       notes: text({}),
       reduction: float({ validation: { isRequired: false, min: 0 } }),
       applications: relationship({
@@ -86,7 +97,7 @@ export const lists: Lists = {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
-      amount: float({ validation: { isRequired: true, min: 0 } }),
+      amount: float({ validation: { isRequired: false, min: 0 } }),
       product: relationship({
         ref: "Product.applications",
         many: false,
@@ -157,10 +168,6 @@ export const lists: Lists = {
   Car: list({
     access: allowAll,
     fields: {
-      owner: relationship({
-        ref: "User.cars",
-        many: false,
-      }),
       vin: text(),
       carModel: relationship({
         ref: "CarModel.cars",

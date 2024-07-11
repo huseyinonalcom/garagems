@@ -19,10 +19,10 @@ model User {
   firstname           String        @default("")
   lastname            String        @default("")
   role                String        @default("customer")
-  cars                Car[]         @relation("Car_owner")
   ssid                String        @default("")
   password            String
   workOrders          WorkOrder[]   @relation("WorkOrder_creator")
+  clientOrders        WorkOrder[]   @relation("WorkOrder_customer")
   applicationsToApply Application[] @relation("Application_applicant")
   applications        Application[] @relation("Application_creator")
 
@@ -39,12 +39,15 @@ model WorkOrder {
   finishedAt   DateTime?
   car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
   carId        String?       @map("car")
+  customer     User?         @relation("WorkOrder_customer", fields: [customerId], references: [id])
+  customerId   String?       @map("customer")
   notes        String        @default("")
   reduction    Float?
   applications Application[] @relation("Application_workOrder")
 
   @@index([creatorId])
   @@index([carId])
+  @@index([customerId])
 }
 
 model Application {
@@ -56,7 +59,7 @@ model Application {
   name        String           @default("")
   description String           @default("")
   price       Float
-  amount      Float
+  amount      Float?
   product     Product?         @relation("Application_product", fields: [productId], references: [id])
   productId   String?          @map("product")
   applicant   User?            @relation("Application_applicant", fields: [applicantId], references: [id])
@@ -105,15 +108,12 @@ model ProductBrand {
 
 model Car {
   id           String      @id @default(cuid())
-  owner        User?       @relation("Car_owner", fields: [ownerId], references: [id])
-  ownerId      String?     @map("owner")
   vin          String      @default("")
   carModel     CarModel?   @relation("Car_carModel", fields: [carModelId], references: [id])
   carModelId   String?     @map("carModel")
   licensePlate String      @default("")
   workOrders   WorkOrder[] @relation("WorkOrder_car")
 
-  @@index([ownerId])
   @@index([carModelId])
 }
 
