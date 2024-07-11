@@ -51,9 +51,9 @@ var session = (0, import_session.statelessSessions)({
 var import_core2 = require("@keystone-6/core");
 
 // schema.ts
-var import_core = require("@keystone-6/core");
-var import_access = require("@keystone-6/core/access");
 var import_fields = require("@keystone-6/core/fields");
+var import_access = require("@keystone-6/core/access");
+var import_core = require("@keystone-6/core");
 function isAdmin({ session: session2 }) {
   if (!session2)
     return false;
