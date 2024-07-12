@@ -75,19 +75,12 @@ function isEmployee({ session: session2 }) {
     return true;
   return false;
 }
-function isUser({ session: session2 }) {
-  if (!session2)
-    return false;
-  if (session2.data.role == "employee" || session2.data.role == "admin" || session2.data.role == "manager" || session2.data.role == "customer")
-    return true;
-  return false;
-}
 var lists = {
   User: (0, import_core.list)({
     access: {
       operation: {
         create: isAdmin,
-        query: isUser,
+        query: import_access.allowAll,
         update: isAdmin,
         delete: import_access.denyAll
       }

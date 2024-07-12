@@ -56,7 +56,7 @@ export const lists: Lists = {
     access: {
       operation: {
         create: isAdmin,
-        query: isUser,
+        query: allowAll,
         update: isAdmin,
         delete: denyAll,
       },
