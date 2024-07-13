@@ -205,6 +205,10 @@ export const lists: Lists = {
         ref: "Application.type",
         many: true,
       }),
+      products: relationship({
+        ref: "Product.applicationType",
+        many: true,
+      }),
     },
   }),
   Product: list({
@@ -242,6 +246,10 @@ export const lists: Lists = {
       applications: relationship({
         ref: "Application.product",
         many: true,
+      }),
+      applicationType: relationship({
+        ref: "ApplicationType.products",
+        many: false,
       }),
       warrantyTime: float({ validation: { isRequired: false, min: 0 } }),
     },

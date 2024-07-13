@@ -81,24 +81,28 @@ model ApplicationType {
   id           String        @id @default(cuid())
   name         String        @default("")
   applications Application[] @relation("Application_type")
+  products     Product[]     @relation("Product_applicationType")
 }
 
 model Product {
-  id             String        @id @default(cuid())
-  name           String        @default("")
-  description    String        @default("")
-  price          Float
-  stock          Float
-  status         String        @default("active")
-  code           String        @default("")
-  ean            String        @default("")
-  productBrand   ProductBrand? @relation("Product_productBrand", fields: [productBrandId], references: [id])
-  productBrandId String?       @map("productBrand")
-  pricedBy       String        @default("amount")
-  applications   Application[] @relation("Application_product")
-  warrantyTime   Float?
+  id                String           @id @default(cuid())
+  name              String           @default("")
+  description       String           @default("")
+  price             Float
+  stock             Float
+  status            String           @default("active")
+  code              String           @default("")
+  ean               String           @default("")
+  productBrand      ProductBrand?    @relation("Product_productBrand", fields: [productBrandId], references: [id])
+  productBrandId    String?          @map("productBrand")
+  pricedBy          String           @default("amount")
+  applications      Application[]    @relation("Application_product")
+  applicationType   ApplicationType? @relation("Product_applicationType", fields: [applicationTypeId], references: [id])
+  applicationTypeId String?          @map("applicationType")
+  warrantyTime      Float?
 
   @@index([productBrandId])
+  @@index([applicationTypeId])
 }
 
 model ProductBrand {

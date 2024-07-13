@@ -235,6 +235,10 @@ var lists = {
       applications: (0, import_fields.relationship)({
         ref: "Application.type",
         many: true
+      }),
+      products: (0, import_fields.relationship)({
+        ref: "Product.applicationType",
+        many: true
       })
     }
   }),
@@ -273,6 +277,10 @@ var lists = {
       applications: (0, import_fields.relationship)({
         ref: "Application.product",
         many: true
+      }),
+      applicationType: (0, import_fields.relationship)({
+        ref: "ApplicationType.products",
+        many: false
       }),
       warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } })
     }

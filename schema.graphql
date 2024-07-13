@@ -435,6 +435,8 @@ type ApplicationType {
   name: String
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
+  products(where: ProductWhereInput! = {}, orderBy: [ProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductWhereUniqueInput): [Product!]
+  productsCount(where: ProductWhereInput! = {}): Int
 }
 
 input ApplicationTypeWhereUniqueInput {
@@ -448,6 +450,13 @@ input ApplicationTypeWhereInput {
   id: IDFilter
   name: StringFilter
   applications: ApplicationManyRelationFilter
+  products: ProductManyRelationFilter
+}
+
+input ProductManyRelationFilter {
+  every: ProductWhereInput
+  some: ProductWhereInput
+  none: ProductWhereInput
 }
 
 input ApplicationTypeOrderByInput {
@@ -458,6 +467,14 @@ input ApplicationTypeOrderByInput {
 input ApplicationTypeUpdateInput {
   name: String
   applications: ApplicationRelateToManyForUpdateInput
+  products: ProductRelateToManyForUpdateInput
+}
+
+input ProductRelateToManyForUpdateInput {
+  disconnect: [ProductWhereUniqueInput!]
+  set: [ProductWhereUniqueInput!]
+  create: [ProductCreateInput!]
+  connect: [ProductWhereUniqueInput!]
 }
 
 input ApplicationTypeUpdateArgs {
@@ -468,6 +485,12 @@ input ApplicationTypeUpdateArgs {
 input ApplicationTypeCreateInput {
   name: String
   applications: ApplicationRelateToManyForCreateInput
+  products: ProductRelateToManyForCreateInput
+}
+
+input ProductRelateToManyForCreateInput {
+  create: [ProductCreateInput!]
+  connect: [ProductWhereUniqueInput!]
 }
 
 type Product {
@@ -483,6 +506,7 @@ type Product {
   pricedBy: String
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
+  applicationType: ApplicationType
   warrantyTime: Float
 }
 
@@ -505,6 +529,7 @@ input ProductWhereInput {
   productBrand: ProductBrandWhereInput
   pricedBy: StringFilter
   applications: ApplicationManyRelationFilter
+  applicationType: ApplicationTypeWhereInput
   warrantyTime: FloatNullableFilter
 }
 
@@ -532,6 +557,7 @@ input ProductUpdateInput {
   productBrand: ProductBrandRelateToOneForUpdateInput
   pricedBy: String
   applications: ApplicationRelateToManyForUpdateInput
+  applicationType: ApplicationTypeRelateToOneForUpdateInput
   warrantyTime: Float
 }
 
@@ -557,6 +583,7 @@ input ProductCreateInput {
   productBrand: ProductBrandRelateToOneForCreateInput
   pricedBy: String
   applications: ApplicationRelateToManyForCreateInput
+  applicationType: ApplicationTypeRelateToOneForCreateInput
   warrantyTime: Float
 }
 
@@ -585,12 +612,6 @@ input ProductBrandWhereInput {
   products: ProductManyRelationFilter
 }
 
-input ProductManyRelationFilter {
-  every: ProductWhereInput
-  some: ProductWhereInput
-  none: ProductWhereInput
-}
-
 input ProductBrandOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -601,13 +622,6 @@ input ProductBrandUpdateInput {
   products: ProductRelateToManyForUpdateInput
 }
 
-input ProductRelateToManyForUpdateInput {
-  disconnect: [ProductWhereUniqueInput!]
-  set: [ProductWhereUniqueInput!]
-  create: [ProductCreateInput!]
-  connect: [ProductWhereUniqueInput!]
-}
-
 input ProductBrandUpdateArgs {
   where: ProductBrandWhereUniqueInput!
   data: ProductBrandUpdateInput!
@@ -616,11 +630,6 @@ input ProductBrandUpdateArgs {
 input ProductBrandCreateInput {
   name: String
   products: ProductRelateToManyForCreateInput
-}
-
-input ProductRelateToManyForCreateInput {
-  create: [ProductCreateInput!]
-  connect: [ProductWhereUniqueInput!]
 }
 
 type Car {
