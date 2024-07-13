@@ -53,6 +53,9 @@ function isUser({ session }: { session?: Session }) {
 
 export const lists: Lists = {
   User: list({
+    ui: {
+      labelField: "firstname",
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -104,6 +107,9 @@ export const lists: Lists = {
     },
   }),
   WorkOrder: list({
+    ui: {
+      labelField: "createdAt",
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -153,6 +159,9 @@ export const lists: Lists = {
     },
   }),
   Application: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -191,6 +200,9 @@ export const lists: Lists = {
     },
   }),
   ApplicationType: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -212,6 +224,9 @@ export const lists: Lists = {
     },
   }),
   Product: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -255,6 +270,9 @@ export const lists: Lists = {
     },
   }),
   ProductBrand: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -269,6 +287,9 @@ export const lists: Lists = {
     },
   }),
   Car: list({
+    ui: {
+      labelField: "licensePlate",
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -288,6 +309,9 @@ export const lists: Lists = {
     },
   }),
   CarModel: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -303,6 +327,9 @@ export const lists: Lists = {
     },
   }),
   CarBrand: list({
+    ui: {
+      labelField: "name",
+    },
     access: {
       operation: {
         create: isAdmin,

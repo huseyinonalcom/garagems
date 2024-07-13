@@ -84,6 +84,9 @@ function isUser({ session: session2 }) {
 }
 var lists = {
   User: (0, import_core.list)({
+    ui: {
+      labelField: "firstname"
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -135,6 +138,9 @@ var lists = {
     }
   }),
   WorkOrder: (0, import_core.list)({
+    ui: {
+      labelField: "createdAt"
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -184,6 +190,9 @@ var lists = {
     }
   }),
   Application: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -222,6 +231,9 @@ var lists = {
     }
   }),
   ApplicationType: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -243,6 +255,9 @@ var lists = {
     }
   }),
   Product: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -286,6 +301,9 @@ var lists = {
     }
   }),
   ProductBrand: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -300,6 +318,9 @@ var lists = {
     }
   }),
   Car: (0, import_core.list)({
+    ui: {
+      labelField: "licensePlate"
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -319,6 +340,9 @@ var lists = {
     }
   }),
   CarModel: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -334,6 +358,9 @@ var lists = {
     }
   }),
   CarBrand: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
     access: {
       operation: {
         create: isAdmin,
