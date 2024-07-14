@@ -92,7 +92,7 @@ var lists = {
         create: isAdmin,
         query: isUser,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -146,7 +146,7 @@ var lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -198,7 +198,7 @@ var lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -243,7 +243,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -271,7 +271,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -317,7 +317,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -334,7 +334,7 @@ var lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -356,7 +356,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -374,7 +374,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {
@@ -391,7 +391,7 @@ var lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: import_access.denyAll
+        delete: isAdmin
       }
     },
     fields: {

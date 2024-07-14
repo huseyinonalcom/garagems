@@ -61,7 +61,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isUser,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: { 
@@ -115,7 +115,7 @@ export const lists: Lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -167,7 +167,7 @@ export const lists: Lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -212,7 +212,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -240,7 +240,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -286,7 +286,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -303,7 +303,7 @@ export const lists: Lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -325,7 +325,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -343,7 +343,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
@@ -360,7 +360,7 @@ export const lists: Lists = {
         create: isAdmin,
         query: isEmployee,
         update: isAdmin,
-        delete: denyAll,
+        delete: isAdmin,
       },
     },
     fields: {
