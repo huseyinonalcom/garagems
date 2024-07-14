@@ -64,7 +64,7 @@ export const lists: Lists = {
         delete: denyAll,
       },
     },
-    fields: {
+    fields: { 
       username: text({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: text({
         isIndexed: "unique",
