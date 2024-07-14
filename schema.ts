@@ -1,5 +1,5 @@
 import { text, relationship, password, timestamp, select, float, multiselect } from "@keystone-6/core/fields";
-import { allowAll, denyAll } from "@keystone-6/core/access";
+import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { list } from "@keystone-6/core";
 
@@ -64,7 +64,7 @@ export const lists: Lists = {
         delete: isAdmin,
       },
     },
-    fields: { 
+    fields: {
       username: text({ validation: { isRequired: true }, isIndexed: "unique" }),
       email: text({
         isIndexed: "unique",
