@@ -315,6 +315,7 @@ type Application {
   description: String
   price: Float
   amount: Float
+  location: [String!]
   product: Product
   applicant: User
   creator: User
@@ -372,6 +373,7 @@ input ApplicationUpdateInput {
   description: String
   price: Float
   amount: Float
+  location: [String!]
   product: ProductRelateToOneForUpdateInput
   applicant: UserRelateToOneForUpdateInput
   creator: UserRelateToOneForUpdateInput
@@ -409,6 +411,7 @@ input ApplicationCreateInput {
   description: String
   price: Float
   amount: Float
+  location: [String!]
   product: ProductRelateToOneForCreateInput
   applicant: UserRelateToOneForCreateInput
   creator: UserRelateToOneForCreateInput

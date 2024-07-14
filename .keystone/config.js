@@ -35,7 +35,7 @@ if (!sessionSecret && process.env.NODE_ENV !== "production") {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "username",
-  sessionData: "username role permissions",
+  sessionData: "username role permissions id",
   secretField: "password",
   initFirstItem: {
     fields: ["username", "firstname", "role", "email", "password"]
@@ -212,6 +212,30 @@ var lists = {
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       amount: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      location: (0, import_fields.multiselect)({
+        type: "string",
+        options: [
+          "headlights",
+          "hood",
+          "rightFrontFender",
+          "leftFrontFender",
+          "rightFrontWindow",
+          "leftFrontWindow",
+          "rightRearWindow",
+          "leftRearWindow",
+          "sunroof",
+          "glassRoof",
+          "roof",
+          "frontBumper",
+          "rearBumper",
+          "rearGlass",
+          "windshield",
+          "wash_interior",
+          "wash_exterior",
+          "wash_interiorAndExterior",
+          "wash_detail"
+        ]
+      }),
       product: (0, import_fields.relationship)({
         ref: "Product.applications",
         many: false
