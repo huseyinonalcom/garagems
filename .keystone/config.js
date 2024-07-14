@@ -164,8 +164,8 @@ var lists = {
       }),
       status: (0, import_fields.select)({
         type: "string",
-        options: ["active", "inactive", "finished", "canceled", "offer"],
-        defaultValue: "inactive",
+        options: ["aktif", "inaktif", "tamamland\u0131", "iptal", "teklif"],
+        defaultValue: "inaktif",
         validation: { isRequired: true },
         access: {
           update: isManager
@@ -212,29 +212,9 @@ var lists = {
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       amount: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
-      location: (0, import_fields.multiselect)({
-        type: "string",
-        options: [
-          "headlights",
-          "hood",
-          "rightFrontFender",
-          "leftFrontFender",
-          "rightFrontWindow",
-          "leftFrontWindow",
-          "rightRearWindow",
-          "leftRearWindow",
-          "sunroof",
-          "glassRoof",
-          "roof",
-          "frontBumper",
-          "rearBumper",
-          "rearGlass",
-          "windshield",
-          "wash_interior",
-          "wash_exterior",
-          "wash_interiorAndExterior",
-          "wash_detail"
-        ]
+      locations: (0, import_fields.relationship)({
+        ref: "ApplicationLocation.applications",
+        many: true
       }),
       product: (0, import_fields.relationship)({
         ref: "Product.applications",
@@ -275,6 +255,10 @@ var lists = {
       products: (0, import_fields.relationship)({
         ref: "Product.applicationType",
         many: true
+      }),
+      locations: (0, import_fields.relationship)({
+        ref: "ApplicationLocation.applicationTypes",
+        many: true
       })
     }
   }),
@@ -297,8 +281,8 @@ var lists = {
       stock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       status: (0, import_fields.select)({
         type: "string",
-        options: ["active", "inactive", "discontinued"],
-        defaultValue: "active",
+        options: ["aktif", "inaktif", "iptal"],
+        defaultValue: "aktif",
         validation: { isRequired: true }
       }),
       code: (0, import_fields.text)({}),
@@ -396,6 +380,30 @@ var lists = {
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
+    }
+  }),
+  ApplicationLocation: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: import_access.denyAll
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      applicationTypes: (0, import_fields.relationship)({
+        ref: "ApplicationType.locations",
+        many: true
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.locations",
+        many: true
+      })
     }
   })
 };

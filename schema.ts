@@ -133,8 +133,8 @@ export const lists: Lists = {
       }),
       status: select({
         type: "string",
-        options: ["active", "inactive", "finished", "canceled", "offer"],
-        defaultValue: "inactive",
+        options: ["aktif", "inaktif", "tamamlandı", "iptal", "teklif"],
+        defaultValue: "inaktif",
         validation: { isRequired: true },
         access: {
           update: isManager,
@@ -181,29 +181,9 @@ export const lists: Lists = {
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
       amount: float({ validation: { isRequired: false, min: 0 } }),
-      location: multiselect({
-        type: "string",
-        options: [
-          "headlights",
-          "hood",
-          "rightFrontFender",
-          "leftFrontFender",
-          "rightFrontWindow",
-          "leftFrontWindow",
-          "rightRearWindow",
-          "leftRearWindow",
-          "sunroof",
-          "glassRoof",
-          "roof",
-          "frontBumper",
-          "rearBumper",
-          "rearGlass",
-          "windshield",
-          "wash_interior",
-          "wash_exterior",
-          "wash_interiorAndExterior",
-          "wash_detail",
-        ],
+      locations: relationship({
+        ref: "ApplicationLocation.applications",
+        many: true,
       }),
       product: relationship({
         ref: "Product.applications",
@@ -245,6 +225,10 @@ export const lists: Lists = {
         ref: "Product.applicationType",
         many: true,
       }),
+      locations: relationship({
+        ref: "ApplicationLocation.applicationTypes",
+        many: true,
+      }),
     },
   }),
   Product: list({
@@ -266,8 +250,8 @@ export const lists: Lists = {
       stock: float({ validation: { isRequired: true, min: 0 } }),
       status: select({
         type: "string",
-        options: ["active", "inactive", "discontinued"],
-        defaultValue: "active",
+        options: ["aktif", "inaktif", "iptal"],
+        defaultValue: "aktif",
         validation: { isRequired: true },
       }),
       code: text({}),
@@ -365,6 +349,30 @@ export const lists: Lists = {
     fields: {
       name: text({ validation: { isRequired: true } }),
       carModels: relationship({ ref: "CarModel.carBrand", many: true }),
+    },
+  }),
+  ApplicationLocation: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: denyAll,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      applicationTypes: relationship({
+        ref: "ApplicationType.locations",
+        many: true,
+      }),
+      applications: relationship({
+        ref: "Application.locations",
+        many: true,
+      }),
     },
   }),
 };
