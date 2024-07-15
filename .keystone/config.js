@@ -465,7 +465,7 @@ var keystone_default = withAuth(
         // This store is used for the image field type
         type: "image",
         // The URL that is returned in the Keystone GraphQL API
-        generateUrl: (path) => `localhost:3000/images${path}`,
+        generateUrl: (path) => `http://localhost:3000/images${path}`,
         // The route that will be created in Keystone's backend to serve the images
         serverRoute: {
           path: "/images"
