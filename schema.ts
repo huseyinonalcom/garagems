@@ -167,7 +167,7 @@ export const lists: Lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: isAdmin,
+        delete: isManager,
       },
     },
     fields: {
