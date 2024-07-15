@@ -31,16 +31,23 @@ model User {
 }
 
 model File {
-  id                      String        @id @default(cuid())
-  name                    String        @default("")
-  image_id                String?
-  image_filesize          Int?
-  image_width             Int?
-  image_height            Int?
-  image_extension         String?
-  from_WorkOrder_images   WorkOrder[]   @relation("WorkOrder_images")
-  from_Application_images Application[] @relation("Application_images")
-  from_Product_images     Product[]     @relation("Product_images")
+  id              String       @id @default(cuid())
+  name            String       @default("")
+  image_id        String?
+  image_filesize  Int?
+  image_width     Int?
+  image_height    Int?
+  image_extension String?
+  application     Application? @relation("File_application", fields: [applicationId], references: [id])
+  applicationId   String?      @map("application")
+  workOrder       WorkOrder?   @relation("File_workOrder", fields: [workOrderId], references: [id])
+  workOrderId     String?      @map("workOrder")
+  product         Product?     @relation("File_product", fields: [productId], references: [id])
+  productId       String?      @map("product")
+
+  @@index([applicationId])
+  @@index([workOrderId])
+  @@index([productId])
 }
 
 model WorkOrder {
@@ -48,7 +55,7 @@ model WorkOrder {
   creator      User?         @relation("WorkOrder_creator", fields: [creatorId], references: [id])
   creatorId    String?       @map("creator")
   createdAt    DateTime?     @default(now())
-  images       File[]        @relation("WorkOrder_images")
+  images       File[]        @relation("File_workOrder")
   status       String        @default("inaktif")
   startedAt    DateTime?
   finishedAt   DateTime?
@@ -69,7 +76,7 @@ model Application {
   id          String                @id @default(cuid())
   workOrder   WorkOrder?            @relation("Application_workOrder", fields: [workOrderId], references: [id])
   workOrderId String?               @map("workOrder")
-  images      File[]                @relation("Application_images")
+  images      File[]                @relation("File_application")
   startedAt   DateTime?
   finishedAt  DateTime?
   name        String                @default("")
@@ -108,7 +115,7 @@ model Product {
   price             Float
   stock             Float
   status            String           @default("aktif")
-  images            File[]           @relation("Product_images")
+  images            File[]           @relation("File_product")
   code              String           @default("")
   ean               String           @default("")
   productBrand      ProductBrand?    @relation("Product_productBrand", fields: [productBrandId], references: [id])

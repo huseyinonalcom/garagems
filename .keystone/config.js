@@ -151,7 +151,19 @@ var lists = {
     },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      image: (0, import_fields.image)({ storage: "my_local_images" })
+      image: (0, import_fields.image)({ storage: "my_local_images" }),
+      application: (0, import_fields.relationship)({
+        ref: "Application.images",
+        many: false
+      }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.images",
+        many: false
+      }),
+      product: (0, import_fields.relationship)({
+        ref: "Product.images",
+        many: false
+      })
     }
   }),
   WorkOrder: (0, import_core.list)({
@@ -180,7 +192,7 @@ var lists = {
         }
       }),
       images: (0, import_fields.relationship)({
-        ref: "File",
+        ref: "File.workOrder",
         many: true
       }),
       status: (0, import_fields.select)({
@@ -228,7 +240,7 @@ var lists = {
         many: false
       }),
       images: (0, import_fields.relationship)({
-        ref: "File",
+        ref: "File.application",
         many: true
       }),
       startedAt: (0, import_fields.timestamp)(),
@@ -311,7 +323,7 @@ var lists = {
         validation: { isRequired: true }
       }),
       images: (0, import_fields.relationship)({
-        ref: "File",
+        ref: "File.product",
         many: true
       }),
       code: (0, import_fields.text)({}),

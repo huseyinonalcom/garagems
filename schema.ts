@@ -121,6 +121,18 @@ export const lists: Lists = {
     fields: {
       name: text({ validation: { isRequired: true } }),
       image: image({ storage: "my_local_images" }),
+      application: relationship({
+        ref: "Application.images",
+        many: false,
+      }),
+      workOrder: relationship({
+        ref: "WorkOrder.images",
+        many: false,
+      }),
+      product: relationship({
+        ref: "Product.images",
+        many: false,
+      }),
     },
   }),
   WorkOrder: list({
@@ -149,7 +161,7 @@ export const lists: Lists = {
         },
       }),
       images: relationship({
-        ref: "File",
+        ref: "File.workOrder",
         many: true,
       }),
       status: select({
@@ -197,7 +209,7 @@ export const lists: Lists = {
         many: false,
       }),
       images: relationship({
-        ref: "File",
+        ref: "File.application",
         many: true,
       }),
       startedAt: timestamp(),
@@ -280,7 +292,7 @@ export const lists: Lists = {
         validation: { isRequired: true },
       }),
       images: relationship({
-        ref: "File",
+        ref: "File.product",
         many: true,
       }),
       code: text({}),
