@@ -120,7 +120,7 @@ export const lists: Lists = {
     },
     fields: {
       name: text({ validation: { isRequired: true } }),
-      image: image({ storage: "my_local_images" }),
+      images: text(),
       application: relationship({
         ref: "Application.images",
         many: false,
