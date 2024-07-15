@@ -1,4 +1,4 @@
-import { text, relationship, password, timestamp, select, float, multiselect } from "@keystone-6/core/fields";
+import { text, relationship, password, timestamp, select, float, multiselect, image } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { list } from "@keystone-6/core";
@@ -106,6 +106,23 @@ export const lists: Lists = {
       }),
     },
   }),
+  File: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      image: image({ storage: "my_local_images" }),
+    },
+  }),
   WorkOrder: list({
     ui: {
       labelField: "createdAt",
@@ -130,6 +147,10 @@ export const lists: Lists = {
           create: denyAll,
           update: denyAll,
         },
+      }),
+      images: relationship({
+        ref: "File",
+        many: true,
       }),
       status: select({
         type: "string",
@@ -174,6 +195,10 @@ export const lists: Lists = {
       workOrder: relationship({
         ref: "WorkOrder.applications",
         many: false,
+      }),
+      images: relationship({
+        ref: "File",
+        many: true,
       }),
       startedAt: timestamp(),
       finishedAt: timestamp(),
@@ -253,6 +278,10 @@ export const lists: Lists = {
         options: ["aktif", "inaktif", "iptal"],
         defaultValue: "aktif",
         validation: { isRequired: true },
+      }),
+      images: relationship({
+        ref: "File",
+        many: true,
       }),
       code: text({}),
       ean: text({}),
