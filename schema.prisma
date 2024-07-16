@@ -33,7 +33,7 @@ model User {
 model File {
   id            String       @id @default(cuid())
   name          String       @default("")
-  images        String       @default("")
+  url           String       @default("")
   application   Application? @relation("File_application", fields: [applicationId], references: [id])
   applicationId String?      @map("application")
   workOrder     WorkOrder?   @relation("File_workOrder", fields: [workOrderId], references: [id])

@@ -151,7 +151,7 @@ var lists = {
     },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      images: (0, import_fields.text)(),
+      url: (0, import_fields.text)(),
       application: (0, import_fields.relationship)({
         ref: "Application.images",
         many: false

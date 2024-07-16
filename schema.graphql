@@ -186,7 +186,7 @@ input ApplicationRelateToManyForCreateInput {
 type File {
   id: ID!
   name: String
-  images: String
+  url: String
   application: Application
   workOrder: WorkOrder
   product: Product
@@ -202,7 +202,7 @@ input FileWhereInput {
   NOT: [FileWhereInput!]
   id: IDFilter
   name: StringFilter
-  images: StringFilter
+  url: StringFilter
   application: ApplicationWhereInput
   workOrder: WorkOrderWhereInput
   product: ProductWhereInput
@@ -211,12 +211,12 @@ input FileWhereInput {
 input FileOrderByInput {
   id: OrderDirection
   name: OrderDirection
-  images: OrderDirection
+  url: OrderDirection
 }
 
 input FileUpdateInput {
   name: String
-  images: String
+  url: String
   application: ApplicationRelateToOneForUpdateInput
   workOrder: WorkOrderRelateToOneForUpdateInput
   product: ProductRelateToOneForUpdateInput
@@ -247,7 +247,7 @@ input FileUpdateArgs {
 
 input FileCreateInput {
   name: String
-  images: String
+  url: String
   application: ApplicationRelateToOneForCreateInput
   workOrder: WorkOrderRelateToOneForCreateInput
   product: ProductRelateToOneForCreateInput
