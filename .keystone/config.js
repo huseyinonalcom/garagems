@@ -141,6 +141,31 @@ var lists = {
       applications: (0, import_fields.relationship)({
         ref: "Application.creator",
         many: true
+      }),
+      notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true })
+    }
+  }),
+  Note: (0, import_core.list)({
+    ui: {
+      labelField: "note"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      note: (0, import_fields.text)({ validation: { isRequired: true } }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.notes",
+        many: false
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.notes",
+        many: false
       })
     }
   }),
@@ -202,6 +227,10 @@ var lists = {
         ref: "File.workOrder",
         many: true
       }),
+      notes: (0, import_fields.relationship)({
+        ref: "Note.workOrder",
+        many: true
+      }),
       status: (0, import_fields.select)({
         type: "string",
         options: ["aktif", "inaktif", "tamamland\u0131", "iptal", "teklif"],
@@ -221,7 +250,6 @@ var lists = {
         ref: "User.clientOrders",
         many: false
       }),
-      notes: (0, import_fields.text)({}),
       reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       applications: (0, import_fields.relationship)({
         ref: "Application.workOrder",

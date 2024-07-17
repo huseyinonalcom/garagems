@@ -26,8 +26,21 @@ model User {
   clientOrders        WorkOrder[]   @relation("WorkOrder_customer")
   applicationsToApply Application[] @relation("Application_applicant")
   applications        Application[] @relation("Application_creator")
+  notes               Note[]        @relation("Note_creator")
 
   @@index([role])
+}
+
+model Note {
+  id          String     @id @default(cuid())
+  note        String     @default("")
+  workOrder   WorkOrder? @relation("Note_workOrder", fields: [workOrderId], references: [id])
+  workOrderId String?    @map("workOrder")
+  creator     User?      @relation("Note_creator", fields: [creatorId], references: [id])
+  creatorId   String?    @map("creator")
+
+  @@index([workOrderId])
+  @@index([creatorId])
 }
 
 model File {
@@ -52,6 +65,7 @@ model WorkOrder {
   creatorId    String?       @map("creator")
   createdAt    DateTime?     @default(now())
   images       File[]        @relation("File_workOrder")
+  notes        Note[]        @relation("Note_workOrder")
   status       String        @default("inaktif")
   startedAt    DateTime?
   finishedAt   DateTime?
@@ -59,7 +73,6 @@ model WorkOrder {
   carId        String?       @map("car")
   customer     User?         @relation("WorkOrder_customer", fields: [customerId], references: [id])
   customerId   String?       @map("customer")
-  notes        String        @default("")
   reduction    Float?
   applications Application[] @relation("Application_workOrder")
 

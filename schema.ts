@@ -132,6 +132,31 @@ export const lists: Lists = {
         ref: "Application.creator",
         many: true,
       }),
+      notes: relationship({ ref: "Note.creator", many: true }),
+    },
+  }),
+  Note: list({
+    ui: {
+      labelField: "note",
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      note: text({ validation: { isRequired: true } }),
+      workOrder: relationship({
+        ref: "WorkOrder.notes",
+        many: false,
+      }),
+      creator: relationship({
+        ref: "User.notes",
+        many: false,
+      }),
     },
   }),
   File: list({
@@ -192,6 +217,10 @@ export const lists: Lists = {
         ref: "File.workOrder",
         many: true,
       }),
+      notes: relationship({
+        ref: "Note.workOrder",
+        many: true,
+      }),
       status: select({
         type: "string",
         options: ["aktif", "inaktif", "tamamlandı", "iptal", "teklif"],
@@ -211,7 +240,6 @@ export const lists: Lists = {
         ref: "User.clientOrders",
         many: false,
       }),
-      notes: text({}),
       reduction: float({ validation: { isRequired: false, min: 0 } }),
       applications: relationship({
         ref: "Application.workOrder",
