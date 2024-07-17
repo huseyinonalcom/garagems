@@ -1,4 +1,13 @@
-import { text, relationship, password, timestamp, select, float, multiselect, image } from "@keystone-6/core/fields";
+import {
+  text,
+  relationship,
+  password,
+  timestamp,
+  select,
+  float,
+  multiselect,
+  image,
+} from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { list } from "@keystone-6/core";
@@ -26,7 +35,8 @@ function isManager({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "admin" || session.data.role == "manager") return true;
+  if (session.data.role == "admin" || session.data.role == "manager")
+    return true;
 
   return false;
 }
@@ -36,7 +46,12 @@ function isEmployee({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager"
+  )
+    return true;
 
   return false;
 }
@@ -46,7 +61,13 @@ function isUser({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager" ||
+    session.data.role == "customer"
+  )
+    return true;
 
   return false;
 }
@@ -93,7 +114,14 @@ export const lists: Lists = {
         },
       }),
       ssid: text({ validation: { isRequired: false } }),
-      password: password({ validation: { isRequired: true } }),
+      password: password({
+        validation: {
+          isRequired: true,
+          length: {
+            min: 6,
+          },
+        },
+      }),
       workOrders: relationship({ ref: "WorkOrder.creator", many: true }),
       clientOrders: relationship({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: relationship({

@@ -124,7 +124,14 @@ var lists = {
         }
       }),
       ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
-      password: (0, import_fields.password)({ validation: { isRequired: true } }),
+      password: (0, import_fields.password)({
+        validation: {
+          isRequired: true,
+          length: {
+            min: 6
+          }
+        }
+      }),
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
       clientOrders: (0, import_fields.relationship)({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: (0, import_fields.relationship)({
