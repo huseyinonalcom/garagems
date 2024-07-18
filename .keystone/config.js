@@ -233,8 +233,8 @@ var lists = {
       }),
       status: (0, import_fields.select)({
         type: "string",
-        options: ["aktif", "inaktif", "tamamland\u0131", "iptal", "teklif"],
-        defaultValue: "inaktif",
+        options: ["aktif", "pasif", "tamamland\u0131", "iptal", "teklif"],
+        defaultValue: "pasif",
         validation: { isRequired: true },
         access: {
           update: isManager
@@ -353,7 +353,7 @@ var lists = {
       stock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       status: (0, import_fields.select)({
         type: "string",
-        options: ["aktif", "inaktif", "iptal"],
+        options: ["aktif", "pasif", "iptal"],
         defaultValue: "aktif",
         validation: { isRequired: true }
       }),

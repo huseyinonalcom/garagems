@@ -223,8 +223,8 @@ export const lists: Lists = {
       }),
       status: select({
         type: "string",
-        options: ["aktif", "inaktif", "tamamlandı", "iptal", "teklif"],
-        defaultValue: "inaktif",
+        options: ["aktif", "pasif", "tamamlandı", "iptal", "teklif"],
+        defaultValue: "pasif",
         validation: { isRequired: true },
         access: {
           update: isManager,
@@ -343,7 +343,7 @@ export const lists: Lists = {
       stock: float({ validation: { isRequired: true, min: 0 } }),
       status: select({
         type: "string",
-        options: ["aktif", "inaktif", "iptal"],
+        options: ["aktif", "pasif", "iptal"],
         defaultValue: "aktif",
         validation: { isRequired: true },
       }),
