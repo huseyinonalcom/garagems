@@ -16,3 +16,4 @@ Bazı adımlar/kurallar kesin olacak (yöneticinin bile atlamaması gereken adı
 Uygulama fire (ek ürün kullanma…)
 Raporlama
 İşcilik fiyatlandırması şu an gerekli değil
+operasyonlar nasıl ayrılacak (tek location)

@@ -142,7 +142,11 @@ var lists = {
         ref: "Application.creator",
         many: true
       }),
-      notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true })
+      notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true }),
+      customerMovement: (0, import_fields.relationship)({
+        ref: "StockMovement.customer",
+        many: true
+      })
     }
   }),
   Note: (0, import_core.list)({
@@ -266,7 +270,7 @@ var lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: isManager
+        delete: isEmployee
       }
     },
     fields: {
@@ -303,6 +307,10 @@ var lists = {
       type: (0, import_fields.relationship)({
         ref: "ApplicationType.applications",
         many: false
+      }),
+      stockMovement: (0, import_fields.relationship)({
+        ref: "StockMovement.application",
+        many: true
       })
     }
   }),
@@ -350,7 +358,6 @@ var lists = {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      stock: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       status: (0, import_fields.select)({
         type: "string",
         options: ["aktif", "pasif", "iptal"],
@@ -381,7 +388,109 @@ var lists = {
         ref: "ApplicationType.products",
         many: false
       }),
-      warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } })
+      stockMovement: (0, import_fields.relationship)({
+        ref: "StockMovement.product",
+        many: true
+      }),
+      warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      color: (0, import_fields.text)({}),
+      width: (0, import_fields.float)({}),
+      length: (0, import_fields.float)({})
+    }
+  }),
+  Storage: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.storage",
+        many: true
+      })
+    }
+  }),
+  DocumentType: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.documentType",
+        many: true
+      })
+    }
+  }),
+  StockMovement: (0, import_core.list)({
+    ui: {
+      labelField: "movementType"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      product: (0, import_fields.relationship)({
+        ref: "Product.stockMovement",
+        many: false
+      }),
+      storage: (0, import_fields.relationship)({
+        ref: "Storage.stockMovements",
+        many: false
+      }),
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      movementType: (0, import_fields.select)({
+        type: "string",
+        options: ["giri\u015F", "\xE7\u0131k\u0131\u015F"],
+        defaultValue: "giri\u015F",
+        validation: { isRequired: true }
+      }),
+      documentType: (0, import_fields.relationship)({
+        ref: "DocumentType.stockMovements",
+        many: false
+      }),
+      note: (0, import_fields.text)({}),
+      customer: (0, import_fields.relationship)({
+        ref: "User.customerMovement",
+        many: false
+      }),
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
+      }),
+      application: (0, import_fields.relationship)({
+        ref: "Application.stockMovement",
+        many: false
+      }),
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
+      })
     }
   }),
   ProductBrand: (0, import_core.list)({

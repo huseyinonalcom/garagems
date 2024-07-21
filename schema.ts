@@ -6,7 +6,6 @@ import {
   select,
   float,
   multiselect,
-  image,
 } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
@@ -30,6 +29,7 @@ function isAdmin({ session }: { session?: Session }) {
 
   return false;
 }
+
 function isManager({ session }: { session?: Session }) {
   // you need to have a session to do this
   if (!session) return false;
@@ -133,6 +133,10 @@ export const lists: Lists = {
         many: true,
       }),
       notes: relationship({ ref: "Note.creator", many: true }),
+      customerMovement: relationship({
+        ref: "StockMovement.customer",
+        many: true,
+      }),
     },
   }),
   Note: list({
@@ -294,6 +298,10 @@ export const lists: Lists = {
         ref: "ApplicationType.applications",
         many: false,
       }),
+      stockMovement: relationship({
+        ref: "StockMovement.application",
+        many: true,
+      }),
     },
   }),
   ApplicationType: list({
@@ -340,7 +348,6 @@ export const lists: Lists = {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
-      stock: float({ validation: { isRequired: true, min: 0 } }),
       status: select({
         type: "string",
         options: ["aktif", "pasif", "iptal"],
@@ -371,7 +378,110 @@ export const lists: Lists = {
         ref: "ApplicationType.products",
         many: false,
       }),
+      stockMovement: relationship({
+        ref: "StockMovement.product",
+        many: true,
+      }),
       warrantyTime: float({ validation: { isRequired: false, min: 0 } }),
+      color: text({}),
+      width: float({}),
+      length: float({}),
+    },
+  }),
+  Storage: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      stockMovements: relationship({
+        ref: "StockMovement.storage",
+        many: true,
+      }),
+    },
+  }),
+  DocumentType: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      stockMovements: relationship({
+        ref: "StockMovement.documentType",
+        many: true,
+      }),
+    },
+  }),
+  StockMovement: list({
+    ui: {
+      labelField: "movementType",
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      product: relationship({
+        ref: "Product.stockMovement",
+        many: false,
+      }),
+      storage: relationship({
+        ref: "Storage.stockMovements",
+        many: false,
+      }),
+      amount: float({ validation: { isRequired: true, min: 0 } }),
+      movementType: select({
+        type: "string",
+        options: ["giriş", "çıkış"],
+        defaultValue: "giriş",
+        validation: { isRequired: true },
+      }),
+      documentType: relationship({
+        ref: "DocumentType.stockMovements",
+        many: false,
+      }),
+      note: text({}),
+      customer: relationship({
+        ref: "User.customerMovement",
+        many: false,
+      }),
+      date: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+      }),
+      application: relationship({
+        ref: "Application.stockMovement",
+        many: false,
+      }),
+
+      createdAt: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: denyAll,
+          update: denyAll,
+        },
+      }),
     },
   }),
   ProductBrand: list({
