@@ -334,7 +334,7 @@ export const lists: Lists = {
           type: graphql.Int,
           async resolve(item, args, context) {
             try {
-              const movements = await context.query.stockMovements.findMany({
+              const movements = await context.query.StockMovement.findMany({
                 where: { product: { id: { equals: item.id } } },
                 query: "amount movementType",
               });
