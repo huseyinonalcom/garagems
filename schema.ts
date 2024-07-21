@@ -332,19 +332,24 @@ export const lists: Lists = {
         field: graphql.field({
           type: graphql.Int,
           async resolve(item, context) {
-            const movements = await context.query.StockMovement.findMany({
-              where: { product: { id: { equals: item.id } } },
-            });
-            console.log(movements);
-            let stock = 0;
-            movements.forEach((movement) => {
-              if (movement.movementType == "giriş") {
-                stock += movement.amount;
-              } else {
-                stock -= movement.amount;
-              }
-            });
-            return stock;
+            try {
+              const movements = await context.query.StockMovement.findMany({
+                where: { product: { id: { equals: item.id } } },
+              });
+              console.log(movements);
+              let stock = 0;
+              movements.forEach((movement) => {
+                if (movement.movementType == "giriş") {
+                  stock += movement.amount;
+                } else {
+                  stock -= movement.amount;
+                }
+              });
+              return stock;
+            } catch (e) {
+              console.log(e);
+              return 0;
+            }
           },
         }),
       }),
