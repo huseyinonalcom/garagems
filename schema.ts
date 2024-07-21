@@ -240,7 +240,7 @@ export const lists: Lists = {
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
           const generalStorage = await context.query.Storage.findOne({
-            where: { name: "Genel" },
+            where: { name: { equals: "Genel" } },
           });
           await context.query.StockMovement.createOne({
             data: {
@@ -251,8 +251,7 @@ export const lists: Lists = {
               application: { connect: { id: item.id } },
             },
           });
-        } else if (operation === 'update') {
-          
+        } else if (operation === "update") {
         }
       },
     },
