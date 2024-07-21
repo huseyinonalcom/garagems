@@ -243,7 +243,7 @@ export const lists: Lists = {
             where: { name: { equals: "Genel" } },
             query: "id",
           });
-          console.log(generalStorage);
+          console.log(JSON.stringify(generalStorage));
           await context.query.StockMovement.createOne({
             data: {
               product: { connect: { id: item.product.id } },
