@@ -331,9 +331,9 @@ export const lists: Lists = {
       currentStock: virtual({
         field: graphql.field({
           type: graphql.Int,
-          async resolve(item, args, context) {
+          async resolve(item, context) {
             const movements = await context.query.StockMovement.findMany({
-              where: { product: { id: item.id } },
+              where: { product: { id: { equals: item.id } } },
             });
             console.log(movements);
             let stock = 0;

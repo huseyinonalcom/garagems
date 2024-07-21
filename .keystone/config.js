@@ -362,7 +362,9 @@ var lists = {
         field: import_core.graphql.field({
           type: import_core.graphql.Int,
           async resolve(item, args, context) {
-            const movements = item.stockMovements;
+            const movements = await context.query.StockMovement.findMany({
+              where: { product: { id: item.id } }
+            });
             console.log(movements);
             let stock = 0;
             movements.forEach((movement) => {
