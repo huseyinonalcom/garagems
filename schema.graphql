@@ -22,8 +22,8 @@ type User {
   applicationsCount(where: ApplicationWhereInput! = {}): Int
   notes(where: NoteWhereInput! = {}, orderBy: [NoteOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NoteWhereUniqueInput): [Note!]
   notesCount(where: NoteWhereInput! = {}): Int
-  customerMovement(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
-  customerMovementCount(where: StockMovementWhereInput! = {}): Int
+  customerMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
+  customerMovementsCount(where: StockMovementWhereInput! = {}): Int
 }
 
 enum UserPermissionType {
@@ -58,7 +58,7 @@ input UserWhereInput {
   applicationsToApply: ApplicationManyRelationFilter
   applications: ApplicationManyRelationFilter
   notes: NoteManyRelationFilter
-  customerMovement: StockMovementManyRelationFilter
+  customerMovements: StockMovementManyRelationFilter
 }
 
 input IDFilter {
@@ -155,7 +155,7 @@ input UserUpdateInput {
   applicationsToApply: ApplicationRelateToManyForUpdateInput
   applications: ApplicationRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
-  customerMovement: StockMovementRelateToManyForUpdateInput
+  customerMovements: StockMovementRelateToManyForUpdateInput
 }
 
 input WorkOrderRelateToManyForUpdateInput {
@@ -206,7 +206,7 @@ input UserCreateInput {
   applicationsToApply: ApplicationRelateToManyForCreateInput
   applications: ApplicationRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
-  customerMovement: StockMovementRelateToManyForCreateInput
+  customerMovements: StockMovementRelateToManyForCreateInput
 }
 
 input WorkOrderRelateToManyForCreateInput {
@@ -520,8 +520,8 @@ type Application {
   applicant: User
   creator: User
   type: ApplicationType
-  stockMovement(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
-  stockMovementCount(where: StockMovementWhereInput! = {}): Int
+  stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
+  stockMovementsCount(where: StockMovementWhereInput! = {}): Int
 }
 
 input ApplicationWhereUniqueInput {
@@ -546,7 +546,7 @@ input ApplicationWhereInput {
   applicant: UserWhereInput
   creator: UserWhereInput
   type: ApplicationTypeWhereInput
-  stockMovement: StockMovementManyRelationFilter
+  stockMovements: StockMovementManyRelationFilter
 }
 
 input FloatFilter {
@@ -590,7 +590,7 @@ input ApplicationUpdateInput {
   applicant: UserRelateToOneForUpdateInput
   creator: UserRelateToOneForUpdateInput
   type: ApplicationTypeRelateToOneForUpdateInput
-  stockMovement: StockMovementRelateToManyForUpdateInput
+  stockMovements: StockMovementRelateToManyForUpdateInput
 }
 
 input ApplicationLocationRelateToManyForUpdateInput {
@@ -625,7 +625,7 @@ input ApplicationCreateInput {
   applicant: UserRelateToOneForCreateInput
   creator: UserRelateToOneForCreateInput
   type: ApplicationTypeRelateToOneForCreateInput
-  stockMovement: StockMovementRelateToManyForCreateInput
+  stockMovements: StockMovementRelateToManyForCreateInput
 }
 
 input ApplicationLocationRelateToManyForCreateInput {
@@ -722,8 +722,8 @@ type Product {
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
   applicationType: ApplicationType
-  stockMovement(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
-  stockMovementCount(where: StockMovementWhereInput! = {}): Int
+  stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
+  stockMovementsCount(where: StockMovementWhereInput! = {}): Int
   warrantyTime: Float
   color: String
   width: Float
@@ -750,7 +750,7 @@ input ProductWhereInput {
   pricedBy: StringFilter
   applications: ApplicationManyRelationFilter
   applicationType: ApplicationTypeWhereInput
-  stockMovement: StockMovementManyRelationFilter
+  stockMovements: StockMovementManyRelationFilter
   warrantyTime: FloatNullableFilter
   color: StringFilter
   width: FloatNullableFilter
@@ -784,7 +784,7 @@ input ProductUpdateInput {
   pricedBy: String
   applications: ApplicationRelateToManyForUpdateInput
   applicationType: ApplicationTypeRelateToOneForUpdateInput
-  stockMovement: StockMovementRelateToManyForUpdateInput
+  stockMovements: StockMovementRelateToManyForUpdateInput
   warrantyTime: Float
   color: String
   width: Float
@@ -814,7 +814,7 @@ input ProductCreateInput {
   pricedBy: String
   applications: ApplicationRelateToManyForCreateInput
   applicationType: ApplicationTypeRelateToOneForCreateInput
-  stockMovement: StockMovementRelateToManyForCreateInput
+  stockMovements: StockMovementRelateToManyForCreateInput
   warrantyTime: Float
   color: String
   width: Float

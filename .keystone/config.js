@@ -143,7 +143,7 @@ var lists = {
         many: true
       }),
       notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true }),
-      customerMovement: (0, import_fields.relationship)({
+      customerMovements: (0, import_fields.relationship)({
         ref: "StockMovement.customer",
         many: true
       })
@@ -308,7 +308,7 @@ var lists = {
         ref: "ApplicationType.applications",
         many: false
       }),
-      stockMovement: (0, import_fields.relationship)({
+      stockMovements: (0, import_fields.relationship)({
         ref: "StockMovement.application",
         many: true
       })
@@ -362,9 +362,7 @@ var lists = {
         field: import_core.graphql.field({
           type: import_core.graphql.Int,
           async resolve(item, args, context) {
-            const movements = await context.query.StockMovement.findMany({
-              where: { product: item.id.toString() }
-            });
+            const movements = item.stockMovements;
             console.log(movements);
             let stock = 0;
             movements.forEach((movement) => {
@@ -408,7 +406,7 @@ var lists = {
         ref: "ApplicationType.products",
         many: false
       }),
-      stockMovement: (0, import_fields.relationship)({
+      stockMovements: (0, import_fields.relationship)({
         ref: "StockMovement.product",
         many: true
       }),
@@ -472,7 +470,7 @@ var lists = {
     },
     fields: {
       product: (0, import_fields.relationship)({
-        ref: "Product.stockMovement",
+        ref: "Product.stockMovements",
         many: false
       }),
       storage: (0, import_fields.relationship)({
@@ -492,7 +490,7 @@ var lists = {
       }),
       note: (0, import_fields.text)({}),
       customer: (0, import_fields.relationship)({
-        ref: "User.customerMovement",
+        ref: "User.customerMovements",
         many: false
       }),
       date: (0, import_fields.timestamp)({
@@ -500,7 +498,7 @@ var lists = {
         isOrderable: true
       }),
       application: (0, import_fields.relationship)({
-        ref: "Application.stockMovement",
+        ref: "Application.stockMovements",
         many: false
       }),
       createdAt: (0, import_fields.timestamp)({

@@ -27,7 +27,7 @@ model User {
   applicationsToApply Application[]   @relation("Application_applicant")
   applications        Application[]   @relation("Application_creator")
   notes               Note[]          @relation("Note_creator")
-  customerMovement    StockMovement[] @relation("StockMovement_customer")
+  customerMovements   StockMovement[] @relation("StockMovement_customer")
 
   @@index([role])
 }
@@ -83,26 +83,26 @@ model WorkOrder {
 }
 
 model Application {
-  id            String                @id @default(cuid())
-  workOrder     WorkOrder?            @relation("Application_workOrder", fields: [workOrderId], references: [id])
-  workOrderId   String?               @map("workOrder")
-  images        File[]                @relation("File_application")
-  startedAt     DateTime?
-  finishedAt    DateTime?
-  name          String                @default("")
-  description   String                @default("")
-  price         Float
-  amount        Float?
-  locations     ApplicationLocation[] @relation("Application_locations")
-  product       Product?              @relation("Application_product", fields: [productId], references: [id])
-  productId     String?               @map("product")
-  applicant     User?                 @relation("Application_applicant", fields: [applicantId], references: [id])
-  applicantId   String?               @map("applicant")
-  creator       User?                 @relation("Application_creator", fields: [creatorId], references: [id])
-  creatorId     String?               @map("creator")
-  type          ApplicationType?      @relation("Application_type", fields: [typeId], references: [id])
-  typeId        String?               @map("type")
-  stockMovement StockMovement[]       @relation("StockMovement_application")
+  id             String                @id @default(cuid())
+  workOrder      WorkOrder?            @relation("Application_workOrder", fields: [workOrderId], references: [id])
+  workOrderId    String?               @map("workOrder")
+  images         File[]                @relation("File_application")
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  name           String                @default("")
+  description    String                @default("")
+  price          Float
+  amount         Float?
+  locations      ApplicationLocation[] @relation("Application_locations")
+  product        Product?              @relation("Application_product", fields: [productId], references: [id])
+  productId      String?               @map("product")
+  applicant      User?                 @relation("Application_applicant", fields: [applicantId], references: [id])
+  applicantId    String?               @map("applicant")
+  creator        User?                 @relation("Application_creator", fields: [creatorId], references: [id])
+  creatorId      String?               @map("creator")
+  type           ApplicationType?      @relation("Application_type", fields: [typeId], references: [id])
+  typeId         String?               @map("type")
+  stockMovements StockMovement[]       @relation("StockMovement_application")
 
   @@index([workOrderId])
   @@index([productId])
@@ -134,7 +134,7 @@ model Product {
   applications      Application[]    @relation("Application_product")
   applicationType   ApplicationType? @relation("Product_applicationType", fields: [applicationTypeId], references: [id])
   applicationTypeId String?          @map("applicationType")
-  stockMovement     StockMovement[]  @relation("StockMovement_product")
+  stockMovements    StockMovement[]  @relation("StockMovement_product")
   warrantyTime      Float?
   color             String           @default("")
   width             Float?

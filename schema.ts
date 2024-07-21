@@ -113,7 +113,7 @@ export const lists: Lists = {
         many: true,
       }),
       notes: relationship({ ref: "Note.creator", many: true }),
-      customerMovement: relationship({
+      customerMovements: relationship({
         ref: "StockMovement.customer",
         many: true,
       }),
@@ -443,7 +443,7 @@ export const lists: Lists = {
     },
     fields: {
       product: relationship({
-        ref: "Product.stockMovement",
+        ref: "Product.stockMovements",
         many: false,
       }),
       storage: relationship({
@@ -463,7 +463,7 @@ export const lists: Lists = {
       }),
       note: text({}),
       customer: relationship({
-        ref: "User.customerMovement",
+        ref: "User.customerMovements",
         many: false,
       }),
       date: timestamp({
@@ -471,7 +471,7 @@ export const lists: Lists = {
         isOrderable: true,
       }),
       application: relationship({
-        ref: "Application.stockMovement",
+        ref: "Application.stockMovements",
         many: false,
       }),
 
