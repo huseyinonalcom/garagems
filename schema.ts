@@ -2,6 +2,7 @@ import { text, relationship, password, timestamp, select, float, multiselect, vi
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
+import keystone from "./keystone";
 
 export type Session = {
   itemId: string;
@@ -335,6 +336,7 @@ export const lists: Lists = {
             try {
               const movements = await context.query.StockMovement.findMany({
                 where: { product: { id: { equals: item.id } } },
+                query: "amount movementType",
               });
               console.log(movements);
               let stock = 0;
