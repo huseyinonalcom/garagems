@@ -252,6 +252,10 @@ export const lists: Lists = {
             },
           });
         } else if (operation === "update") {
+        } else if (operation === "delete") {
+          await context.query.StockMovement.deleteMany({
+            where: { application: { id: { equals: item.id } } },
+          });
         }
       },
     },
