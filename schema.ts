@@ -369,7 +369,6 @@ export const lists: Lists = {
                 where: { product: { id: { equals: item.id } } },
                 query: "amount movementType",
               });
-              console.log(movements);
               let stock = 0;
               movements.forEach((movement) => {
                 if (movement.movementType == "giriş") {
