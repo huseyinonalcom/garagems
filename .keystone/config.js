@@ -358,6 +358,26 @@ var lists = {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      currentStock: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Int,
+          async resolve(item, args, context) {
+            const movements = await context.query.StockMovement.findMany({
+              where: { product: item.id.toString() }
+            });
+            console.log(movements);
+            let stock = 0;
+            movements.forEach((movement) => {
+              if (movement.movementType == "giri\u015F") {
+                stock += movement.amount;
+              } else {
+                stock -= movement.amount;
+              }
+            });
+            return stock;
+          }
+        })
+      }),
       status: (0, import_fields.select)({
         type: "string",
         options: ["aktif", "pasif", "iptal"],

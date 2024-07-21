@@ -1,15 +1,7 @@
-import {
-  text,
-  relationship,
-  password,
-  timestamp,
-  select,
-  float,
-  multiselect,
-} from "@keystone-6/core/fields";
+import { text, relationship, password, timestamp, select, float, multiselect, virtual } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
-import { list } from "@keystone-6/core";
+import { graphql, list } from "@keystone-6/core";
 
 export type Session = {
   itemId: string;
@@ -35,8 +27,7 @@ function isManager({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "admin" || session.data.role == "manager")
-    return true;
+  if (session.data.role == "admin" || session.data.role == "manager") return true;
 
   return false;
 }
@@ -46,12 +37,7 @@ function isEmployee({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (
-    session.data.role == "employee" ||
-    session.data.role == "admin" ||
-    session.data.role == "manager"
-  )
-    return true;
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
 
   return false;
 }
@@ -61,13 +47,7 @@ function isUser({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (
-    session.data.role == "employee" ||
-    session.data.role == "admin" ||
-    session.data.role == "manager" ||
-    session.data.role == "customer"
-  )
-    return true;
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
 
   return false;
 }
@@ -348,6 +328,26 @@ export const lists: Lists = {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
+      currentStock: virtual({
+        field: graphql.field({
+          type: graphql.Int,
+          async resolve(item, args, context) {
+            const movements = await context.query.StockMovement.findMany({
+              where: { product: item.id.toString() },
+            });
+            console.log(movements);
+            let stock = 0;
+            movements.forEach((movement) => {
+              if (movement.movementType == "giriş") {
+                stock += movement.amount;
+              } else {
+                stock -= movement.amount;
+              }
+            });
+            return stock;
+          },
+        }),
+      }),
       status: select({
         type: "string",
         options: ["aktif", "pasif", "iptal"],
