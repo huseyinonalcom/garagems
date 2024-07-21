@@ -258,6 +258,7 @@ export const lists: Lists = {
             where: { application: { id: { equals: item.id } } },
             query: "id",
           });
+          console.log(movements);
           movements.forEach(async (movement) => {
             await context.query.StockMovement.deleteOne({
               where: { id: { equals: movement.id } },
