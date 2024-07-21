@@ -254,6 +254,7 @@ export const lists: Lists = {
           });
         } else if (operation === "update") {
         } else if (operation === "delete") {
+          console.log(item);
           const movements = await context.query.StockMovement.findMany({
             where: { application: { id: { equals: item.id } } },
             query: "id",
