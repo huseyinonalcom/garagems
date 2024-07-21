@@ -278,7 +278,7 @@ export const lists: Lists = {
         ref: "ApplicationType.applications",
         many: false,
       }),
-      stockMovement: relationship({
+      stockMovements: relationship({
         ref: "StockMovement.application",
         many: true,
       }),
@@ -332,9 +332,10 @@ export const lists: Lists = {
         field: graphql.field({
           type: graphql.Int,
           async resolve(item, args, context) {
-            const movements = await context.query.StockMovement.findMany({
-              where: { product: { id: item.id } },
-            });
+            const movements = item.stockMovements;
+            // await context.query.StockMovement.findMany({
+            //   where: { product: { id: item.id } },
+            // });
             console.log(movements);
             let stock = 0;
             movements.forEach((movement) => {
@@ -378,7 +379,7 @@ export const lists: Lists = {
         ref: "ApplicationType.products",
         many: false,
       }),
-      stockMovement: relationship({
+      stockMovements: relationship({
         ref: "StockMovement.product",
         many: true,
       }),
