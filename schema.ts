@@ -251,7 +251,7 @@ export const lists: Lists = {
             });
           });
         }
-      }
+      },
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
           const generalStorage = await context.query.Storage.findMany({
