@@ -332,10 +332,9 @@ export const lists: Lists = {
         field: graphql.field({
           type: graphql.Int,
           async resolve(item, args, context) {
-            const movements = item.stockMovements;
-            // await context.query.StockMovement.findMany({
-            //   where: { product: { id: item.id } },
-            // });
+            const movements = await context.query.StockMovement.findMany({
+              where: { product: { id: item.id } },
+            });
             console.log(movements);
             let stock = 0;
             movements.forEach((movement) => {
