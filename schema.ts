@@ -247,7 +247,7 @@ export const lists: Lists = {
           await context.query.StockMovement.createOne({
             data: {
               product: { connect: { id: item.productId } },
-              storage: { connect: { id: generalStorage.Storages.at(0).id } },
+              storage: { connect: { id: generalStorage.at(0).id } },
               amount: item.amount,
               movementType: "çıkış",
               application: { connect: { id: item.id } },
