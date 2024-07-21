@@ -239,13 +239,15 @@ export const lists: Lists = {
     hooks: {
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
-          const generalStorage = await context.query.Storage.findOne({
+          const generalStorage = await context.query.Storage.findMany({
             where: { name: { equals: "Genel" } },
+            query: "id",
           });
+
           await context.query.StockMovement.createOne({
             data: {
               product: { connect: { id: item.product.id } },
-              storage: { connect: { id: generalStorage.id } },
+              storage: { connect: { id: generalStorage.Storages.at(0).id } },
               amount: item.amount,
               movementType: "çıkış",
               application: { connect: { id: item.id } },
