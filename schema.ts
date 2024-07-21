@@ -236,6 +236,26 @@ export const lists: Lists = {
     ui: {
       labelField: "name",
     },
+    hooks: {
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findOne({
+            where: { name: "Genel" },
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.product.id } },
+              storage: { connect: { id: generalStorage.id } },
+              amount: item.amount,
+              movementType: "çıkış",
+              application: { connect: { id: item.id } },
+            },
+          });
+        } else if (operation === 'update') {
+          
+        }
+      },
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -258,7 +278,8 @@ export const lists: Lists = {
       name: text({ validation: { isRequired: true } }),
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
-      amount: float({ validation: { isRequired: false, min: 0 } }),
+      amount: float({ validation: { isRequired: true, min: 0 } }),
+      wastage: float({ validation: { isRequired: false, min: 0 } }),
       locations: relationship({
         ref: "ApplicationLocation.applications",
         many: true,
