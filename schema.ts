@@ -243,7 +243,6 @@ export const lists: Lists = {
             where: { name: { equals: "Genel" } },
             query: "id",
           });
-          console.log(JSON.stringify(item));
           await context.query.StockMovement.createOne({
             data: {
               product: { connect: { id: item.productId } },
@@ -255,8 +254,14 @@ export const lists: Lists = {
           });
         } else if (operation === "update") {
         } else if (operation === "delete") {
-          await context.query.StockMovement.deleteMany({
+          const movements = await context.query.StockMovement.findMany({
             where: { application: { id: { equals: item.id } } },
+            query: "id",
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: { equals: movement.id } },
+            });
           });
         }
       },
