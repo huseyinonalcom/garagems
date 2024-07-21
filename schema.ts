@@ -237,6 +237,21 @@ export const lists: Lists = {
       labelField: "name",
     },
     hooks: {
+      beforeOperation: async ({ operation, item, context }) => {
+       if (operation === "delete") {
+          console.log(item);
+          const movements = await context.query.StockMovement.findMany({
+            where: { application: { id: { equals: item.id } } },
+            query: "id",
+          });
+          console.log(movements);
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: { equals: movement.id } },
+            });
+          });
+        }
+      }
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
           const generalStorage = await context.query.Storage.findMany({
@@ -253,18 +268,6 @@ export const lists: Lists = {
             },
           });
         } else if (operation === "update") {
-        } else if (operation === "delete") {
-          console.log(item);
-          const movements = await context.query.StockMovement.findMany({
-            where: { application: { id: { equals: item.id } } },
-            query: "id",
-          });
-          console.log(movements);
-          movements.forEach(async (movement) => {
-            await context.query.StockMovement.deleteOne({
-              where: { id: { equals: movement.id } },
-            });
-          });
         }
       },
     },
