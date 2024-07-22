@@ -92,7 +92,8 @@ model Application {
   name           String                @default("")
   description    String                @default("")
   price          Float
-  amount         Float?
+  amount         Float
+  wastage        Float?
   locations      ApplicationLocation[] @relation("Application_locations")
   product        Product?              @relation("Application_product", fields: [productId], references: [id])
   productId      String?               @map("product")

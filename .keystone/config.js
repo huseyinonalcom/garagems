@@ -265,6 +265,41 @@ var lists = {
     ui: {
       labelField: "name"
     },
+    hooks: {
+      beforeOperation: async ({ operation, item, context }) => {
+        if (operation === "delete") {
+          console.log(item);
+          const movements = await context.query.StockMovement.findMany({
+            where: { application: { id: { equals: item.id } } },
+            query: "id"
+          });
+          console.log(movements);
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id }
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id"
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0).id } },
+              amount: item.amount,
+              movementType: "\xE7\u0131k\u0131\u015F",
+              application: { connect: { id: item.id } }
+            }
+          });
+        } else if (operation === "update") {
+        }
+      }
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -287,7 +322,8 @@ var lists = {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      amount: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      wastage: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       locations: (0, import_fields.relationship)({
         ref: "ApplicationLocation.applications",
         many: true
@@ -362,19 +398,24 @@ var lists = {
         field: import_core.graphql.field({
           type: import_core.graphql.Int,
           async resolve(item, args, context) {
-            const movements = await context.query.StockMovement.findMany({
-              where: { product: { id: item.id } }
-            });
-            console.log(movements);
-            let stock = 0;
-            movements.forEach((movement) => {
-              if (movement.movementType == "giri\u015F") {
-                stock += movement.amount;
-              } else {
-                stock -= movement.amount;
-              }
-            });
-            return stock;
+            try {
+              const movements = await context.query.StockMovement.findMany({
+                where: { product: { id: { equals: item.id } } },
+                query: "amount movementType"
+              });
+              let stock = 0;
+              movements.forEach((movement) => {
+                if (movement.movementType == "giri\u015F") {
+                  stock += movement.amount;
+                } else {
+                  stock -= movement.amount;
+                }
+              });
+              return stock;
+            } catch (e) {
+              console.log(e);
+              return 0;
+            }
           }
         })
       }),
