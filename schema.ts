@@ -1,8 +1,16 @@
-import { text, relationship, password, timestamp, select, float, multiselect, virtual } from "@keystone-6/core/fields";
+import {
+  text,
+  relationship,
+  password,
+  timestamp,
+  select,
+  float,
+  multiselect,
+  virtual,
+} from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
-import keystone from "./keystone";
 
 export type Session = {
   itemId: string;
@@ -28,7 +36,8 @@ function isManager({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "admin" || session.data.role == "manager") return true;
+  if (session.data.role == "admin" || session.data.role == "manager")
+    return true;
 
   return false;
 }
@@ -38,7 +47,12 @@ function isEmployee({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager"
+  )
+    return true;
 
   return false;
 }
@@ -48,7 +62,13 @@ function isUser({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager" ||
+    session.data.role == "customer"
+  )
+    return true;
 
   return false;
 }
@@ -215,8 +235,56 @@ export const lists: Lists = {
           update: isManager,
         },
       }),
-      startedAt: timestamp(),
-      finishedAt: timestamp(),
+      startedAt: virtual({
+        field: graphql.field({
+          type: graphql.DateTime,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "startedAt",
+              });
+              let earliestStart = applications.at(0)!.startedAt;
+              applications.forEach((app) => {
+                if (app.startedAt < earliestStart) {
+                  earliestStart = app.startedAt;
+                }
+              });
+              return earliestStart;
+            } catch (e) {
+              console.log(e);
+              return null;
+            }
+          },
+        }),
+      }),
+      finishedAt: virtual({
+        field: graphql.field({
+          type: graphql.DateTime,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "finishedAt",
+              });
+              if (applications.every((app) => app.finishedAt)) {
+                let latestFinish = applications.at(0)!.finishedAt;
+                applications.forEach((app) => {
+                  if (app.finishedAt > latestFinish) {
+                    latestFinish = app.finishedAt;
+                  }
+                });
+                return latestFinish;
+              } else {
+                return null;
+              }
+            } catch (e) {
+              console.log(e);
+              return null;
+            }
+          },
+        }),
+      }),
       car: relationship({
         ref: "Car.workOrders",
         many: false,

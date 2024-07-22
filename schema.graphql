@@ -402,8 +402,6 @@ input WorkOrderWhereInput {
   images: FileManyRelationFilter
   notes: NoteManyRelationFilter
   status: StringFilter
-  startedAt: DateTimeNullableFilter
-  finishedAt: DateTimeNullableFilter
   car: CarWhereInput
   customer: UserWhereInput
   reduction: FloatNullableFilter
@@ -442,8 +440,6 @@ input WorkOrderOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   status: OrderDirection
-  startedAt: OrderDirection
-  finishedAt: OrderDirection
   reduction: OrderDirection
 }
 
@@ -453,8 +449,6 @@ input WorkOrderUpdateInput {
   images: FileRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
   status: String
-  startedAt: DateTime
-  finishedAt: DateTime
   car: CarRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
   reduction: Float
@@ -485,8 +479,6 @@ input WorkOrderCreateInput {
   images: FileRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
   status: String
-  startedAt: DateTime
-  finishedAt: DateTime
   car: CarRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
   reduction: Float

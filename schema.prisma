@@ -68,8 +68,6 @@ model WorkOrder {
   images       File[]        @relation("File_workOrder")
   notes        Note[]        @relation("Note_workOrder")
   status       String        @default("pasif")
-  startedAt    DateTime?
-  finishedAt   DateTime?
   car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
   carId        String?       @map("car")
   customer     User?         @relation("WorkOrder_customer", fields: [customerId], references: [id])

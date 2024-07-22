@@ -244,8 +244,56 @@ var lists = {
           update: isManager
         }
       }),
-      startedAt: (0, import_fields.timestamp)(),
-      finishedAt: (0, import_fields.timestamp)(),
+      startedAt: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.DateTime,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "startedAt"
+              });
+              let earliestStart = applications.at(0).startedAt;
+              applications.forEach((app) => {
+                if (app.startedAt < earliestStart) {
+                  earliestStart = app.startedAt;
+                }
+              });
+              return earliestStart;
+            } catch (e) {
+              console.log(e);
+              return null;
+            }
+          }
+        })
+      }),
+      finishedAt: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.DateTime,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "finishedAt"
+              });
+              if (applications.every((app) => app.finishedAt)) {
+                let latestFinish = applications.at(0).finishedAt;
+                applications.forEach((app) => {
+                  if (app.finishedAt > latestFinish) {
+                    latestFinish = app.finishedAt;
+                  }
+                });
+                return latestFinish;
+              } else {
+                return null;
+              }
+            } catch (e) {
+              console.log(e);
+              return null;
+            }
+          }
+        })
+      }),
       car: (0, import_fields.relationship)({
         ref: "Car.workOrders",
         many: false
