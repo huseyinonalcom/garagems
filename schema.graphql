@@ -5,6 +5,7 @@ type User {
   id: ID!
   username: String
   email: String
+  isBlocked: Boolean
   phone: String
   firstname: String
   lastname: String
@@ -48,6 +49,7 @@ input UserWhereInput {
   id: IDFilter
   username: StringFilter
   email: StringFilter
+  isBlocked: BooleanFilter
   phone: StringFilter
   firstname: StringFilter
   lastname: StringFilter
@@ -100,6 +102,11 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
+input BooleanFilter {
+  equals: Boolean
+  not: BooleanFilter
+}
+
 input WorkOrderManyRelationFilter {
   every: WorkOrderWhereInput
   some: WorkOrderWhereInput
@@ -128,6 +135,7 @@ input UserOrderByInput {
   id: OrderDirection
   username: OrderDirection
   email: OrderDirection
+  isBlocked: OrderDirection
   phone: OrderDirection
   firstname: OrderDirection
   lastname: OrderDirection
@@ -143,6 +151,7 @@ enum OrderDirection {
 input UserUpdateInput {
   username: String
   email: String
+  isBlocked: Boolean
   phone: String
   firstname: String
   lastname: String
@@ -194,6 +203,7 @@ input UserUpdateArgs {
 input UserCreateInput {
   username: String
   email: String
+  isBlocked: Boolean
   phone: String
   firstname: String
   lastname: String
@@ -377,6 +387,7 @@ type WorkOrder {
   notes(where: NoteWhereInput! = {}, orderBy: [NoteOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NoteWhereUniqueInput): [Note!]
   notesCount(where: NoteWhereInput! = {}): Int
   status: String
+  paymentPlan: PaymentPlan
   startedAt: DateTime
   finishedAt: DateTime
   car: Car
@@ -402,6 +413,7 @@ input WorkOrderWhereInput {
   images: FileManyRelationFilter
   notes: NoteManyRelationFilter
   status: StringFilter
+  paymentPlan: PaymentPlanWhereInput
   car: CarWhereInput
   customer: UserWhereInput
   reduction: FloatNullableFilter
@@ -449,6 +461,7 @@ input WorkOrderUpdateInput {
   images: FileRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
   status: String
+  paymentPlan: PaymentPlanRelateToOneForUpdateInput
   car: CarRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
   reduction: Float
@@ -460,6 +473,12 @@ input FileRelateToManyForUpdateInput {
   set: [FileWhereUniqueInput!]
   create: [FileCreateInput!]
   connect: [FileWhereUniqueInput!]
+}
+
+input PaymentPlanRelateToOneForUpdateInput {
+  create: PaymentPlanCreateInput
+  connect: PaymentPlanWhereUniqueInput
+  disconnect: Boolean
 }
 
 input CarRelateToOneForUpdateInput {
@@ -479,6 +498,7 @@ input WorkOrderCreateInput {
   images: FileRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
   status: String
+  paymentPlan: PaymentPlanRelateToOneForCreateInput
   car: CarRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
   reduction: Float
@@ -488,6 +508,11 @@ input WorkOrderCreateInput {
 input FileRelateToManyForCreateInput {
   create: [FileCreateInput!]
   connect: [FileWhereUniqueInput!]
+}
+
+input PaymentPlanRelateToOneForCreateInput {
+  create: PaymentPlanCreateInput
+  connect: PaymentPlanWhereUniqueInput
 }
 
 input CarRelateToOneForCreateInput {
@@ -507,8 +532,7 @@ type Application {
   price: Float
   amount: Float
   wastage: Float
-  locations(where: ApplicationLocationWhereInput! = {}, orderBy: [ApplicationLocationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationLocationWhereUniqueInput): [ApplicationLocation!]
-  locationsCount(where: ApplicationLocationWhereInput! = {}): Int
+  location: ApplicationLocation
   product: Product
   applicant: User
   creator: User
@@ -535,7 +559,7 @@ input ApplicationWhereInput {
   price: FloatFilter
   amount: FloatFilter
   wastage: FloatNullableFilter
-  locations: ApplicationLocationManyRelationFilter
+  location: ApplicationLocationWhereInput
   product: ProductWhereInput
   applicant: UserWhereInput
   creator: UserWhereInput
@@ -552,12 +576,6 @@ input FloatFilter {
   gt: Float
   gte: Float
   not: FloatFilter
-}
-
-input ApplicationLocationManyRelationFilter {
-  every: ApplicationLocationWhereInput
-  some: ApplicationLocationWhereInput
-  none: ApplicationLocationWhereInput
 }
 
 input ApplicationOrderByInput {
@@ -581,7 +599,7 @@ input ApplicationUpdateInput {
   price: Float
   amount: Float
   wastage: Float
-  locations: ApplicationLocationRelateToManyForUpdateInput
+  location: ApplicationLocationRelateToOneForUpdateInput
   product: ProductRelateToOneForUpdateInput
   applicant: UserRelateToOneForUpdateInput
   creator: UserRelateToOneForUpdateInput
@@ -589,11 +607,10 @@ input ApplicationUpdateInput {
   stockMovements: StockMovementRelateToManyForUpdateInput
 }
 
-input ApplicationLocationRelateToManyForUpdateInput {
-  disconnect: [ApplicationLocationWhereUniqueInput!]
-  set: [ApplicationLocationWhereUniqueInput!]
-  create: [ApplicationLocationCreateInput!]
-  connect: [ApplicationLocationWhereUniqueInput!]
+input ApplicationLocationRelateToOneForUpdateInput {
+  create: ApplicationLocationCreateInput
+  connect: ApplicationLocationWhereUniqueInput
+  disconnect: Boolean
 }
 
 input ApplicationTypeRelateToOneForUpdateInput {
@@ -617,7 +634,7 @@ input ApplicationCreateInput {
   price: Float
   amount: Float
   wastage: Float
-  locations: ApplicationLocationRelateToManyForCreateInput
+  location: ApplicationLocationRelateToOneForCreateInput
   product: ProductRelateToOneForCreateInput
   applicant: UserRelateToOneForCreateInput
   creator: UserRelateToOneForCreateInput
@@ -625,9 +642,9 @@ input ApplicationCreateInput {
   stockMovements: StockMovementRelateToManyForCreateInput
 }
 
-input ApplicationLocationRelateToManyForCreateInput {
-  create: [ApplicationLocationCreateInput!]
-  connect: [ApplicationLocationWhereUniqueInput!]
+input ApplicationLocationRelateToOneForCreateInput {
+  create: ApplicationLocationCreateInput
+  connect: ApplicationLocationWhereUniqueInput
 }
 
 input ApplicationTypeRelateToOneForCreateInput {
@@ -667,6 +684,12 @@ input ProductManyRelationFilter {
   none: ProductWhereInput
 }
 
+input ApplicationLocationManyRelationFilter {
+  every: ApplicationLocationWhereInput
+  some: ApplicationLocationWhereInput
+  none: ApplicationLocationWhereInput
+}
+
 input ApplicationTypeOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -686,6 +709,13 @@ input ProductRelateToManyForUpdateInput {
   connect: [ProductWhereUniqueInput!]
 }
 
+input ApplicationLocationRelateToManyForUpdateInput {
+  disconnect: [ApplicationLocationWhereUniqueInput!]
+  set: [ApplicationLocationWhereUniqueInput!]
+  create: [ApplicationLocationCreateInput!]
+  connect: [ApplicationLocationWhereUniqueInput!]
+}
+
 input ApplicationTypeUpdateArgs {
   where: ApplicationTypeWhereUniqueInput!
   data: ApplicationTypeUpdateInput!
@@ -701,6 +731,11 @@ input ApplicationTypeCreateInput {
 input ProductRelateToManyForCreateInput {
   create: [ProductCreateInput!]
   connect: [ProductWhereUniqueInput!]
+}
+
+input ApplicationLocationRelateToManyForCreateInput {
+  create: [ApplicationLocationCreateInput!]
+  connect: [ApplicationLocationWhereUniqueInput!]
 }
 
 type Product {
@@ -1294,6 +1329,129 @@ input ApplicationTypeRelateToManyForCreateInput {
   connect: [ApplicationTypeWhereUniqueInput!]
 }
 
+type PaymentPlan {
+  id: ID!
+  name: String
+  workOrder: WorkOrder
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  paymentsCount(where: PaymentWhereInput! = {}): Int
+  periods: Float
+  toPay: Float
+  completed: Boolean
+}
+
+input PaymentPlanWhereUniqueInput {
+  id: ID
+}
+
+input PaymentPlanWhereInput {
+  AND: [PaymentPlanWhereInput!]
+  OR: [PaymentPlanWhereInput!]
+  NOT: [PaymentPlanWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  workOrder: WorkOrderWhereInput
+  payments: PaymentManyRelationFilter
+  periods: FloatFilter
+}
+
+input PaymentManyRelationFilter {
+  every: PaymentWhereInput
+  some: PaymentWhereInput
+  none: PaymentWhereInput
+}
+
+input PaymentPlanOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  periods: OrderDirection
+}
+
+input PaymentPlanUpdateInput {
+  name: String
+  workOrder: WorkOrderRelateToOneForUpdateInput
+  payments: PaymentRelateToManyForUpdateInput
+  periods: Float
+}
+
+input PaymentRelateToManyForUpdateInput {
+  disconnect: [PaymentWhereUniqueInput!]
+  set: [PaymentWhereUniqueInput!]
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
+input PaymentPlanUpdateArgs {
+  where: PaymentPlanWhereUniqueInput!
+  data: PaymentPlanUpdateInput!
+}
+
+input PaymentPlanCreateInput {
+  name: String
+  workOrder: WorkOrderRelateToOneForCreateInput
+  payments: PaymentRelateToManyForCreateInput
+  periods: Float
+}
+
+input PaymentRelateToManyForCreateInput {
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
+type Payment {
+  id: ID!
+  amount: Float
+  paymentPlan: PaymentPlan
+  reference: String
+  type: String
+  date: DateTime
+}
+
+input PaymentWhereUniqueInput {
+  id: ID
+}
+
+input PaymentWhereInput {
+  AND: [PaymentWhereInput!]
+  OR: [PaymentWhereInput!]
+  NOT: [PaymentWhereInput!]
+  id: IDFilter
+  amount: FloatFilter
+  paymentPlan: PaymentPlanWhereInput
+  reference: StringFilter
+  type: StringFilter
+  date: DateTimeNullableFilter
+}
+
+input PaymentOrderByInput {
+  id: OrderDirection
+  amount: OrderDirection
+  reference: OrderDirection
+  type: OrderDirection
+  date: OrderDirection
+}
+
+input PaymentUpdateInput {
+  amount: Float
+  paymentPlan: PaymentPlanRelateToOneForUpdateInput
+  reference: String
+  type: String
+  date: DateTime
+}
+
+input PaymentUpdateArgs {
+  where: PaymentWhereUniqueInput!
+  data: PaymentUpdateInput!
+}
+
+input PaymentCreateInput {
+  amount: Float
+  paymentPlan: PaymentPlanRelateToOneForCreateInput
+  reference: String
+  type: String
+  date: DateTime
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -1390,6 +1548,18 @@ type Mutation {
   updateApplicationLocations(data: [ApplicationLocationUpdateArgs!]!): [ApplicationLocation]
   deleteApplicationLocation(where: ApplicationLocationWhereUniqueInput!): ApplicationLocation
   deleteApplicationLocations(where: [ApplicationLocationWhereUniqueInput!]!): [ApplicationLocation]
+  createPaymentPlan(data: PaymentPlanCreateInput!): PaymentPlan
+  createPaymentPlans(data: [PaymentPlanCreateInput!]!): [PaymentPlan]
+  updatePaymentPlan(where: PaymentPlanWhereUniqueInput!, data: PaymentPlanUpdateInput!): PaymentPlan
+  updatePaymentPlans(data: [PaymentPlanUpdateArgs!]!): [PaymentPlan]
+  deletePaymentPlan(where: PaymentPlanWhereUniqueInput!): PaymentPlan
+  deletePaymentPlans(where: [PaymentPlanWhereUniqueInput!]!): [PaymentPlan]
+  createPayment(data: PaymentCreateInput!): Payment
+  createPayments(data: [PaymentCreateInput!]!): [Payment]
+  updatePayment(where: PaymentWhereUniqueInput!, data: PaymentUpdateInput!): Payment
+  updatePayments(data: [PaymentUpdateArgs!]!): [Payment]
+  deletePayment(where: PaymentWhereUniqueInput!): Payment
+  deletePayments(where: [PaymentWhereUniqueInput!]!): [Payment]
   endSession: Boolean!
   authenticateUserWithPassword(username: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -1460,6 +1630,12 @@ type Query {
   applicationLocations(where: ApplicationLocationWhereInput! = {}, orderBy: [ApplicationLocationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationLocationWhereUniqueInput): [ApplicationLocation!]
   applicationLocation(where: ApplicationLocationWhereUniqueInput!): ApplicationLocation
   applicationLocationsCount(where: ApplicationLocationWhereInput! = {}): Int
+  paymentPlans(where: PaymentPlanWhereInput! = {}, orderBy: [PaymentPlanOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentPlanWhereUniqueInput): [PaymentPlan!]
+  paymentPlan(where: PaymentPlanWhereUniqueInput!): PaymentPlan
+  paymentPlansCount(where: PaymentPlanWhereInput! = {}): Int
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  payment(where: PaymentWhereUniqueInput!): Payment
+  paymentsCount(where: PaymentWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

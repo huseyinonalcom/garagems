@@ -35,7 +35,7 @@ if (!sessionSecret && process.env.NODE_ENV !== "production") {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "username",
-  sessionData: "id username role permissions",
+  sessionData: "id username role permissions isBlocked",
   secretField: "password",
   initFirstItem: {
     fields: ["username", "firstname", "role", "email", "password"]
@@ -59,28 +59,28 @@ function isAdmin({ session: session2 }) {
     return false;
   if (session2.data.role == "admin")
     return true;
-  return false;
+  return !session2.data.isBlocked;
 }
 function isManager({ session: session2 }) {
   if (!session2)
     return false;
   if (session2.data.role == "admin" || session2.data.role == "manager")
     return true;
-  return false;
+  return !session2.data.isBlocked;
 }
 function isEmployee({ session: session2 }) {
   if (!session2)
     return false;
   if (session2.data.role == "employee" || session2.data.role == "admin" || session2.data.role == "manager")
     return true;
-  return false;
+  return !session2.data.isBlocked;
 }
 function isUser({ session: session2 }) {
   if (!session2)
     return false;
   if (session2.data.role == "employee" || session2.data.role == "admin" || session2.data.role == "manager" || session2.data.role == "customer")
     return true;
-  return false;
+  return !session2.data.isBlocked;
 }
 var lists = {
   User: (0, import_core.list)({
@@ -100,6 +100,7 @@ var lists = {
       email: (0, import_fields.text)({
         isIndexed: "unique"
       }),
+      isBlocked: (0, import_fields.checkbox)({ defaultValue: false }),
       phone: (0, import_fields.text)({ validation: { isRequired: false } }),
       firstname: (0, import_fields.text)({ validation: { isRequired: true } }),
       lastname: (0, import_fields.text)({ validation: { isRequired: false } }),
@@ -244,6 +245,10 @@ var lists = {
           update: isManager
         }
       }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.workOrder",
+        many: false
+      }),
       startedAt: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.DateTime,
@@ -372,9 +377,9 @@ var lists = {
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       wastage: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
-      locations: (0, import_fields.relationship)({
+      location: (0, import_fields.relationship)({
         ref: "ApplicationLocation.applications",
-        many: true
+        many: false
       }),
       product: (0, import_fields.relationship)({
         ref: "Product.applications",
@@ -695,8 +700,122 @@ var lists = {
         many: true
       }),
       applications: (0, import_fields.relationship)({
-        ref: "Application.locations",
+        ref: "Application.location",
         many: true
+      })
+    }
+  }),
+  PaymentPlan: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.paymentPlan",
+        many: false
+      }),
+      payments: (0, import_fields.relationship)({
+        ref: "Payment.paymentPlan",
+        many: true
+      }),
+      periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
+      toPay: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.PaymentPlanPayment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount"
+              });
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }"
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc, app) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+              return total - paymentTotal;
+            } catch (e) {
+              console.log(e);
+              return 123456;
+            }
+          }
+        })
+      }),
+      completed: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Boolean,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.PaymentPlanPayment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount"
+              });
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }"
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc, app) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+              return total <= paymentTotal;
+            } catch (e) {
+              console.log(e);
+              return false;
+            }
+          }
+        })
+      })
+    }
+  }),
+  Payment: (0, import_core.list)({
+    ui: {
+      labelField: "date"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isManager
+      }
+    },
+    fields: {
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.payments",
+        many: false
+      }),
+      reference: (0, import_fields.text)({}),
+      type: (0, import_fields.select)({
+        type: "string",
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        defaultValue: "nakit",
+        validation: { isRequired: true }
+      }),
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
       })
     }
   })

@@ -1,13 +1,4 @@
-import {
-  text,
-  relationship,
-  password,
-  timestamp,
-  select,
-  float,
-  multiselect,
-  virtual,
-} from "@keystone-6/core/fields";
+import { text, relationship, password, timestamp, select, float, multiselect, virtual, checkbox } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
@@ -15,6 +6,7 @@ import { graphql, list } from "@keystone-6/core";
 export type Session = {
   itemId: string;
   data: {
+    isBlocked: boolean;
     username: string;
     role: "admin" | "customer" | "employee" | "manager";
     permissions: any;
@@ -28,7 +20,7 @@ function isAdmin({ session }: { session?: Session }) {
   // admins can do anything
   if (session.data.role == "admin") return true;
 
-  return false;
+  return !session.data.isBlocked;
 }
 
 function isManager({ session }: { session?: Session }) {
@@ -36,10 +28,9 @@ function isManager({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "admin" || session.data.role == "manager")
-    return true;
+  if (session.data.role == "admin" || session.data.role == "manager") return true;
 
-  return false;
+  return !session.data.isBlocked;
 }
 
 function isEmployee({ session }: { session?: Session }) {
@@ -47,14 +38,9 @@ function isEmployee({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (
-    session.data.role == "employee" ||
-    session.data.role == "admin" ||
-    session.data.role == "manager"
-  )
-    return true;
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
 
-  return false;
+  return !session.data.isBlocked;
 }
 
 function isUser({ session }: { session?: Session }) {
@@ -62,15 +48,9 @@ function isUser({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (
-    session.data.role == "employee" ||
-    session.data.role == "admin" ||
-    session.data.role == "manager" ||
-    session.data.role == "customer"
-  )
-    return true;
+  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
 
-  return false;
+  return !session.data.isBlocked;
 }
 
 export const lists: Lists = {
@@ -91,6 +71,7 @@ export const lists: Lists = {
       email: text({
         isIndexed: "unique",
       }),
+      isBlocked: checkbox({ defaultValue: false }),
       phone: text({ validation: { isRequired: false } }),
       firstname: text({ validation: { isRequired: true } }),
       lastname: text({ validation: { isRequired: false } }),
@@ -235,6 +216,10 @@ export const lists: Lists = {
           update: isManager,
         },
       }),
+      paymentPlan: relationship({
+        ref: "PaymentPlan.workOrder",
+        many: false,
+      }),
       startedAt: virtual({
         field: graphql.field({
           type: graphql.DateTime,
@@ -363,9 +348,9 @@ export const lists: Lists = {
       price: float({ validation: { isRequired: true, min: 0 } }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
       wastage: float({ validation: { isRequired: false, min: 0 } }),
-      locations: relationship({
+      location: relationship({
         ref: "ApplicationLocation.applications",
-        many: true,
+        many: false,
       }),
       product: relationship({
         ref: "Product.applications",
@@ -687,8 +672,124 @@ export const lists: Lists = {
         many: true,
       }),
       applications: relationship({
-        ref: "Application.locations",
+        ref: "Application.location",
         many: true,
+      }),
+    },
+  }),
+  PaymentPlan: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      workOrder: relationship({
+        ref: "WorkOrder.paymentPlan",
+        many: false,
+      }),
+      payments: relationship({
+        ref: "Payment.paymentPlan",
+        many: true,
+      }),
+      periods: float({ validation: { isRequired: true, min: 1 } }),
+      toPay: virtual({
+        field: graphql.field({
+          type: graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.PaymentPlanPayment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount",
+              });
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }",
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+
+              return total - paymentTotal;
+            } catch (e) {
+              console.log(e);
+              return 123456;
+            }
+          },
+        }),
+      }),
+      completed: virtual({
+        field: graphql.field({
+          type: graphql.Boolean,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.PaymentPlanPayment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount",
+              });
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }",
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+
+              return total <= paymentTotal;
+            } catch (e) {
+              console.log(e);
+              return false;
+            }
+          },
+        }),
+      }),
+    },
+  }),
+  Payment: list({
+    ui: {
+      labelField: "date",
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isManager,
+      },
+    },
+    fields: {
+      amount: float({ validation: { isRequired: true, min: 0 } }),
+      paymentPlan: relationship({
+        ref: "PaymentPlan.payments",
+        many: false,
+      }),
+      reference: text({}),
+      type: select({
+        type: "string",
+        options: ["nakit", "kredi kartı", "havale", "çek", "senet", "banka kartı"],
+        defaultValue: "nakit",
+        validation: { isRequired: true },
+      }),
+      date: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
       }),
     },
   }),
