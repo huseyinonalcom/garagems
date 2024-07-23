@@ -222,7 +222,7 @@ export const lists: Lists = {
       }),
       startedAt: virtual({
         field: graphql.field({
-          type: graphql.DateTime,
+          type: graphql.String,
           async resolve(item, args, context) {
             try {
               const applications = await context.query.Application.findMany({
@@ -245,7 +245,7 @@ export const lists: Lists = {
       }),
       finishedAt: virtual({
         field: graphql.field({
-          type: graphql.DateTime,
+          type: graphql.String,
           async resolve(item, args, context) {
             try {
               const applications = await context.query.Application.findMany({
