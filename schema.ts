@@ -318,12 +318,10 @@ export const lists: Lists = {
             }
           }
         } else if (operation === "delete") {
-          console.log(item);
           const movements = await context.query.StockMovement.findMany({
             where: { application: { id: { equals: item.id } } },
             query: "id",
           });
-          console.log(movements);
           movements.forEach(async (movement) => {
             await context.query.StockMovement.deleteOne({
               where: { id: movement.id },
@@ -331,7 +329,7 @@ export const lists: Lists = {
           });
         }
       },
-      afterOperation: async ({ operation, item, context }) => {
+      afterOperation: async ({ operation, item, inputData, context }) => {
         if (operation === "create") {
           const generalStorage = await context.query.Storage.findMany({
             where: { name: { equals: "Genel" } },
@@ -347,6 +345,61 @@ export const lists: Lists = {
             },
           });
         } else if (operation === "update") {
+          if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id",
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id",
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0)!.id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "giriş",
+                application: { connect: { id: item.id } },
+              },
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0)!.id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "çıkış",
+                application: { connect: { id: item.id } },
+              },
+            });
+          } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id",
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id",
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0)!.id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "çıkış",
+                application: { connect: { id: item.id } },
+              },
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0)!.id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "giriş",
+                application: { connect: { id: item.id } },
+              },
+            });
+          }
         }
       },
     },
@@ -449,8 +502,12 @@ export const lists: Lists = {
           type: graphql.Int,
           async resolve(item, args, context) {
             try {
+              const generalStorage = await context.query.Storage.findMany({
+                where: { name: { equals: "Genel" } },
+                query: "id",
+              });
               const movements = await context.query.StockMovement.findMany({
-                where: { product: { id: { equals: item.id } } },
+                where: { product: { id: { equals: item.id } }, storage: { id: { equals: generalStorage.at(0)!.id } } },
                 query: "amount movementType",
               });
               let stock = 0;
