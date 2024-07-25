@@ -346,6 +346,7 @@ export const lists: Lists = {
           });
         } else if (operation === "update") {
           console.log("updating application");
+          console.log(inputData);
           if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
             console.log("adding wastage");
             const generalStorage = await context.query.Storage.findMany({
