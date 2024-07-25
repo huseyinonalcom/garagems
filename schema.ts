@@ -345,7 +345,9 @@ export const lists: Lists = {
             },
           });
         } else if (operation === "update") {
+          console.log("updating application");
           if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
+            console.log("adding wastage");
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
               query: "id",
@@ -373,6 +375,7 @@ export const lists: Lists = {
               },
             });
           } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
+            console.log("subtracting wastage");
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
               query: "id",
