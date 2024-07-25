@@ -237,7 +237,6 @@ export const lists: Lists = {
               });
               return earliestStart;
             } catch (e) {
-              console.log(e);
               return null;
             }
           },
@@ -264,7 +263,6 @@ export const lists: Lists = {
                 return null;
               }
             } catch (e) {
-              console.log(e);
               return null;
             }
           },
@@ -318,10 +316,6 @@ export const lists: Lists = {
             }
           }
           if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
-            console.log("updating application");
-            console.log(inputData);
-            console.log(item);
-            console.log("adding wastage");
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
               query: "id",
@@ -349,7 +343,6 @@ export const lists: Lists = {
               },
             });
           } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
-            console.log("subtracting wastage");
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
               query: "id",
@@ -524,7 +517,6 @@ export const lists: Lists = {
               });
               return stock;
             } catch (e) {
-              console.log(e);
               return 0;
             }
           },
@@ -811,7 +803,6 @@ export const lists: Lists = {
 
               return total - paymentTotal;
             } catch (e) {
-              console.log(e);
               return 123456;
             }
           },
@@ -841,7 +832,6 @@ export const lists: Lists = {
 
               return total <= paymentTotal;
             } catch (e) {
-              console.log(e);
               return false;
             }
           },

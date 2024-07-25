@@ -266,7 +266,6 @@ var lists = {
               });
               return earliestStart;
             } catch (e) {
-              console.log(e);
               return null;
             }
           }
@@ -293,7 +292,6 @@ var lists = {
                 return null;
               }
             } catch (e) {
-              console.log(e);
               return null;
             }
           }
@@ -319,14 +317,93 @@ var lists = {
       labelField: "name"
     },
     hooks: {
-      beforeOperation: async ({ operation, item, context }) => {
-        if (operation === "delete") {
-          console.log(item);
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "update") {
+          if (inputData.startedAt) {
+            if (item.startedAt) {
+              throw new Error("Application already started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+          }
+          if (inputData.finishedAt) {
+            if (!item.startedAt) {
+              throw new Error("Application not started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+            if (item.finishedAt) {
+              throw new Error("Application already finished");
+            }
+            if (inputData.finishedAt < item.startedAt) {
+              throw new Error("Finish date cannot be before start date");
+            }
+            if (inputData.applicant.connect?.id != item.applicantId) {
+              throw new Error("Applicant cannot be changed");
+            }
+          }
+          if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id"
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id"
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0).id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "giri\u015F",
+                application: { connect: { id: item.id } }
+              }
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0).id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "\xE7\u0131k\u0131\u015F",
+                application: { connect: { id: item.id } }
+              }
+            });
+          } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id"
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id"
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0).id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "\xE7\u0131k\u0131\u015F",
+                application: { connect: { id: item.id } }
+              }
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0).id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "giri\u015F",
+                application: { connect: { id: item.id } }
+              }
+            });
+          }
+        } else if (operation === "delete") {
           const movements = await context.query.StockMovement.findMany({
             where: { application: { id: { equals: item.id } } },
             query: "id"
           });
-          console.log(movements);
           movements.forEach(async (movement) => {
             await context.query.StockMovement.deleteOne({
               where: { id: movement.id }
@@ -349,7 +426,6 @@ var lists = {
               application: { connect: { id: item.id } }
             }
           });
-        } else if (operation === "update") {
         }
       }
     },
@@ -376,7 +452,7 @@ var lists = {
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      wastage: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      wastage: (0, import_fields.float)({ validation: { isRequired: false, min: 0 }, defaultValue: 0 }),
       location: (0, import_fields.relationship)({
         ref: "ApplicationLocation.applications",
         many: false
@@ -452,8 +528,12 @@ var lists = {
           type: import_core.graphql.Int,
           async resolve(item, args, context) {
             try {
+              const generalStorage = await context.query.Storage.findMany({
+                where: { name: { equals: "Genel" } },
+                query: "id"
+              });
               const movements = await context.query.StockMovement.findMany({
-                where: { product: { id: { equals: item.id } } },
+                where: { product: { id: { equals: item.id } }, storage: { id: { equals: generalStorage.at(0).id } } },
                 query: "amount movementType"
               });
               let stock = 0;
@@ -466,7 +546,6 @@ var lists = {
               });
               return stock;
             } catch (e) {
-              console.log(e);
               return 0;
             }
           }
@@ -751,7 +830,6 @@ var lists = {
               });
               return total - paymentTotal;
             } catch (e) {
-              console.log(e);
               return 123456;
             }
           }
@@ -780,7 +858,6 @@ var lists = {
               });
               return total <= paymentTotal;
             } catch (e) {
-              console.log(e);
               return false;
             }
           }

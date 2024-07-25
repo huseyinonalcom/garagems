@@ -93,7 +93,7 @@ model Application {
   description    String               @default("")
   price          Float
   amount         Float
-  wastage        Float?
+  wastage        Float?               @default(0)
   location       ApplicationLocation? @relation("Application_location", fields: [locationId], references: [id])
   locationId     String?              @map("location")
   product        Product?             @relation("Application_product", fields: [productId], references: [id])
