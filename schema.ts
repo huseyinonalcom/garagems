@@ -426,7 +426,7 @@ export const lists: Lists = {
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
-      wastage: float({ validation: { isRequired: false, min: 0 } }),
+      wastage: float({ validation: { isRequired: false, min: 0 }, defaultValue: 0 }),
       location: relationship({
         ref: "ApplicationLocation.applications",
         many: false,
