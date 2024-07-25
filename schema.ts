@@ -292,8 +292,31 @@ export const lists: Lists = {
     hooks: {
       beforeOperation: async ({ operation, item, inputData, context }) => {
         if (operation === "update") {
-          console.log(inputData);
-          console.log(item);
+          if (inputData.startedAt) {
+            if (item.startedAt) {
+              throw new Error("Application already started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+          }
+          if (inputData.finishedAt) {
+            if (!item.startedAt) {
+              throw new Error("Application not started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+            if (item.finishedAt) {
+              throw new Error("Application already finished");
+            }
+            if (inputData.finishedAt < item.startedAt) {
+              throw new Error("Finish date cannot be before start date");
+            }
+            if (inputData.applicant.connect?.id != item.applicantId) {
+              throw new Error("Applicant cannot be changed");
+            }
+          }
         } else if (operation === "delete") {
           console.log(item);
           const movements = await context.query.StockMovement.findMany({
