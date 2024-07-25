@@ -290,8 +290,11 @@ export const lists: Lists = {
       labelField: "name",
     },
     hooks: {
-      beforeOperation: async ({ operation, item, context }) => {
-        if (operation === "delete") {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "update") {
+          console.log(inputData);
+          console.log(item);
+        } else if (operation === "delete") {
           console.log(item);
           const movements = await context.query.StockMovement.findMany({
             where: { application: { id: { equals: item.id } } },
