@@ -317,38 +317,10 @@ export const lists: Lists = {
               throw new Error("Applicant cannot be changed");
             }
           }
-        } else if (operation === "delete") {
-          const movements = await context.query.StockMovement.findMany({
-            where: { application: { id: { equals: item.id } } },
-            query: "id",
-          });
-          movements.forEach(async (movement) => {
-            await context.query.StockMovement.deleteOne({
-              where: { id: movement.id },
-            });
-          });
-        }
-      },
-      afterOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "create") {
-          const generalStorage = await context.query.Storage.findMany({
-            where: { name: { equals: "Genel" } },
-            query: "id",
-          });
-          await context.query.StockMovement.createOne({
-            data: {
-              product: { connect: { id: item.productId } },
-              storage: { connect: { id: generalStorage.at(0)!.id } },
-              amount: item.amount,
-              movementType: "çıkış",
-              application: { connect: { id: item.id } },
-            },
-          });
-        } else if (operation === "update") {
-          console.log("updating application");
-          console.log(inputData);
-          console.log(item);
           if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
+            console.log("updating application");
+            console.log(inputData);
+            console.log(item);
             console.log("adding wastage");
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
@@ -405,6 +377,33 @@ export const lists: Lists = {
               },
             });
           }
+        } else if (operation === "delete") {
+          const movements = await context.query.StockMovement.findMany({
+            where: { application: { id: { equals: item.id } } },
+            query: "id",
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id },
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id",
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0)!.id } },
+              amount: item.amount,
+              movementType: "çıkış",
+              application: { connect: { id: item.id } },
+            },
+          });
         }
       },
     },
