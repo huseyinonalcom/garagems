@@ -104,6 +104,10 @@ export const lists: Lists = {
           },
         },
       }),
+      qcWorkOrders: relationship({
+        ref: "WorkOrder.qcUser",
+        many: true,
+      }),
       workOrders: relationship({ ref: "WorkOrder.creator", many: true }),
       clientOrders: relationship({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: relationship({
@@ -220,6 +224,15 @@ export const lists: Lists = {
         ref: "PaymentPlan.workOrder",
         many: false,
       }),
+      qcDone: checkbox({ defaultValue: false }),
+      qcUser: relationship({
+        ref: "User.qcWorkOrders",
+        many: false,
+      }),
+      checkDate: timestamp({
+        validation: { isRequired: false },
+      }),
+      checkDone: checkbox({ defaultValue: false }),
       startedAt: virtual({
         field: graphql.field({
           type: graphql.String,
