@@ -23,6 +23,7 @@ model User {
   permissions         String          @default("[]")
   ssid                String          @default("")
   password            String
+  qcWorkOrders        WorkOrder[]     @relation("WorkOrder_qcUser")
   workOrders          WorkOrder[]     @relation("WorkOrder_creator")
   clientOrders        WorkOrder[]     @relation("WorkOrder_customer")
   applicationsToApply Application[]   @relation("Application_applicant")
@@ -70,6 +71,11 @@ model WorkOrder {
   notes        Note[]        @relation("Note_workOrder")
   status       String        @default("pasif")
   paymentPlan  PaymentPlan?  @relation("PaymentPlan_workOrder")
+  qcDone       Boolean       @default(false)
+  qcUser       User?         @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])
+  qcUserId     String?       @map("qcUser")
+  checkDate    DateTime?
+  checkDone    Boolean       @default(false)
   car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
   carId        String?       @map("car")
   customer     User?         @relation("WorkOrder_customer", fields: [customerId], references: [id])
@@ -78,6 +84,7 @@ model WorkOrder {
   applications Application[] @relation("Application_workOrder")
 
   @@index([creatorId])
+  @@index([qcUserId])
   @@index([carId])
   @@index([customerId])
 }

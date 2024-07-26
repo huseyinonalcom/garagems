@@ -13,6 +13,8 @@ type User {
   permissions: [UserPermissionType!]
   ssid: String
   password: PasswordState
+  qcWorkOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
+  qcWorkOrdersCount(where: WorkOrderWhereInput! = {}): Int
   workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
   workOrdersCount(where: WorkOrderWhereInput! = {}): Int
   clientOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
@@ -55,6 +57,7 @@ input UserWhereInput {
   lastname: StringFilter
   role: StringFilter
   ssid: StringFilter
+  qcWorkOrders: WorkOrderManyRelationFilter
   workOrders: WorkOrderManyRelationFilter
   clientOrders: WorkOrderManyRelationFilter
   applicationsToApply: ApplicationManyRelationFilter
@@ -159,6 +162,7 @@ input UserUpdateInput {
   permissions: [UserPermissionType!]
   ssid: String
   password: String
+  qcWorkOrders: WorkOrderRelateToManyForUpdateInput
   workOrders: WorkOrderRelateToManyForUpdateInput
   clientOrders: WorkOrderRelateToManyForUpdateInput
   applicationsToApply: ApplicationRelateToManyForUpdateInput
@@ -211,6 +215,7 @@ input UserCreateInput {
   permissions: [UserPermissionType!]
   ssid: String
   password: String
+  qcWorkOrders: WorkOrderRelateToManyForCreateInput
   workOrders: WorkOrderRelateToManyForCreateInput
   clientOrders: WorkOrderRelateToManyForCreateInput
   applicationsToApply: ApplicationRelateToManyForCreateInput
@@ -388,6 +393,10 @@ type WorkOrder {
   notesCount(where: NoteWhereInput! = {}): Int
   status: String
   paymentPlan: PaymentPlan
+  qcDone: Boolean
+  qcUser: User
+  checkDate: DateTime
+  checkDone: Boolean
   startedAt: String
   finishedAt: String
   car: Car
@@ -414,6 +423,10 @@ input WorkOrderWhereInput {
   notes: NoteManyRelationFilter
   status: StringFilter
   paymentPlan: PaymentPlanWhereInput
+  qcDone: BooleanFilter
+  qcUser: UserWhereInput
+  checkDate: DateTimeNullableFilter
+  checkDone: BooleanFilter
   car: CarWhereInput
   customer: UserWhereInput
   reduction: FloatNullableFilter
@@ -452,6 +465,9 @@ input WorkOrderOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   status: OrderDirection
+  qcDone: OrderDirection
+  checkDate: OrderDirection
+  checkDone: OrderDirection
   reduction: OrderDirection
 }
 
@@ -462,6 +478,10 @@ input WorkOrderUpdateInput {
   notes: NoteRelateToManyForUpdateInput
   status: String
   paymentPlan: PaymentPlanRelateToOneForUpdateInput
+  qcDone: Boolean
+  qcUser: UserRelateToOneForUpdateInput
+  checkDate: DateTime
+  checkDone: Boolean
   car: CarRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
   reduction: Float
@@ -499,6 +519,10 @@ input WorkOrderCreateInput {
   notes: NoteRelateToManyForCreateInput
   status: String
   paymentPlan: PaymentPlanRelateToOneForCreateInput
+  qcDone: Boolean
+  qcUser: UserRelateToOneForCreateInput
+  checkDate: DateTime
+  checkDone: Boolean
   car: CarRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
   reduction: Float

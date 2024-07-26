@@ -133,6 +133,10 @@ var lists = {
           }
         }
       }),
+      qcWorkOrders: (0, import_fields.relationship)({
+        ref: "WorkOrder.qcUser",
+        many: true
+      }),
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
       clientOrders: (0, import_fields.relationship)({ ref: "WorkOrder.customer", many: true }),
       applicationsToApply: (0, import_fields.relationship)({
@@ -249,6 +253,15 @@ var lists = {
         ref: "PaymentPlan.workOrder",
         many: false
       }),
+      qcDone: (0, import_fields.checkbox)({ defaultValue: false }),
+      qcUser: (0, import_fields.relationship)({
+        ref: "User.qcWorkOrders",
+        many: false
+      }),
+      checkDate: (0, import_fields.timestamp)({
+        validation: { isRequired: false }
+      }),
+      checkDone: (0, import_fields.checkbox)({ defaultValue: false }),
       startedAt: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.String,
