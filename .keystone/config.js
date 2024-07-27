@@ -826,6 +826,26 @@ var lists = {
               }
             });
           }
+        } else if (operation === "update") {
+          const exitingNotifications = context.query.Notification.findMany({
+            where: { paymentPlan: { id: { equals: item.id } } },
+            query: "id date"
+          });
+          exitingNotifications.forEach(async (notification) => {
+            await context.query.Notification.deleteOne({
+              where: { id: notification.id }
+            });
+          });
+          for (let i = 1; i < item.periods; i++) {
+            await context.query.Notification.createOne({
+              data: {
+                paymentPlan: { connect: { id: item.id } },
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                message: "\xD6deme tarihi",
+                notifyRoles: ["admin"]
+              }
+            });
+          }
         }
       }
     },
