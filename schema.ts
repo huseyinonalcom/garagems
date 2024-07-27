@@ -233,6 +233,10 @@ export const lists: Lists = {
         validation: { isRequired: false },
       }),
       checkDone: checkbox({ defaultValue: false }),
+      notifications: relationship({
+        ref: "Notification.workOrder",
+        many: true,
+      }),
       startedAt: virtual({
         field: graphql.field({
           type: graphql.String,
@@ -781,6 +785,22 @@ export const lists: Lists = {
         delete: isAdmin,
       },
     },
+    hooks: {
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          for (let i = 1; i < item.periods; i++) {
+            await context.query.Notification.createOne({
+              data: {
+                paymentPlan: { connect: { id: item.id } },
+                date: new Date(new Date().getTime() + i * item.periodDuration * 24 * 60 * 60 * 1000),
+                message: "Ödeme tarihi",
+                notifyRoles: ["admin"],
+              },
+            });
+          }
+        }
+      },
+    },
     fields: {
       name: text({ validation: { isRequired: true } }),
       workOrder: relationship({
@@ -792,15 +812,12 @@ export const lists: Lists = {
         many: true,
       }),
       periods: float({ validation: { isRequired: true, min: 1 } }),
+      periodDuration: float({ validation: { isRequired: true, min: 1 } }),
       toPay: virtual({
         field: graphql.field({
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              const payments = await context.query.PaymentPlanPayment.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount",
-              });
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }",
@@ -810,11 +827,36 @@ export const lists: Lists = {
                 total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               });
               let paymentTotal = 0;
-              payments.forEach((payment) => {
+              item.payments.forEach((payment) => {
                 paymentTotal += payment.amount;
               });
 
               return total - paymentTotal;
+            } catch (e) {
+              return 123456;
+            }
+          },
+        }),
+      }),
+      nextPayment: virtual({
+        field: graphql.field({
+          type: graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }",
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              item.payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+
+              return (total - paymentTotal) / item.periods;
             } catch (e) {
               return 123456;
             }
@@ -849,6 +891,10 @@ export const lists: Lists = {
             }
           },
         }),
+      }),
+      notifications: relationship({
+        ref: "Notification.paymentPlan",
+        many: true,
       }),
     },
   }),
@@ -901,6 +947,14 @@ export const lists: Lists = {
         isOrderable: true,
       }),
       message: text({ validation: { isRequired: true } }),
+      paymentPlan: relationship({
+        ref: "PaymentPlan.notifications",
+        many: false,
+      }),
+      workOrder: relationship({
+        ref: "WorkOrder.notifications",
+        many: false,
+      }),
       link: text({}),
       handled: checkbox({ defaultValue: false }),
       notifyRoles: multiselect({

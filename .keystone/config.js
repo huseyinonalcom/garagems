@@ -262,6 +262,10 @@ var lists = {
         validation: { isRequired: false }
       }),
       checkDone: (0, import_fields.checkbox)({ defaultValue: false }),
+      notifications: (0, import_fields.relationship)({
+        ref: "Notification.workOrder",
+        many: true
+      }),
       startedAt: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.String,
@@ -809,6 +813,22 @@ var lists = {
         delete: isAdmin
       }
     },
+    hooks: {
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          for (let i = 1; i < item.periods; i++) {
+            await context.query.Notification.createOne({
+              data: {
+                paymentPlan: { connect: { id: item.id } },
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                message: "\xD6deme tarihi",
+                notifyRoles: ["admin"]
+              }
+            });
+          }
+        }
+      }
+    },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       workOrder: (0, import_fields.relationship)({
@@ -820,15 +840,12 @@ var lists = {
         many: true
       }),
       periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
+      periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       toPay: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.Float,
           async resolve(item, args, context) {
             try {
-              const payments = await context.query.PaymentPlanPayment.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount"
-              });
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }"
@@ -838,10 +855,34 @@ var lists = {
                 total += order.applications.reduce((acc, app) => acc + app.price, 0);
               });
               let paymentTotal = 0;
-              payments.forEach((payment) => {
+              item.payments.forEach((payment) => {
                 paymentTotal += payment.amount;
               });
               return total - paymentTotal;
+            } catch (e) {
+              return 123456;
+            }
+          }
+        })
+      }),
+      nextPayment: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "status applications { price }"
+              });
+              let total = 0;
+              workOrder.forEach((order) => {
+                total += order.applications.reduce((acc, app) => acc + app.price, 0);
+              });
+              let paymentTotal = 0;
+              item.payments.forEach((payment) => {
+                paymentTotal += payment.amount;
+              });
+              return (total - paymentTotal) / item.periods;
             } catch (e) {
               return 123456;
             }
@@ -875,6 +916,10 @@ var lists = {
             }
           }
         })
+      }),
+      notifications: (0, import_fields.relationship)({
+        ref: "Notification.paymentPlan",
+        many: true
       })
     }
   }),
@@ -927,6 +972,14 @@ var lists = {
         isOrderable: true
       }),
       message: (0, import_fields.text)({ validation: { isRequired: true } }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.notifications",
+        many: false
+      }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.notifications",
+        many: false
+      }),
       link: (0, import_fields.text)({}),
       handled: (0, import_fields.checkbox)({ defaultValue: false }),
       notifyRoles: (0, import_fields.multiselect)({

@@ -397,6 +397,8 @@ type WorkOrder {
   qcUser: User
   checkDate: DateTime
   checkDone: Boolean
+  notifications(where: NotificationWhereInput! = {}, orderBy: [NotificationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NotificationWhereUniqueInput): [Notification!]
+  notificationsCount(where: NotificationWhereInput! = {}): Int
   startedAt: String
   finishedAt: String
   car: Car
@@ -427,6 +429,7 @@ input WorkOrderWhereInput {
   qcUser: UserWhereInput
   checkDate: DateTimeNullableFilter
   checkDone: BooleanFilter
+  notifications: NotificationManyRelationFilter
   car: CarWhereInput
   customer: UserWhereInput
   reduction: FloatNullableFilter
@@ -448,6 +451,12 @@ input FileManyRelationFilter {
   every: FileWhereInput
   some: FileWhereInput
   none: FileWhereInput
+}
+
+input NotificationManyRelationFilter {
+  every: NotificationWhereInput
+  some: NotificationWhereInput
+  none: NotificationWhereInput
 }
 
 input FloatNullableFilter {
@@ -482,6 +491,7 @@ input WorkOrderUpdateInput {
   qcUser: UserRelateToOneForUpdateInput
   checkDate: DateTime
   checkDone: Boolean
+  notifications: NotificationRelateToManyForUpdateInput
   car: CarRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
   reduction: Float
@@ -499,6 +509,13 @@ input PaymentPlanRelateToOneForUpdateInput {
   create: PaymentPlanCreateInput
   connect: PaymentPlanWhereUniqueInput
   disconnect: Boolean
+}
+
+input NotificationRelateToManyForUpdateInput {
+  disconnect: [NotificationWhereUniqueInput!]
+  set: [NotificationWhereUniqueInput!]
+  create: [NotificationCreateInput!]
+  connect: [NotificationWhereUniqueInput!]
 }
 
 input CarRelateToOneForUpdateInput {
@@ -523,6 +540,7 @@ input WorkOrderCreateInput {
   qcUser: UserRelateToOneForCreateInput
   checkDate: DateTime
   checkDone: Boolean
+  notifications: NotificationRelateToManyForCreateInput
   car: CarRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
   reduction: Float
@@ -537,6 +555,11 @@ input FileRelateToManyForCreateInput {
 input PaymentPlanRelateToOneForCreateInput {
   create: PaymentPlanCreateInput
   connect: PaymentPlanWhereUniqueInput
+}
+
+input NotificationRelateToManyForCreateInput {
+  create: [NotificationCreateInput!]
+  connect: [NotificationWhereUniqueInput!]
 }
 
 input CarRelateToOneForCreateInput {
@@ -1360,8 +1383,12 @@ type PaymentPlan {
   payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
   paymentsCount(where: PaymentWhereInput! = {}): Int
   periods: Float
+  periodDuration: Float
   toPay: Float
+  nextPayment: Float
   completed: Boolean
+  notifications(where: NotificationWhereInput! = {}, orderBy: [NotificationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NotificationWhereUniqueInput): [Notification!]
+  notificationsCount(where: NotificationWhereInput! = {}): Int
 }
 
 input PaymentPlanWhereUniqueInput {
@@ -1377,6 +1404,8 @@ input PaymentPlanWhereInput {
   workOrder: WorkOrderWhereInput
   payments: PaymentManyRelationFilter
   periods: FloatFilter
+  periodDuration: FloatFilter
+  notifications: NotificationManyRelationFilter
 }
 
 input PaymentManyRelationFilter {
@@ -1389,6 +1418,7 @@ input PaymentPlanOrderByInput {
   id: OrderDirection
   name: OrderDirection
   periods: OrderDirection
+  periodDuration: OrderDirection
 }
 
 input PaymentPlanUpdateInput {
@@ -1396,6 +1426,8 @@ input PaymentPlanUpdateInput {
   workOrder: WorkOrderRelateToOneForUpdateInput
   payments: PaymentRelateToManyForUpdateInput
   periods: Float
+  periodDuration: Float
+  notifications: NotificationRelateToManyForUpdateInput
 }
 
 input PaymentRelateToManyForUpdateInput {
@@ -1415,6 +1447,8 @@ input PaymentPlanCreateInput {
   workOrder: WorkOrderRelateToOneForCreateInput
   payments: PaymentRelateToManyForCreateInput
   periods: Float
+  periodDuration: Float
+  notifications: NotificationRelateToManyForCreateInput
 }
 
 input PaymentRelateToManyForCreateInput {
@@ -1480,6 +1514,8 @@ type Notification {
   id: ID!
   date: DateTime
   message: String
+  paymentPlan: PaymentPlan
+  workOrder: WorkOrder
   link: String
   handled: Boolean
   notifyRoles: [NotificationNotifyRoleType!]
@@ -1503,6 +1539,8 @@ input NotificationWhereInput {
   id: IDFilter
   date: DateTimeNullableFilter
   message: StringFilter
+  paymentPlan: PaymentPlanWhereInput
+  workOrder: WorkOrderWhereInput
   link: StringFilter
   handled: BooleanFilter
 }
@@ -1518,6 +1556,8 @@ input NotificationOrderByInput {
 input NotificationUpdateInput {
   date: DateTime
   message: String
+  paymentPlan: PaymentPlanRelateToOneForUpdateInput
+  workOrder: WorkOrderRelateToOneForUpdateInput
   link: String
   handled: Boolean
   notifyRoles: [NotificationNotifyRoleType!]
@@ -1531,6 +1571,8 @@ input NotificationUpdateArgs {
 input NotificationCreateInput {
   date: DateTime
   message: String
+  paymentPlan: PaymentPlanRelateToOneForCreateInput
+  workOrder: WorkOrderRelateToOneForCreateInput
   link: String
   handled: Boolean
   notifyRoles: [NotificationNotifyRoleType!]

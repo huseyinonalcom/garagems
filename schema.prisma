@@ -63,25 +63,26 @@ model File {
 }
 
 model WorkOrder {
-  id           String        @id @default(cuid())
-  creator      User?         @relation("WorkOrder_creator", fields: [creatorId], references: [id])
-  creatorId    String?       @map("creator")
-  createdAt    DateTime?     @default(now())
-  images       File[]        @relation("File_workOrder")
-  notes        Note[]        @relation("Note_workOrder")
-  status       String        @default("pasif")
-  paymentPlan  PaymentPlan?  @relation("PaymentPlan_workOrder")
-  qcDone       Boolean       @default(false)
-  qcUser       User?         @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])
-  qcUserId     String?       @map("qcUser")
-  checkDate    DateTime?
-  checkDone    Boolean       @default(false)
-  car          Car?          @relation("WorkOrder_car", fields: [carId], references: [id])
-  carId        String?       @map("car")
-  customer     User?         @relation("WorkOrder_customer", fields: [customerId], references: [id])
-  customerId   String?       @map("customer")
-  reduction    Float?
-  applications Application[] @relation("Application_workOrder")
+  id            String         @id @default(cuid())
+  creator       User?          @relation("WorkOrder_creator", fields: [creatorId], references: [id])
+  creatorId     String?        @map("creator")
+  createdAt     DateTime?      @default(now())
+  images        File[]         @relation("File_workOrder")
+  notes         Note[]         @relation("Note_workOrder")
+  status        String         @default("pasif")
+  paymentPlan   PaymentPlan?   @relation("PaymentPlan_workOrder")
+  qcDone        Boolean        @default(false)
+  qcUser        User?          @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])
+  qcUserId      String?        @map("qcUser")
+  checkDate     DateTime?
+  checkDone     Boolean        @default(false)
+  notifications Notification[] @relation("Notification_workOrder")
+  car           Car?           @relation("WorkOrder_car", fields: [carId], references: [id])
+  carId         String?        @map("car")
+  customer      User?          @relation("WorkOrder_customer", fields: [customerId], references: [id])
+  customerId    String?        @map("customer")
+  reduction     Float?
+  applications  Application[]  @relation("Application_workOrder")
 
   @@index([creatorId])
   @@index([qcUserId])
@@ -232,12 +233,14 @@ model ApplicationLocation {
 }
 
 model PaymentPlan {
-  id          String     @id @default(cuid())
-  name        String     @default("")
-  workOrder   WorkOrder? @relation("PaymentPlan_workOrder", fields: [workOrderId], references: [id])
-  workOrderId String?    @unique @map("workOrder")
-  payments    Payment[]  @relation("Payment_paymentPlan")
-  periods     Float
+  id             String         @id @default(cuid())
+  name           String         @default("")
+  workOrder      WorkOrder?     @relation("PaymentPlan_workOrder", fields: [workOrderId], references: [id])
+  workOrderId    String?        @unique @map("workOrder")
+  payments       Payment[]      @relation("Payment_paymentPlan")
+  periods        Float
+  periodDuration Float
+  notifications  Notification[] @relation("Notification_paymentPlan")
 }
 
 model Payment {
@@ -253,10 +256,17 @@ model Payment {
 }
 
 model Notification {
-  id          String    @id @default(cuid())
-  date        DateTime? @default(now())
-  message     String    @default("")
-  link        String    @default("")
-  handled     Boolean   @default(false)
-  notifyRoles String    @default("[]")
+  id            String       @id @default(cuid())
+  date          DateTime?    @default(now())
+  message       String       @default("")
+  paymentPlan   PaymentPlan? @relation("Notification_paymentPlan", fields: [paymentPlanId], references: [id])
+  paymentPlanId String?      @map("paymentPlan")
+  workOrder     WorkOrder?   @relation("Notification_workOrder", fields: [workOrderId], references: [id])
+  workOrderId   String?      @map("workOrder")
+  link          String       @default("")
+  handled       Boolean      @default(false)
+  notifyRoles   String       @default("[]")
+
+  @@index([paymentPlanId])
+  @@index([workOrderId])
 }
