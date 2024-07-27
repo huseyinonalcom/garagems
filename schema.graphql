@@ -1476,6 +1476,66 @@ input PaymentCreateInput {
   date: DateTime
 }
 
+type Notification {
+  id: ID!
+  date: DateTime
+  message: String
+  link: String
+  handled: Boolean
+  notifyRoles: [NotificationNotifyRoleType!]
+}
+
+enum NotificationNotifyRoleType {
+  admin
+  customer
+  employee
+  manager
+}
+
+input NotificationWhereUniqueInput {
+  id: ID
+}
+
+input NotificationWhereInput {
+  AND: [NotificationWhereInput!]
+  OR: [NotificationWhereInput!]
+  NOT: [NotificationWhereInput!]
+  id: IDFilter
+  date: DateTimeNullableFilter
+  message: StringFilter
+  link: StringFilter
+  handled: BooleanFilter
+}
+
+input NotificationOrderByInput {
+  id: OrderDirection
+  date: OrderDirection
+  message: OrderDirection
+  link: OrderDirection
+  handled: OrderDirection
+}
+
+input NotificationUpdateInput {
+  date: DateTime
+  message: String
+  link: String
+  handled: Boolean
+  notifyRoles: [NotificationNotifyRoleType!]
+}
+
+input NotificationUpdateArgs {
+  where: NotificationWhereUniqueInput!
+  data: NotificationUpdateInput!
+}
+
+input NotificationCreateInput {
+  date: DateTime
+  message: String
+  link: String
+  handled: Boolean
+  notifyRoles: [NotificationNotifyRoleType!]
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -1584,6 +1644,12 @@ type Mutation {
   updatePayments(data: [PaymentUpdateArgs!]!): [Payment]
   deletePayment(where: PaymentWhereUniqueInput!): Payment
   deletePayments(where: [PaymentWhereUniqueInput!]!): [Payment]
+  createNotification(data: NotificationCreateInput!): Notification
+  createNotifications(data: [NotificationCreateInput!]!): [Notification]
+  updateNotification(where: NotificationWhereUniqueInput!, data: NotificationUpdateInput!): Notification
+  updateNotifications(data: [NotificationUpdateArgs!]!): [Notification]
+  deleteNotification(where: NotificationWhereUniqueInput!): Notification
+  deleteNotifications(where: [NotificationWhereUniqueInput!]!): [Notification]
   endSession: Boolean!
   authenticateUserWithPassword(username: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -1660,6 +1726,9 @@ type Query {
   payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
   payment(where: PaymentWhereUniqueInput!): Payment
   paymentsCount(where: PaymentWhereInput! = {}): Int
+  notifications(where: NotificationWhereInput! = {}, orderBy: [NotificationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NotificationWhereUniqueInput): [Notification!]
+  notification(where: NotificationWhereUniqueInput!): Notification
+  notificationsCount(where: NotificationWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

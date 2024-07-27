@@ -908,6 +908,32 @@ var lists = {
         isOrderable: true
       })
     }
+  }),
+  Notification: (0, import_core.list)({
+    ui: {
+      labelField: "date"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
+      }),
+      message: (0, import_fields.text)({ validation: { isRequired: true } }),
+      link: (0, import_fields.text)({}),
+      handled: (0, import_fields.checkbox)({ defaultValue: false }),
+      notifyRoles: (0, import_fields.multiselect)({
+        type: "enum",
+        options: ["admin", "customer", "employee", "manager"]
+      })
+    }
   })
 };
 

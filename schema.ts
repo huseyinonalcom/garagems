@@ -883,4 +883,30 @@ export const lists: Lists = {
       }),
     },
   }),
+  Notification: list({
+    ui: {
+      labelField: "date",
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      date: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+      }),
+      message: text({ validation: { isRequired: true } }),
+      link: text({}),
+      handled: checkbox({ defaultValue: false }),
+      notifyRoles: multiselect({
+        type: "enum",
+        options: ["admin", "customer", "employee", "manager"],
+      }),
+    },
+  }),
 };
