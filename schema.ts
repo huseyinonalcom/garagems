@@ -799,7 +799,7 @@ export const lists: Lists = {
             });
           }
         } else if (operation === "update") {
-          const exitingNotifications = context.query.Notification.findMany({
+          const exitingNotifications = await context.query.Notification.findMany({
             where: { paymentPlan: { id: { equals: item.id } } },
             query: "id date",
           });
@@ -840,6 +840,7 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
+              console.log(item);
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }",
