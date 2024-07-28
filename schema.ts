@@ -865,6 +865,7 @@ export const lists: Lists = {
 
               return total - paymentTotal;
             } catch (e) {
+              console.log(e);
               return 123456;
             }
           },
