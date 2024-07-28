@@ -8,6 +8,13 @@ export default withAuth(
       provider: "sqlite",
       url: "file:./keystone.db",
     },
+    server: {
+      cors: {
+        origin: ["http://localhost:8081"],
+        credentials: true,
+      },
+    },
+
     lists,
     session,
     graphql: {
