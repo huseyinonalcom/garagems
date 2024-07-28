@@ -840,11 +840,11 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              console.log(item);
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }",
               });
+              console.log(workOrder);
               let total = 0;
               workOrder.forEach((order) => {
                 total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
