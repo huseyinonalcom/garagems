@@ -844,15 +844,24 @@ export const lists: Lists = {
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }",
               });
-              console.log(JSON.stringify(workOrder));
               let total = 0;
               workOrder.forEach((order) => {
                 total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               });
               let paymentTotal = 0;
-              item.payments.forEach((payment) => {
-                paymentTotal += payment.amount;
-              });
+              if (item.payments && item.payments.length > 0) {
+                item.payments.forEach((payment) => {
+                  paymentTotal += payment.amount;
+                });
+              }
+              console.log(
+                JSON.stringify({
+                  total: total,
+                  paymentTotal: paymentTotal,
+                  workOrder: JSON.stringify(workOrder),
+                  item: JSON.stringify(item),
+                })
+              );
 
               return total - paymentTotal;
             } catch (e) {
