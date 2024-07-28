@@ -840,14 +840,12 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
                 query: "status applications { price }",
               });
               let total = 0;
-              workOrder.forEach((order) => {
-                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
-              });
+              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               let paymentTotal = 0;
               if (item.payments && item.payments.length > 0) {
                 item.payments.forEach((payment) => {
@@ -860,6 +858,7 @@ export const lists: Lists = {
                   paymentTotal: paymentTotal,
                   workOrder: JSON.stringify(workOrder),
                   item: JSON.stringify(item),
+                  result: total - paymentTotal,
                 })
               );
 
@@ -876,21 +875,30 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
                 query: "status applications { price }",
               });
               let total = 0;
-              workOrder.forEach((order) => {
-                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
-              });
+              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               let paymentTotal = 0;
-              item.payments.forEach((payment) => {
-                paymentTotal += payment.amount;
-              });
-
+              if (item.payments && item.payments.length > 0) {
+                item.payments.forEach((payment) => {
+                  paymentTotal += payment.amount;
+                });
+              }
+              console.log(
+                JSON.stringify({
+                  total: total,
+                  paymentTotal: paymentTotal,
+                  workOrder: JSON.stringify(workOrder),
+                  item: JSON.stringify(item),
+                  result: (total - paymentTotal) / item.periods,
+                })
+              );
               return (total - paymentTotal) / item.periods;
             } catch (e) {
+              console.log(e);
               return 123456;
             }
           },
