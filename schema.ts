@@ -844,7 +844,7 @@ export const lists: Lists = {
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "status applications { price }",
               });
-              console.log(workOrder);
+              console.log(JSON.stringify(workOrder));
               let total = 0;
               workOrder.forEach((order) => {
                 total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
