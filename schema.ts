@@ -857,19 +857,6 @@ export const lists: Lists = {
                   paymentTotal += payment.amount;
                 });
               }
-              console.log(
-                JSON.stringify({
-                  tp: {
-                    total: total,
-                    paymentTotal: paymentTotal,
-                    workOrder: JSON.stringify(workOrder),
-                    item: JSON.stringify(item),
-                    result: total - paymentTotal,
-                    payments: JSON.stringify(payments),
-                  },
-                })
-              );
-
               return total - paymentTotal;
             } catch (e) {
               console.log(e);
@@ -899,18 +886,6 @@ export const lists: Lists = {
                   paymentTotal += payment.amount;
                 });
               }
-              console.log(
-                JSON.stringify({
-                  np: {
-                    total: total,
-                    paymentTotal: paymentTotal,
-                    workOrder: JSON.stringify(workOrder),
-                    item: JSON.stringify(item),
-                    result: total - paymentTotal,
-                    payments: JSON.stringify(payments),
-                  },
-                })
-              );
 
               if (item.periods <= payments.length) {
                 return total - paymentTotal;
@@ -947,6 +922,9 @@ export const lists: Lists = {
               const firstPaymentDate = firstPayment!.date;
 
               const nextPaymentDate = new Date(firstPaymentDate.getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000);
+
+              console.log(nextPaymentDate);
+              console.log(nextPaymentDate.toLocaleString("tr-TR").slice(0, -3));
 
               return nextPaymentDate.toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
