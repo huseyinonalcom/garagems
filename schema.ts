@@ -665,7 +665,6 @@ export const lists: Lists = {
         ref: "Application.stockMovements",
         many: false,
       }),
-
       createdAt: timestamp({
         defaultValue: { kind: "now" },
         isOrderable: true,
