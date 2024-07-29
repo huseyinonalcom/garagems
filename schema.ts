@@ -847,8 +847,12 @@ export const lists: Lists = {
               let total = 0;
               total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               let paymentTotal = 0;
-              if (item.payments && item.payments.length > 0) {
-                item.payments.forEach((payment) => {
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date",
+              });
+              if (payments && payments.length > 0) {
+                payments.forEach((payment) => {
                   paymentTotal += payment.amount;
                 });
               }
@@ -860,7 +864,7 @@ export const lists: Lists = {
                     workOrder: JSON.stringify(workOrder),
                     item: JSON.stringify(item),
                     result: total - paymentTotal,
-                    payments: JSON.stringify(item.payments),
+                    payments: JSON.stringify(payments),
                   },
                 })
               );
@@ -885,8 +889,12 @@ export const lists: Lists = {
               let total = 0;
               total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
               let paymentTotal = 0;
-              if (item.payments && item.payments.length > 0) {
-                item.payments.forEach((payment) => {
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date",
+              });
+              if (payments && payments.length > 0) {
+                payments.forEach((payment) => {
                   paymentTotal += payment.amount;
                 });
               }
@@ -897,8 +905,8 @@ export const lists: Lists = {
                     paymentTotal: paymentTotal,
                     workOrder: JSON.stringify(workOrder),
                     item: JSON.stringify(item),
-                    result: (total - paymentTotal) / item.periods,
-                    payments: JSON.stringify(item.payments),
+                    result: total - paymentTotal,
+                    payments: JSON.stringify(payments),
                   },
                 })
               );
@@ -915,27 +923,11 @@ export const lists: Lists = {
           type: graphql.String,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findOne({
-                where: { id: item.workOrderId },
-                query: "status applications { price }",
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date",
               });
-              let total = 0;
-              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
-              let paymentTotal = 0;
-              if (item.payments && item.payments.length > 0) {
-                item.payments.forEach((payment) => {
-                  paymentTotal += payment.amount;
-                });
-              }
-              // console.log(
-              //   JSON.stringify({
-              //     total: total,
-              //     paymentTotal: paymentTotal,
-              //     workOrder: JSON.stringify(workOrder),
-              //     item: JSON.stringify(item),
-              //     result: (total - paymentTotal) / item.periods,
-              //   })
-              // );
+
               return "-";
             } catch (e) {
               console.log(e);
@@ -949,13 +941,13 @@ export const lists: Lists = {
           type: graphql.Boolean,
           async resolve(item, args, context) {
             try {
-              const payments = await context.query.PaymentPlanPayment.findMany({
+              const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "amount",
               });
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
-                query: "status applications { price }",
+                query: "applications { price }",
               });
               let total = 0;
               workOrder.forEach((order) => {

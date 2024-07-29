@@ -827,7 +827,7 @@ var lists = {
             });
           }
         } else if (operation === "update") {
-          const exitingNotifications = context.query.Notification.findMany({
+          const exitingNotifications = await context.query.Notification.findMany({
             where: { paymentPlan: { id: { equals: item.id } } },
             query: "id date"
           });
@@ -866,20 +866,37 @@ var lists = {
           type: import_core.graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
                 query: "status applications { price }"
               });
               let total = 0;
-              workOrder.forEach((order) => {
-                total += order.applications.reduce((acc, app) => acc + app.price, 0);
-              });
+              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
               let paymentTotal = 0;
-              item.payments.forEach((payment) => {
-                paymentTotal += payment.amount;
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date"
               });
+              if (payments && payments.length > 0) {
+                payments.forEach((payment) => {
+                  paymentTotal += payment.amount;
+                });
+              }
+              console.log(
+                JSON.stringify({
+                  tp: {
+                    total,
+                    paymentTotal,
+                    workOrder: JSON.stringify(workOrder),
+                    item: JSON.stringify(item),
+                    result: total - paymentTotal,
+                    payments: JSON.stringify(payments)
+                  }
+                })
+              );
               return total - paymentTotal;
             } catch (e) {
+              console.log(e);
               return 123456;
             }
           }
@@ -890,21 +907,55 @@ var lists = {
           type: import_core.graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
                 query: "status applications { price }"
               });
               let total = 0;
-              workOrder.forEach((order) => {
-                total += order.applications.reduce((acc, app) => acc + app.price, 0);
-              });
+              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
               let paymentTotal = 0;
-              item.payments.forEach((payment) => {
-                paymentTotal += payment.amount;
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date"
               });
+              if (payments && payments.length > 0) {
+                payments.forEach((payment) => {
+                  paymentTotal += payment.amount;
+                });
+              }
+              console.log(
+                JSON.stringify({
+                  np: {
+                    total,
+                    paymentTotal,
+                    workOrder: JSON.stringify(workOrder),
+                    item: JSON.stringify(item),
+                    result: total - paymentTotal,
+                    payments: JSON.stringify(payments)
+                  }
+                })
+              );
               return (total - paymentTotal) / item.periods;
             } catch (e) {
+              console.log(e);
               return 123456;
+            }
+          }
+        })
+      }),
+      nextPaymentDate: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.String,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount date"
+              });
+              return "-";
+            } catch (e) {
+              console.log(e);
+              return "-";
             }
           }
         })
@@ -914,13 +965,13 @@ var lists = {
           type: import_core.graphql.Boolean,
           async resolve(item, args, context) {
             try {
-              const payments = await context.query.PaymentPlanPayment.findMany({
+              const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "amount"
               });
               const workOrder = await context.query.WorkOrder.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
-                query: "status applications { price }"
+                query: "applications { price }"
               });
               let total = 0;
               workOrder.forEach((order) => {
@@ -1016,6 +1067,12 @@ var keystone_default = withAuth(
     db: {
       provider: "sqlite",
       url: "file:./keystone.db"
+    },
+    server: {
+      cors: {
+        origin: ["http://localhost:8081"],
+        credentials: true
+      }
     },
     lists,
     session,
