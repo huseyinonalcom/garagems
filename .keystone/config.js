@@ -87,6 +87,18 @@ var lists = {
     ui: {
       labelField: "firstname"
     },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "create") {
+          const existingUsers = await context.query.User.findMany({
+            query: "id"
+          });
+          if (existingUsers.length > 14) {
+            throw new Error("User limit reached");
+          }
+        }
+      }
+    },
     access: {
       operation: {
         create: isAdmin,
@@ -469,7 +481,10 @@ var lists = {
       description: (0, import_fields.text)({}),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      wastage: (0, import_fields.float)({ validation: { isRequired: false, min: 0 }, defaultValue: 0 }),
+      wastage: (0, import_fields.float)({
+        validation: { isRequired: false, min: 0 },
+        defaultValue: 0
+      }),
       location: (0, import_fields.relationship)({
         ref: "ApplicationLocation.applications",
         many: false
@@ -550,7 +565,10 @@ var lists = {
                 query: "id"
               });
               const movements = await context.query.StockMovement.findMany({
-                where: { product: { id: { equals: item.id } }, storage: { id: { equals: generalStorage.at(0).id } } },
+                where: {
+                  product: { id: { equals: item.id } },
+                  storage: { id: { equals: generalStorage.at(0).id } }
+                },
                 query: "amount movementType"
               });
               let stock = 0;
@@ -820,7 +838,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -840,7 +860,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -871,7 +893,10 @@ var lists = {
                 query: "status applications { price }"
               });
               let total = 0;
-              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
+              total += workOrder.applications.reduce(
+                (acc, app) => acc + app.price,
+                0
+              );
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -900,7 +925,10 @@ var lists = {
                 query: "status applications { price }"
               });
               let total = 0;
-              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
+              total += workOrder.applications.reduce(
+                (acc, app) => acc + app.price,
+                0
+              );
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -965,7 +993,10 @@ var lists = {
               });
               let total = 0;
               workOrder.forEach((order) => {
-                total += order.applications.reduce((acc, app) => acc + app.price, 0);
+                total += order.applications.reduce(
+                  (acc, app) => acc + app.price,
+                  0
+                );
               });
               let paymentTotal = 0;
               payments.forEach((payment) => {
@@ -1005,7 +1036,14 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        options: [
+          "nakit",
+          "kredi kart\u0131",
+          "havale",
+          "\xE7ek",
+          "senet",
+          "banka kart\u0131"
+        ],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

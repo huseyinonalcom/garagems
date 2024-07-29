@@ -1,4 +1,14 @@
-import { text, relationship, password, timestamp, select, float, multiselect, virtual, checkbox } from "@keystone-6/core/fields";
+import {
+  text,
+  relationship,
+  password,
+  timestamp,
+  select,
+  float,
+  multiselect,
+  virtual,
+  checkbox,
+} from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
@@ -28,7 +38,8 @@ function isManager({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "admin" || session.data.role == "manager") return true;
+  if (session.data.role == "admin" || session.data.role == "manager")
+    return true;
 
   return !session.data.isBlocked;
 }
@@ -38,7 +49,12 @@ function isEmployee({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager"
+  )
+    return true;
 
   return !session.data.isBlocked;
 }
@@ -48,7 +64,13 @@ function isUser({ session }: { session?: Session }) {
   if (!session) return false;
 
   // admins can do anything
-  if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
+  if (
+    session.data.role == "employee" ||
+    session.data.role == "admin" ||
+    session.data.role == "manager" ||
+    session.data.role == "customer"
+  )
+    return true;
 
   return !session.data.isBlocked;
 }
@@ -57,6 +79,18 @@ export const lists: Lists = {
   User: list({
     ui: {
       labelField: "firstname",
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "create") {
+          const existingUsers = await context.query.User.findMany({
+            query: "id",
+          });
+          if (existingUsers.length > 14) {
+            throw new Error("User limit reached");
+          }
+        }
+      },
     },
     access: {
       operation: {
@@ -253,7 +287,9 @@ export const lists: Lists = {
                 }
               });
 
-              return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
+              return new Date(earliestStart)
+                .toLocaleString("tr-TR")
+                .slice(0, -3);
             } catch (e) {
               return null;
             }
@@ -276,7 +312,9 @@ export const lists: Lists = {
                     latestFinish = app.finishedAt;
                   }
                 });
-                return new Date(latestFinish).toLocaleString("tr-TR").slice(0, -3);
+                return new Date(latestFinish)
+                  .toLocaleString("tr-TR")
+                  .slice(0, -3);
               } else {
                 return null;
               }
@@ -360,7 +398,11 @@ export const lists: Lists = {
                 application: { connect: { id: item.id } },
               },
             });
-          } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
+          } else if (
+            inputData.wastage &&
+            item.wastage &&
+            inputData.wastage < item.wastage
+          ) {
             const generalStorage = await context.query.Storage.findMany({
               where: { name: { equals: "Genel" } },
               query: "id",
@@ -441,7 +483,10 @@ export const lists: Lists = {
       description: text({}),
       price: float({ validation: { isRequired: true, min: 0 } }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
-      wastage: float({ validation: { isRequired: false, min: 0 }, defaultValue: 0 }),
+      wastage: float({
+        validation: { isRequired: false, min: 0 },
+        defaultValue: 0,
+      }),
       location: relationship({
         ref: "ApplicationLocation.applications",
         many: false,
@@ -522,7 +567,10 @@ export const lists: Lists = {
                 query: "id",
               });
               const movements = await context.query.StockMovement.findMany({
-                where: { product: { id: { equals: item.id } }, storage: { id: { equals: generalStorage.at(0)!.id } } },
+                where: {
+                  product: { id: { equals: item.id } },
+                  storage: { id: { equals: generalStorage.at(0)!.id } },
+                },
                 query: "amount movementType",
               });
               let stock = 0;
@@ -792,17 +840,21 @@ export const lists: Lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(new Date().getTime() + i * item.periodDuration * 24 * 60 * 60 * 1000),
+                date: new Date(
+                  new Date().getTime() +
+                    i * item.periodDuration * 24 * 60 * 60 * 1000
+                ),
                 message: "Ödeme tarihi",
                 notifyRoles: ["admin"],
               },
             });
           }
         } else if (operation === "update") {
-          const exitingNotifications = await context.query.Notification.findMany({
-            where: { paymentPlan: { id: { equals: item.id } } },
-            query: "id date",
-          });
+          const exitingNotifications =
+            await context.query.Notification.findMany({
+              where: { paymentPlan: { id: { equals: item.id } } },
+              query: "id date",
+            });
 
           exitingNotifications.forEach(async (notification) => {
             await context.query.Notification.deleteOne({
@@ -814,7 +866,10 @@ export const lists: Lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(new Date().getTime() + i * item.periodDuration * 24 * 60 * 60 * 1000),
+                date: new Date(
+                  new Date().getTime() +
+                    i * item.periodDuration * 24 * 60 * 60 * 1000
+                ),
                 message: "Ödeme tarihi",
                 notifyRoles: ["admin"],
               },
@@ -845,7 +900,10 @@ export const lists: Lists = {
                 query: "status applications { price }",
               });
               let total = 0;
-              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              total += workOrder.applications.reduce(
+                (acc: any, app: { price: any }) => acc + app.price,
+                0
+              );
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -874,7 +932,10 @@ export const lists: Lists = {
                 query: "status applications { price }",
               });
               let total = 0;
-              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              total += workOrder.applications.reduce(
+                (acc: any, app: { price: any }) => acc + app.price,
+                0
+              );
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -889,7 +950,9 @@ export const lists: Lists = {
               if (item.periods <= payments.length) {
                 return total - paymentTotal;
               } else {
-                return (total - paymentTotal) / (item.periods - payments.length);
+                return (
+                  (total - paymentTotal) / (item.periods - payments.length)
+                );
               }
             } catch (e) {
               console.log(e);
@@ -920,9 +983,13 @@ export const lists: Lists = {
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment!.date;
 
-              const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000;
+              const nextPaymentDate =
+                new Date(firstPaymentDate).getTime() +
+                payments.length * item.periodDuration * 24 * 60 * 60 * 1000;
 
-              return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
+              return new Date(nextPaymentDate)
+                .toLocaleString("tr-TR")
+                .slice(0, -3);
             } catch (e) {
               console.log(e);
               return "-";
@@ -945,7 +1012,10 @@ export const lists: Lists = {
               });
               let total = 0;
               workOrder.forEach((order) => {
-                total += order.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+                total += order.applications.reduce(
+                  (acc: any, app: { price: any }) => acc + app.price,
+                  0
+                );
               });
               let paymentTotal = 0;
               payments.forEach((payment) => {
@@ -986,7 +1056,14 @@ export const lists: Lists = {
       reference: text({}),
       type: select({
         type: "string",
-        options: ["nakit", "kredi kartı", "havale", "çek", "senet", "banka kartı"],
+        options: [
+          "nakit",
+          "kredi kartı",
+          "havale",
+          "çek",
+          "senet",
+          "banka kartı",
+        ],
         defaultValue: "nakit",
         validation: { isRequired: true },
       }),
