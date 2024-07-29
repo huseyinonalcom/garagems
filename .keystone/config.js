@@ -281,7 +281,7 @@ var lists = {
                   earliestStart = app.startedAt;
                 }
               });
-              return earliestStart;
+              return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               return null;
             }
@@ -304,7 +304,7 @@ var lists = {
                     latestFinish = app.finishedAt;
                   }
                 });
-                return latestFinish;
+                return new Date(latestFinish).toLocaleString("tr-TR").slice(0, -3);
               } else {
                 return null;
               }
@@ -882,18 +882,6 @@ var lists = {
                   paymentTotal += payment.amount;
                 });
               }
-              console.log(
-                JSON.stringify({
-                  tp: {
-                    total,
-                    paymentTotal,
-                    workOrder: JSON.stringify(workOrder),
-                    item: JSON.stringify(item),
-                    result: total - paymentTotal,
-                    payments: JSON.stringify(payments)
-                  }
-                })
-              );
               return total - paymentTotal;
             } catch (e) {
               console.log(e);
@@ -923,19 +911,11 @@ var lists = {
                   paymentTotal += payment.amount;
                 });
               }
-              console.log(
-                JSON.stringify({
-                  np: {
-                    total,
-                    paymentTotal,
-                    workOrder: JSON.stringify(workOrder),
-                    item: JSON.stringify(item),
-                    result: total - paymentTotal,
-                    payments: JSON.stringify(payments)
-                  }
-                })
-              );
-              return (total - paymentTotal) / item.periods;
+              if (item.periods <= payments.length) {
+                return total - paymentTotal;
+              } else {
+                return (total - paymentTotal) / (item.periods - payments.length);
+              }
             } catch (e) {
               console.log(e);
               return 123456;
@@ -950,9 +930,19 @@ var lists = {
             try {
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount date"
+                query: "amount date",
+                orderBy: { date: "asc" }
               });
-              return "-";
+              if (payments.length == 0) {
+                return "-";
+              }
+              if (payments.length >= item.periods) {
+                return "-";
+              }
+              const firstPayment = payments.at(0);
+              const firstPaymentDate = firstPayment.date;
+              const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1e3;
+              return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               console.log(e);
               return "-";
