@@ -922,7 +922,7 @@ export const lists: Lists = {
               const firstPaymentDate = firstPayment!.date;
               console.log(firstPaymentDate);
 
-              const nextPaymentDate = new Date(firstPaymentDate.getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000);
+              const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000;
 
               console.log(nextPaymentDate);
               console.log(nextPaymentDate.toLocaleString("tr-TR").slice(0, -3));
