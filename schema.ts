@@ -910,7 +910,12 @@ export const lists: Lists = {
                   },
                 })
               );
-              return (total - paymentTotal) / (item.periods - payments.length);
+
+              if (item.periods == payments.length) {
+                return total - paymentTotal;
+              } else {
+                return (total - paymentTotal) / (item.periods - payments.length);
+              }
             } catch (e) {
               console.log(e);
               return 123456;
@@ -929,7 +934,20 @@ export const lists: Lists = {
                 orderBy: { date: "asc" },
               });
 
-              return payments.at(0)!.date + item.periodDuration * 24 * 60 * 60 * 1000 * payments.length;
+              if (payments.length == 0) {
+                return "-";
+              }
+
+              if (payments.length == item.periods) {
+                return "-";
+              }
+
+              const firstPayment = payments.at(0);
+              const firstPaymentDate = firstPayment!.date;
+
+              const nextPaymentDate = new Date(firstPaymentDate.getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000);
+
+              return nextPaymentDate.toISOString();
             } catch (e) {
               console.log(e);
               return "-";
