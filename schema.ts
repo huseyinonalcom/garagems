@@ -910,7 +910,7 @@ export const lists: Lists = {
                   },
                 })
               );
-              return (total - paymentTotal) / item.periods;
+              return (total - paymentTotal) / (item.periods - payments.length);
             } catch (e) {
               console.log(e);
               return 123456;
@@ -926,9 +926,10 @@ export const lists: Lists = {
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "amount date",
+                orderBy: { date: "asc" },
               });
 
-              return "-";
+              return payments.at(0)!.date + item.periodDuration * 24 * 60 * 60 * 1000 * payments.length;
             } catch (e) {
               console.log(e);
               return "-";
