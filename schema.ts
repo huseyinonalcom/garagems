@@ -252,7 +252,8 @@ export const lists: Lists = {
                   earliestStart = app.startedAt;
                 }
               });
-              return earliestStart;
+
+              return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               return null;
             }
@@ -275,7 +276,7 @@ export const lists: Lists = {
                     latestFinish = app.finishedAt;
                   }
                 });
-                return latestFinish;
+                return new Date(latestFinish).toLocaleString("tr-TR").slice(0, -3);
               } else {
                 return null;
               }
@@ -947,7 +948,7 @@ export const lists: Lists = {
 
               const nextPaymentDate = new Date(firstPaymentDate.getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000);
 
-              return nextPaymentDate.toISOString();
+              return nextPaymentDate.toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               console.log(e);
               return "-";
