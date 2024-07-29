@@ -914,12 +914,13 @@ export const lists: Lists = {
                 return "-";
               }
 
-              if (payments.length == item.periods) {
+              if (payments.length >= item.periods) {
                 return "-";
               }
 
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment!.date;
+              console.log(firstPaymentDate);
 
               const nextPaymentDate = new Date(firstPaymentDate.getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000);
 
