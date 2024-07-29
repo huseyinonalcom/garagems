@@ -854,11 +854,14 @@ export const lists: Lists = {
               }
               console.log(
                 JSON.stringify({
-                  total: total,
-                  paymentTotal: paymentTotal,
-                  workOrder: JSON.stringify(workOrder),
-                  item: JSON.stringify(item),
-                  result: total - paymentTotal,
+                  tp: {
+                    total: total,
+                    paymentTotal: paymentTotal,
+                    workOrder: JSON.stringify(workOrder),
+                    item: JSON.stringify(item),
+                    result: total - paymentTotal,
+                    payments: JSON.stringify(item.payments),
+                  },
                 })
               );
 
@@ -889,17 +892,54 @@ export const lists: Lists = {
               }
               console.log(
                 JSON.stringify({
-                  total: total,
-                  paymentTotal: paymentTotal,
-                  workOrder: JSON.stringify(workOrder),
-                  item: JSON.stringify(item),
-                  result: (total - paymentTotal) / item.periods,
+                  np: {
+                    total: total,
+                    paymentTotal: paymentTotal,
+                    workOrder: JSON.stringify(workOrder),
+                    item: JSON.stringify(item),
+                    result: (total - paymentTotal) / item.periods,
+                    payments: JSON.stringify(item.payments),
+                  },
                 })
               );
               return (total - paymentTotal) / item.periods;
             } catch (e) {
               console.log(e);
               return 123456;
+            }
+          },
+        }),
+      }),
+      nextPaymentDate: virtual({
+        field: graphql.field({
+          type: graphql.String,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "status applications { price }",
+              });
+              let total = 0;
+              total += workOrder.applications.reduce((acc: any, app: { price: any }) => acc + app.price, 0);
+              let paymentTotal = 0;
+              if (item.payments && item.payments.length > 0) {
+                item.payments.forEach((payment) => {
+                  paymentTotal += payment.amount;
+                });
+              }
+              // console.log(
+              //   JSON.stringify({
+              //     total: total,
+              //     paymentTotal: paymentTotal,
+              //     workOrder: JSON.stringify(workOrder),
+              //     item: JSON.stringify(item),
+              //     result: (total - paymentTotal) / item.periods,
+              //   })
+              // );
+              return "-";
+            } catch (e) {
+              console.log(e);
+              return "-";
             }
           },
         }),
