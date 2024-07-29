@@ -912,7 +912,7 @@ export const lists: Lists = {
                 })
               );
 
-              if (item.periods == payments.length) {
+              if (item.periods <= payments.length) {
                 return total - paymentTotal;
               } else {
                 return (total - paymentTotal) / (item.periods - payments.length);
