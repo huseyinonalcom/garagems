@@ -920,14 +920,13 @@ export const lists: Lists = {
 
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment!.date;
-              console.log(firstPaymentDate);
 
               const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000;
 
               console.log(nextPaymentDate);
-              console.log(nextPaymentDate.toLocaleString("tr-TR").slice(0, -3));
+              console.log(new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3));
 
-              return nextPaymentDate.toLocaleString("tr-TR").slice(0, -3);
+              return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               console.log(e);
               return "-";
