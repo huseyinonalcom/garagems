@@ -622,6 +622,18 @@ export const lists: Lists = {
         ref: "StockMovement.product",
         many: true,
       }),
+      warrantyType: select({
+        type: "string",
+        options: ["ömür", "garanti", "ömur_boyu", "yok"],
+        defaultValue: "yok",
+        validation: { isRequired: true },
+      }),
+      warrantyTimeScale: select({
+        type: "string",
+        options: ["gün", "hafta", "ay", "yıl"],
+        defaultValue: "yıl",
+        validation: { isRequired: true },
+      }),
       warrantyTime: float({ validation: { isRequired: false, min: 0 } }),
       color: text({}),
       width: float({}),

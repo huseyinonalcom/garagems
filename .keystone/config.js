@@ -620,6 +620,18 @@ var lists = {
         ref: "StockMovement.product",
         many: true
       }),
+      warrantyType: (0, import_fields.select)({
+        type: "string",
+        options: ["\xF6m\xFCr", "garanti", "\xF6mur_boyu", "yok"],
+        defaultValue: "yok",
+        validation: { isRequired: true }
+      }),
+      warrantyTimeScale: (0, import_fields.select)({
+        type: "string",
+        options: ["g\xFCn", "hafta", "ay", "y\u0131l"],
+        defaultValue: "y\u0131l",
+        validation: { isRequired: true }
+      }),
       warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       color: (0, import_fields.text)({}),
       width: (0, import_fields.float)({}),

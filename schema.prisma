@@ -146,6 +146,8 @@ model Product {
   applicationType   ApplicationType? @relation("Product_applicationType", fields: [applicationTypeId], references: [id])
   applicationTypeId String?          @map("applicationType")
   stockMovements    StockMovement[]  @relation("StockMovement_product")
+  warrantyType      String           @default("yok")
+  warrantyTimeScale String           @default("yıl")
   warrantyTime      Float?
   color             String           @default("")
   width             Float?
