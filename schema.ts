@@ -638,6 +638,10 @@ export const lists: Lists = {
       color: text({}),
       width: float({}),
       length: float({}),
+      height: float({}),
+      depth: float({}),
+      weight: float({}),
+      thickness: float({}),
     },
   }),
   Storage: list({

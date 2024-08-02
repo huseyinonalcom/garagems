@@ -635,7 +635,11 @@ var lists = {
       warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       color: (0, import_fields.text)({}),
       width: (0, import_fields.float)({}),
-      length: (0, import_fields.float)({})
+      length: (0, import_fields.float)({}),
+      height: (0, import_fields.float)({}),
+      depth: (0, import_fields.float)({}),
+      weight: (0, import_fields.float)({}),
+      thickness: (0, import_fields.float)({})
     }
   }),
   Storage: (0, import_core.list)({

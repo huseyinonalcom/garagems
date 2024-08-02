@@ -152,6 +152,10 @@ model Product {
   color             String           @default("")
   width             Float?
   length            Float?
+  height            Float?
+  depth             Float?
+  weight            Float?
+  thickness         Float?
 
   @@index([productBrandId])
   @@index([applicationTypeId])

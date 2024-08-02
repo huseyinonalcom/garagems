@@ -809,6 +809,10 @@ type Product {
   color: String
   width: Float
   length: Float
+  height: Float
+  depth: Float
+  weight: Float
+  thickness: Float
 }
 
 input ProductWhereUniqueInput {
@@ -838,6 +842,10 @@ input ProductWhereInput {
   color: StringFilter
   width: FloatNullableFilter
   length: FloatNullableFilter
+  height: FloatNullableFilter
+  depth: FloatNullableFilter
+  weight: FloatNullableFilter
+  thickness: FloatNullableFilter
 }
 
 input ProductOrderByInput {
@@ -855,6 +863,10 @@ input ProductOrderByInput {
   color: OrderDirection
   width: OrderDirection
   length: OrderDirection
+  height: OrderDirection
+  depth: OrderDirection
+  weight: OrderDirection
+  thickness: OrderDirection
 }
 
 input ProductUpdateInput {
@@ -876,6 +888,10 @@ input ProductUpdateInput {
   color: String
   width: Float
   length: Float
+  height: Float
+  depth: Float
+  weight: Float
+  thickness: Float
 }
 
 input ProductBrandRelateToOneForUpdateInput {
@@ -908,6 +924,10 @@ input ProductCreateInput {
   color: String
   width: Float
   length: Float
+  height: Float
+  depth: Float
+  weight: Float
+  thickness: Float
 }
 
 input ProductBrandRelateToOneForCreateInput {
