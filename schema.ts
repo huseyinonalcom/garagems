@@ -1,4 +1,4 @@
-import { text, relationship, password, timestamp, select, float, multiselect, virtual, checkbox } from "@keystone-6/core/fields";
+import { text, relationship, password, timestamp, select, float, multiselect, virtual, checkbox, integer } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
@@ -1188,6 +1188,29 @@ export const lists: Lists = {
       notifyRoles: multiselect({
         type: "enum",
         options: ["admin", "customer", "employee", "manager"],
+      }),
+    },
+  }),
+  SoftwareVersion: list({
+    isSingleton: true,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isUser,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      version: integer({ validation: { isRequired: true } }),
+      iosLink: text({}),
+      androidLink: text({}),
+      webLink: text({}),
+      windowsLink: text({}),
+      macLink: text({}),
+      date: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
       }),
     },
   }),
