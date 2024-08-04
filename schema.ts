@@ -600,7 +600,7 @@ export const lists: Lists = {
       }),
       warrantyTimeScale: select({
         type: "string",
-        options: ["gün", "hafta", "ay", "yıl"],
+        options: ["gün", "ay", "yıl"],
         defaultValue: "yıl",
         validation: { isRequired: true },
       }),
