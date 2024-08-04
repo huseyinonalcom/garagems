@@ -214,28 +214,6 @@ export const lists: Lists = {
           update: denyAll,
         },
       }),
-      documentType: select({
-        type: "string",
-        options: ["satış", "fatura", "irsaliye", "sözleşme", "diğer"],
-        defaultValue: "satış",
-        validation: { isRequired: true },
-      }),
-      products: relationship({
-        ref: "DocumentProduct.document",
-        many: true,
-      }),
-      creator: relationship({
-        ref: "User.documents",
-        many: false,
-      }),
-      paymentPlan: relationship({
-        ref: "PaymentPlan.document",
-        many: false,
-      }),
-      customer: relationship({
-        ref: "User.customerDocuments",
-        many: false,
-      }),
       total: virtual({
         field: graphql.field({
           type: graphql.Float,
@@ -255,6 +233,28 @@ export const lists: Lists = {
             }
           },
         }),
+      }),
+      documentType: select({
+        type: "string",
+        options: ["satış", "fatura", "irsaliye", "sözleşme", "diğer"],
+        defaultValue: "satış",
+        validation: { isRequired: true },
+      }),
+      creator: relationship({
+        ref: "User.documents",
+        many: false,
+      }),
+      customer: relationship({
+        ref: "User.customerDocuments",
+        many: false,
+      }),
+      products: relationship({
+        ref: "DocumentProduct.document",
+        many: true,
+      }),
+      paymentPlan: relationship({
+        ref: "PaymentPlan.document",
+        many: false,
       }),
     },
   }),
