@@ -265,6 +265,10 @@ export const lists: Lists = {
                 }
               });
 
+              if (!earliestStart) {
+                return null;
+              }
+
               return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               return null;
