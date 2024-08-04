@@ -744,7 +744,7 @@ export const lists: Lists = {
         ref: "CarModel.cars",
         many: false,
       }),
-      licensePlate: text({ validation: { isRequired: true } }),
+      licensePlate: text(),
       workOrders: relationship({ ref: "WorkOrder.car", many: true }),
     },
   }),
