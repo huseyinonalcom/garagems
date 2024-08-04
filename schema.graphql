@@ -25,6 +25,10 @@ type User {
   applicationsCount(where: ApplicationWhereInput! = {}): Int
   notes(where: NoteWhereInput! = {}, orderBy: [NoteOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NoteWhereUniqueInput): [Note!]
   notesCount(where: NoteWhereInput! = {}): Int
+  documents(where: DocumentWhereInput! = {}, orderBy: [DocumentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentWhereUniqueInput): [Document!]
+  documentsCount(where: DocumentWhereInput! = {}): Int
+  customerDocuments(where: DocumentWhereInput! = {}, orderBy: [DocumentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentWhereUniqueInput): [Document!]
+  customerDocumentsCount(where: DocumentWhereInput! = {}): Int
   customerMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
   customerMovementsCount(where: StockMovementWhereInput! = {}): Int
 }
@@ -63,6 +67,8 @@ input UserWhereInput {
   applicationsToApply: ApplicationManyRelationFilter
   applications: ApplicationManyRelationFilter
   notes: NoteManyRelationFilter
+  documents: DocumentManyRelationFilter
+  customerDocuments: DocumentManyRelationFilter
   customerMovements: StockMovementManyRelationFilter
 }
 
@@ -128,6 +134,12 @@ input NoteManyRelationFilter {
   none: NoteWhereInput
 }
 
+input DocumentManyRelationFilter {
+  every: DocumentWhereInput
+  some: DocumentWhereInput
+  none: DocumentWhereInput
+}
+
 input StockMovementManyRelationFilter {
   every: StockMovementWhereInput
   some: StockMovementWhereInput
@@ -168,6 +180,8 @@ input UserUpdateInput {
   applicationsToApply: ApplicationRelateToManyForUpdateInput
   applications: ApplicationRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
+  documents: DocumentRelateToManyForUpdateInput
+  customerDocuments: DocumentRelateToManyForUpdateInput
   customerMovements: StockMovementRelateToManyForUpdateInput
 }
 
@@ -190,6 +204,13 @@ input NoteRelateToManyForUpdateInput {
   set: [NoteWhereUniqueInput!]
   create: [NoteCreateInput!]
   connect: [NoteWhereUniqueInput!]
+}
+
+input DocumentRelateToManyForUpdateInput {
+  disconnect: [DocumentWhereUniqueInput!]
+  set: [DocumentWhereUniqueInput!]
+  create: [DocumentCreateInput!]
+  connect: [DocumentWhereUniqueInput!]
 }
 
 input StockMovementRelateToManyForUpdateInput {
@@ -221,6 +242,8 @@ input UserCreateInput {
   applicationsToApply: ApplicationRelateToManyForCreateInput
   applications: ApplicationRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
+  documents: DocumentRelateToManyForCreateInput
+  customerDocuments: DocumentRelateToManyForCreateInput
   customerMovements: StockMovementRelateToManyForCreateInput
 }
 
@@ -237,6 +260,11 @@ input ApplicationRelateToManyForCreateInput {
 input NoteRelateToManyForCreateInput {
   create: [NoteCreateInput!]
   connect: [NoteWhereUniqueInput!]
+}
+
+input DocumentRelateToManyForCreateInput {
+  create: [DocumentCreateInput!]
+  connect: [DocumentWhereUniqueInput!]
 }
 
 input StockMovementRelateToManyForCreateInput {
@@ -383,6 +411,192 @@ input ProductRelateToOneForCreateInput {
   connect: ProductWhereUniqueInput
 }
 
+type Document {
+  id: ID!
+  createdAt: DateTime
+  documentType: String
+  reduction: Float
+  products(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
+  productsCount(where: DocumentProductWhereInput! = {}): Int
+  creator: User
+  paymentPlan: PaymentPlan
+  customer: User
+  total: Float
+}
+
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
+
+input DocumentWhereUniqueInput {
+  id: ID
+}
+
+input DocumentWhereInput {
+  AND: [DocumentWhereInput!]
+  OR: [DocumentWhereInput!]
+  NOT: [DocumentWhereInput!]
+  id: IDFilter
+  createdAt: DateTimeNullableFilter
+  documentType: StringFilter
+  reduction: FloatNullableFilter
+  products: DocumentProductManyRelationFilter
+  creator: UserWhereInput
+  paymentPlan: PaymentPlanWhereInput
+  customer: UserWhereInput
+}
+
+input DateTimeNullableFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: DateTimeNullableFilter
+}
+
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
+}
+
+input DocumentProductManyRelationFilter {
+  every: DocumentProductWhereInput
+  some: DocumentProductWhereInput
+  none: DocumentProductWhereInput
+}
+
+input DocumentOrderByInput {
+  id: OrderDirection
+  createdAt: OrderDirection
+  documentType: OrderDirection
+  reduction: OrderDirection
+}
+
+input DocumentUpdateInput {
+  createdAt: DateTime
+  documentType: String
+  reduction: Float
+  products: DocumentProductRelateToManyForUpdateInput
+  creator: UserRelateToOneForUpdateInput
+  paymentPlan: PaymentPlanRelateToOneForUpdateInput
+  customer: UserRelateToOneForUpdateInput
+}
+
+input DocumentProductRelateToManyForUpdateInput {
+  disconnect: [DocumentProductWhereUniqueInput!]
+  set: [DocumentProductWhereUniqueInput!]
+  create: [DocumentProductCreateInput!]
+  connect: [DocumentProductWhereUniqueInput!]
+}
+
+input PaymentPlanRelateToOneForUpdateInput {
+  create: PaymentPlanCreateInput
+  connect: PaymentPlanWhereUniqueInput
+  disconnect: Boolean
+}
+
+input DocumentUpdateArgs {
+  where: DocumentWhereUniqueInput!
+  data: DocumentUpdateInput!
+}
+
+input DocumentCreateInput {
+  createdAt: DateTime
+  documentType: String
+  reduction: Float
+  products: DocumentProductRelateToManyForCreateInput
+  creator: UserRelateToOneForCreateInput
+  paymentPlan: PaymentPlanRelateToOneForCreateInput
+  customer: UserRelateToOneForCreateInput
+}
+
+input DocumentProductRelateToManyForCreateInput {
+  create: [DocumentProductCreateInput!]
+  connect: [DocumentProductWhereUniqueInput!]
+}
+
+input PaymentPlanRelateToOneForCreateInput {
+  create: PaymentPlanCreateInput
+  connect: PaymentPlanWhereUniqueInput
+}
+
+type DocumentProduct {
+  id: ID!
+  amount: Float
+  product: Product
+  tax: Float
+  document: Document
+}
+
+input DocumentProductWhereUniqueInput {
+  id: ID
+}
+
+input DocumentProductWhereInput {
+  AND: [DocumentProductWhereInput!]
+  OR: [DocumentProductWhereInput!]
+  NOT: [DocumentProductWhereInput!]
+  id: IDFilter
+  amount: FloatFilter
+  product: ProductWhereInput
+  tax: FloatFilter
+  document: DocumentWhereInput
+}
+
+input FloatFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatFilter
+}
+
+input DocumentProductOrderByInput {
+  id: OrderDirection
+  amount: OrderDirection
+  tax: OrderDirection
+}
+
+input DocumentProductUpdateInput {
+  amount: Float
+  product: ProductRelateToOneForUpdateInput
+  tax: Float
+  document: DocumentRelateToOneForUpdateInput
+}
+
+input DocumentRelateToOneForUpdateInput {
+  create: DocumentCreateInput
+  connect: DocumentWhereUniqueInput
+  disconnect: Boolean
+}
+
+input DocumentProductUpdateArgs {
+  where: DocumentProductWhereUniqueInput!
+  data: DocumentProductUpdateInput!
+}
+
+input DocumentProductCreateInput {
+  amount: Float
+  product: ProductRelateToOneForCreateInput
+  tax: Float
+  document: DocumentRelateToOneForCreateInput
+}
+
+input DocumentRelateToOneForCreateInput {
+  create: DocumentCreateInput
+  connect: DocumentWhereUniqueInput
+}
+
 type WorkOrder {
   id: ID!
   creator: User
@@ -407,8 +621,6 @@ type WorkOrder {
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
 }
-
-scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 input WorkOrderWhereUniqueInput {
   id: ID
@@ -436,17 +648,6 @@ input WorkOrderWhereInput {
   applications: ApplicationManyRelationFilter
 }
 
-input DateTimeNullableFilter {
-  equals: DateTime
-  in: [DateTime!]
-  notIn: [DateTime!]
-  lt: DateTime
-  lte: DateTime
-  gt: DateTime
-  gte: DateTime
-  not: DateTimeNullableFilter
-}
-
 input FileManyRelationFilter {
   every: FileWhereInput
   some: FileWhereInput
@@ -457,17 +658,6 @@ input NotificationManyRelationFilter {
   every: NotificationWhereInput
   some: NotificationWhereInput
   none: NotificationWhereInput
-}
-
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
 }
 
 input WorkOrderOrderByInput {
@@ -503,12 +693,6 @@ input FileRelateToManyForUpdateInput {
   set: [FileWhereUniqueInput!]
   create: [FileCreateInput!]
   connect: [FileWhereUniqueInput!]
-}
-
-input PaymentPlanRelateToOneForUpdateInput {
-  create: PaymentPlanCreateInput
-  connect: PaymentPlanWhereUniqueInput
-  disconnect: Boolean
 }
 
 input NotificationRelateToManyForUpdateInput {
@@ -550,11 +734,6 @@ input WorkOrderCreateInput {
 input FileRelateToManyForCreateInput {
   create: [FileCreateInput!]
   connect: [FileWhereUniqueInput!]
-}
-
-input PaymentPlanRelateToOneForCreateInput {
-  create: PaymentPlanCreateInput
-  connect: PaymentPlanWhereUniqueInput
 }
 
 input NotificationRelateToManyForCreateInput {
@@ -612,17 +791,6 @@ input ApplicationWhereInput {
   creator: UserWhereInput
   type: ApplicationTypeWhereInput
   stockMovements: StockMovementManyRelationFilter
-}
-
-input FloatFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatFilter
 }
 
 input ApplicationOrderByInput {
@@ -803,6 +971,9 @@ type Product {
   applicationType: ApplicationType
   stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
   stockMovementsCount(where: StockMovementWhereInput! = {}): Int
+  documentProducts(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
+  documentProductsCount(where: DocumentProductWhereInput! = {}): Int
+  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -836,6 +1007,8 @@ input ProductWhereInput {
   applications: ApplicationManyRelationFilter
   applicationType: ApplicationTypeWhereInput
   stockMovements: StockMovementManyRelationFilter
+  documentProducts: DocumentProductManyRelationFilter
+  tax: FloatFilter
   warrantyType: StringFilter
   warrantyTimeScale: StringFilter
   warrantyTime: FloatNullableFilter
@@ -857,6 +1030,7 @@ input ProductOrderByInput {
   code: OrderDirection
   ean: OrderDirection
   pricedBy: OrderDirection
+  tax: OrderDirection
   warrantyType: OrderDirection
   warrantyTimeScale: OrderDirection
   warrantyTime: OrderDirection
@@ -882,6 +1056,8 @@ input ProductUpdateInput {
   applications: ApplicationRelateToManyForUpdateInput
   applicationType: ApplicationTypeRelateToOneForUpdateInput
   stockMovements: StockMovementRelateToManyForUpdateInput
+  documentProducts: DocumentProductRelateToManyForUpdateInput
+  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -918,6 +1094,8 @@ input ProductCreateInput {
   applications: ApplicationRelateToManyForCreateInput
   applicationType: ApplicationTypeRelateToOneForCreateInput
   stockMovements: StockMovementRelateToManyForCreateInput
+  documentProducts: DocumentProductRelateToManyForCreateInput
+  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -1412,6 +1590,7 @@ type PaymentPlan {
   workOrder: WorkOrder
   payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
   paymentsCount(where: PaymentWhereInput! = {}): Int
+  document: Document
   periods: Float
   periodDuration: Float
   periodDurationScale: String
@@ -1435,6 +1614,7 @@ input PaymentPlanWhereInput {
   name: StringFilter
   workOrder: WorkOrderWhereInput
   payments: PaymentManyRelationFilter
+  document: DocumentWhereInput
   periods: FloatFilter
   periodDuration: FloatFilter
   periodDurationScale: StringFilter
@@ -1459,6 +1639,7 @@ input PaymentPlanUpdateInput {
   name: String
   workOrder: WorkOrderRelateToOneForUpdateInput
   payments: PaymentRelateToManyForUpdateInput
+  document: DocumentRelateToOneForUpdateInput
   periods: Float
   periodDuration: Float
   periodDurationScale: String
@@ -1481,6 +1662,7 @@ input PaymentPlanCreateInput {
   name: String
   workOrder: WorkOrderRelateToOneForCreateInput
   payments: PaymentRelateToManyForCreateInput
+  document: DocumentRelateToOneForCreateInput
   periods: Float
   periodDuration: Float
   periodDurationScale: String
@@ -1638,6 +1820,18 @@ type Mutation {
   updateFiles(data: [FileUpdateArgs!]!): [File]
   deleteFile(where: FileWhereUniqueInput!): File
   deleteFiles(where: [FileWhereUniqueInput!]!): [File]
+  createDocument(data: DocumentCreateInput!): Document
+  createDocuments(data: [DocumentCreateInput!]!): [Document]
+  updateDocument(where: DocumentWhereUniqueInput!, data: DocumentUpdateInput!): Document
+  updateDocuments(data: [DocumentUpdateArgs!]!): [Document]
+  deleteDocument(where: DocumentWhereUniqueInput!): Document
+  deleteDocuments(where: [DocumentWhereUniqueInput!]!): [Document]
+  createDocumentProduct(data: DocumentProductCreateInput!): DocumentProduct
+  createDocumentProducts(data: [DocumentProductCreateInput!]!): [DocumentProduct]
+  updateDocumentProduct(where: DocumentProductWhereUniqueInput!, data: DocumentProductUpdateInput!): DocumentProduct
+  updateDocumentProducts(data: [DocumentProductUpdateArgs!]!): [DocumentProduct]
+  deleteDocumentProduct(where: DocumentProductWhereUniqueInput!): DocumentProduct
+  deleteDocumentProducts(where: [DocumentProductWhereUniqueInput!]!): [DocumentProduct]
   createWorkOrder(data: WorkOrderCreateInput!): WorkOrder
   createWorkOrders(data: [WorkOrderCreateInput!]!): [WorkOrder]
   updateWorkOrder(where: WorkOrderWhereUniqueInput!, data: WorkOrderUpdateInput!): WorkOrder
@@ -1762,6 +1956,12 @@ type Query {
   files(where: FileWhereInput! = {}, orderBy: [FileOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: FileWhereUniqueInput): [File!]
   file(where: FileWhereUniqueInput!): File
   filesCount(where: FileWhereInput! = {}): Int
+  documents(where: DocumentWhereInput! = {}, orderBy: [DocumentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentWhereUniqueInput): [Document!]
+  document(where: DocumentWhereUniqueInput!): Document
+  documentsCount(where: DocumentWhereInput! = {}): Int
+  documentProducts(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
+  documentProduct(where: DocumentProductWhereUniqueInput!): DocumentProduct
+  documentProductsCount(where: DocumentProductWhereInput! = {}): Int
   workOrders(where: WorkOrderWhereInput! = {}, orderBy: [WorkOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: WorkOrderWhereUniqueInput): [WorkOrder!]
   workOrder(where: WorkOrderWhereUniqueInput!): WorkOrder
   workOrdersCount(where: WorkOrderWhereInput! = {}): Int

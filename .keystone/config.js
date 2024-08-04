@@ -160,6 +160,8 @@ var lists = {
         many: true
       }),
       notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true }),
+      documents: (0, import_fields.relationship)({ ref: "Document.creator", many: true }),
+      customerDocuments: (0, import_fields.relationship)({ ref: "Document.customer", many: true }),
       customerMovements: (0, import_fields.relationship)({
         ref: "StockMovement.customer",
         many: true
@@ -215,6 +217,97 @@ var lists = {
       }),
       product: (0, import_fields.relationship)({
         ref: "Product.images",
+        many: false
+      })
+    }
+  }),
+  Document: (0, import_core.list)({
+    ui: {
+      labelField: "createdAt"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
+      }),
+      documentType: (0, import_fields.select)({
+        type: "string",
+        options: ["fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
+        defaultValue: "di\u011Fer",
+        validation: { isRequired: true }
+      }),
+      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      products: (0, import_fields.relationship)({
+        ref: "DocumentProduct.document",
+        many: true
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.documents",
+        many: false
+      }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.document",
+        many: false
+      }),
+      customer: (0, import_fields.relationship)({
+        ref: "User.customerDocuments",
+        many: false
+      }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const products = await context.query.DocumentProduct.findMany({
+                where: { document: { id: { equals: item.id } } },
+                query: "amount product { price }"
+              });
+              let total = 0;
+              products.forEach((product) => {
+                total += product.amount * product.product.price;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      })
+    }
+  }),
+  DocumentProduct: (0, import_core.list)({
+    ui: {
+      labelField: "amount"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      product: (0, import_fields.relationship)({
+        ref: "Product.documentProducts",
+        many: false
+      }),
+      tax: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      document: (0, import_fields.relationship)({
+        ref: "Document.products",
         many: false
       })
     }
@@ -293,6 +386,9 @@ var lists = {
                   earliestStart = app.startedAt;
                 }
               });
+              if (!earliestStart) {
+                return null;
+              }
               return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               return null;
@@ -620,6 +716,11 @@ var lists = {
         ref: "StockMovement.product",
         many: true
       }),
+      documentProducts: (0, import_fields.relationship)({
+        ref: "DocumentProduct.product",
+        many: true
+      }),
+      tax: (0, import_fields.float)({ validation: { isRequired: true, min: 0 }, defaultValue: 0 }),
       warrantyType: (0, import_fields.select)({
         type: "string",
         options: ["\xF6m\xFCr", "garanti", "\xF6mur_boyu", "yok"],
@@ -628,7 +729,7 @@ var lists = {
       }),
       warrantyTimeScale: (0, import_fields.select)({
         type: "string",
-        options: ["g\xFCn", "hafta", "ay", "y\u0131l"],
+        options: ["g\xFCn", "ay", "y\u0131l"],
         defaultValue: "y\u0131l",
         validation: { isRequired: true }
       }),
@@ -772,7 +873,7 @@ var lists = {
         ref: "CarModel.cars",
         many: false
       }),
-      licensePlate: (0, import_fields.text)({ validation: { isRequired: true } }),
+      licensePlate: (0, import_fields.text)(),
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.car", many: true })
     }
   }),
@@ -893,6 +994,10 @@ var lists = {
         ref: "Payment.paymentPlan",
         many: true
       }),
+      document: (0, import_fields.relationship)({
+        ref: "Document.paymentPlan",
+        many: false
+      }),
       periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDurationScale: (0, import_fields.select)({
@@ -908,7 +1013,7 @@ var lists = {
             try {
               const workOrder = await context.query.WorkOrder.findOne({
                 where: { id: item.workOrderId },
-                query: "status applications { price }"
+                query: "applications { price }"
               });
               let total = 0;
               total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
@@ -937,7 +1042,7 @@ var lists = {
             try {
               const workOrder = await context.query.WorkOrder.findOne({
                 where: { id: item.workOrderId },
-                query: "status applications { price }"
+                query: "applications { price }"
               });
               let total = 0;
               total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
@@ -1003,10 +1108,21 @@ var lists = {
                 where: { paymentPlan: { id: { equals: item.id } } },
                 query: "applications { price }"
               });
-              let total = 0;
-              workOrder.forEach((order) => {
-                total += order.applications.reduce((acc, app) => acc + app.price, 0);
+              console.log(workOrder);
+              const document = await context.query.Document.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "total"
               });
+              let total = 0;
+              if (workOrder) {
+                workOrder.forEach((order) => {
+                  total += order.applications.reduce((acc, app) => acc + app.price, 0);
+                });
+              } else if (document) {
+                document.forEach((doc) => {
+                  total += doc.total;
+                });
+              }
               let paymentTotal = 0;
               payments.forEach((payment) => {
                 paymentTotal += payment.amount;

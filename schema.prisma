@@ -29,6 +29,8 @@ model User {
   applicationsToApply Application[]   @relation("Application_applicant")
   applications        Application[]   @relation("Application_creator")
   notes               Note[]          @relation("Note_creator")
+  documents           Document[]      @relation("Document_creator")
+  customerDocuments   Document[]      @relation("Document_customer")
   customerMovements   StockMovement[] @relation("StockMovement_customer")
 
   @@index([role])
@@ -60,6 +62,36 @@ model File {
   @@index([applicationId])
   @@index([workOrderId])
   @@index([productId])
+}
+
+model Document {
+  id            String            @id @default(cuid())
+  createdAt     DateTime?         @default(now())
+  documentType  String            @default("diğer")
+  reduction     Float?
+  products      DocumentProduct[] @relation("DocumentProduct_document")
+  creator       User?             @relation("Document_creator", fields: [creatorId], references: [id])
+  creatorId     String?           @map("creator")
+  paymentPlan   PaymentPlan?      @relation("Document_paymentPlan", fields: [paymentPlanId], references: [id])
+  paymentPlanId String?           @unique @map("paymentPlan")
+  customer      User?             @relation("Document_customer", fields: [customerId], references: [id])
+  customerId    String?           @map("customer")
+
+  @@index([creatorId])
+  @@index([customerId])
+}
+
+model DocumentProduct {
+  id         String    @id @default(cuid())
+  amount     Float
+  product    Product?  @relation("DocumentProduct_product", fields: [productId], references: [id])
+  productId  String?   @map("product")
+  tax        Float
+  document   Document? @relation("DocumentProduct_document", fields: [documentId], references: [id])
+  documentId String?   @map("document")
+
+  @@index([productId])
+  @@index([documentId])
 }
 
 model WorkOrder {
@@ -131,25 +163,27 @@ model ApplicationType {
 }
 
 model Product {
-  id                String           @id @default(cuid())
-  name              String           @default("")
-  description       String           @default("")
+  id                String            @id @default(cuid())
+  name              String            @default("")
+  description       String            @default("")
   price             Float
-  status            String           @default("aktif")
-  images            File[]           @relation("File_product")
-  code              String           @default("")
-  ean               String           @default("")
-  productBrand      ProductBrand?    @relation("Product_productBrand", fields: [productBrandId], references: [id])
-  productBrandId    String?          @map("productBrand")
-  pricedBy          String           @default("amount")
-  applications      Application[]    @relation("Application_product")
-  applicationType   ApplicationType? @relation("Product_applicationType", fields: [applicationTypeId], references: [id])
-  applicationTypeId String?          @map("applicationType")
-  stockMovements    StockMovement[]  @relation("StockMovement_product")
-  warrantyType      String           @default("yok")
-  warrantyTimeScale String           @default("yıl")
+  status            String            @default("aktif")
+  images            File[]            @relation("File_product")
+  code              String            @default("")
+  ean               String            @default("")
+  productBrand      ProductBrand?     @relation("Product_productBrand", fields: [productBrandId], references: [id])
+  productBrandId    String?           @map("productBrand")
+  pricedBy          String            @default("amount")
+  applications      Application[]     @relation("Application_product")
+  applicationType   ApplicationType?  @relation("Product_applicationType", fields: [applicationTypeId], references: [id])
+  applicationTypeId String?           @map("applicationType")
+  stockMovements    StockMovement[]   @relation("StockMovement_product")
+  documentProducts  DocumentProduct[] @relation("DocumentProduct_product")
+  tax               Float             @default(0)
+  warrantyType      String            @default("yok")
+  warrantyTimeScale String            @default("yıl")
   warrantyTime      Float?
-  color             String           @default("")
+  color             String            @default("")
   width             Float?
   length            Float?
   height            Float?
@@ -244,6 +278,7 @@ model PaymentPlan {
   workOrder           WorkOrder?     @relation("PaymentPlan_workOrder", fields: [workOrderId], references: [id])
   workOrderId         String?        @unique @map("workOrder")
   payments            Payment[]      @relation("Payment_paymentPlan")
+  document            Document?      @relation("Document_paymentPlan")
   periods             Float
   periodDuration      Float
   periodDurationScale String         @default("ay")
