@@ -54,6 +54,27 @@ var import_core2 = require("@keystone-6/core");
 var import_fields = require("@keystone-6/core/fields");
 var import_access = require("@keystone-6/core/access");
 var import_core = require("@keystone-6/core");
+
+// utils.ts
+var calculateDate = ({ number, unit, startDate }) => {
+  const date = startDate;
+  switch (unit.toLowerCase()) {
+    case "g\xFCn":
+      date.setDate(date.getDate() + number);
+      break;
+    case "ay":
+      date.setMonth(date.getMonth() + number);
+      break;
+    case "y\u0131l":
+      date.setFullYear(date.getFullYear() + number);
+      break;
+    default:
+      throw new Error('Invalid unit. Use "day", "month", or "year".');
+  }
+  return date;
+};
+
+// schema.ts
 function isAdmin({ session: session2 }) {
   if (!session2)
     return false;
@@ -1096,12 +1117,20 @@ var lists = {
               if (payments.length == 0) {
                 return "-";
               }
-              if (payments.length >= item.periods) {
-                return "-";
-              }
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment.date;
-              const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1e3;
+              item.periods;
+              item.periodDuration;
+              item.periodDurationScale;
+              let dates = [];
+              for (let i = 1; i < item.periods; i++) {
+                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: new Date(firstPaymentDate) }));
+              }
+              const now = /* @__PURE__ */ new Date();
+              const nextPaymentDate = dates.find((date) => date > now) || "-";
+              if (nextPaymentDate === "-") {
+                return "-";
+              }
               return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
               console.log(e);

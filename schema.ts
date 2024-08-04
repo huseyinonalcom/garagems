@@ -2,6 +2,7 @@ import { text, relationship, password, timestamp, select, float, multiselect, vi
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
+import { calculateDate } from "./utils";
 
 export type Session = {
   itemId: string;
@@ -1076,14 +1077,25 @@ export const lists: Lists = {
                 return "-";
               }
 
-              if (payments.length >= item.periods) {
-                return "-";
-              }
-
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment!.date;
 
-              const nextPaymentDate = new Date(firstPaymentDate).getTime() + payments.length * item.periodDuration * 24 * 60 * 60 * 1000;
+              item.periods;
+              item.periodDuration;
+              item.periodDurationScale;
+
+              let dates = [];
+
+              for (let i = 1; i < item.periods; i++) {
+                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: new Date(firstPaymentDate) }));
+              }
+
+              const now = new Date();
+              const nextPaymentDate = dates.find((date) => date > now) || "-";
+
+              if (nextPaymentDate === "-") {
+                return "-";
+              }
 
               return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
             } catch (e) {
