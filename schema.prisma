@@ -67,8 +67,7 @@ model File {
 model Document {
   id            String            @id @default(cuid())
   createdAt     DateTime?         @default(now())
-  documentType  String            @default("diğer")
-  reduction     Float?
+  documentType  String            @default("satış")
   products      DocumentProduct[] @relation("DocumentProduct_document")
   creator       User?             @relation("Document_creator", fields: [creatorId], references: [id])
   creatorId     String?           @map("creator")
@@ -86,7 +85,7 @@ model DocumentProduct {
   amount     Float
   product    Product?  @relation("DocumentProduct_product", fields: [productId], references: [id])
   productId  String?   @map("product")
-  tax        Float
+  price      Float
   document   Document? @relation("DocumentProduct_document", fields: [documentId], references: [id])
   documentId String?   @map("document")
 
@@ -113,7 +112,6 @@ model WorkOrder {
   carId         String?        @map("car")
   customer      User?          @relation("WorkOrder_customer", fields: [customerId], references: [id])
   customerId    String?        @map("customer")
-  reduction     Float?
   applications  Application[]  @relation("Application_workOrder")
 
   @@index([creatorId])
@@ -179,7 +177,6 @@ model Product {
   applicationTypeId String?           @map("applicationType")
   stockMovements    StockMovement[]   @relation("StockMovement_product")
   documentProducts  DocumentProduct[] @relation("DocumentProduct_product")
-  tax               Float             @default(0)
   warrantyType      String            @default("yok")
   warrantyTimeScale String            @default("yıl")
   warrantyTime      Float?
@@ -281,6 +278,7 @@ model PaymentPlan {
   document            Document?      @relation("Document_paymentPlan")
   periods             Float
   periodDuration      Float
+  periodPayment       Float
   periodDurationScale String         @default("ay")
   notifications       Notification[] @relation("Notification_paymentPlan")
 }

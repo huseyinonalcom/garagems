@@ -415,7 +415,6 @@ type Document {
   id: ID!
   createdAt: DateTime
   documentType: String
-  reduction: Float
   products(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
   productsCount(where: DocumentProductWhereInput! = {}): Int
   creator: User
@@ -437,7 +436,6 @@ input DocumentWhereInput {
   id: IDFilter
   createdAt: DateTimeNullableFilter
   documentType: StringFilter
-  reduction: FloatNullableFilter
   products: DocumentProductManyRelationFilter
   creator: UserWhereInput
   paymentPlan: PaymentPlanWhereInput
@@ -455,17 +453,6 @@ input DateTimeNullableFilter {
   not: DateTimeNullableFilter
 }
 
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
-}
-
 input DocumentProductManyRelationFilter {
   every: DocumentProductWhereInput
   some: DocumentProductWhereInput
@@ -476,13 +463,11 @@ input DocumentOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   documentType: OrderDirection
-  reduction: OrderDirection
 }
 
 input DocumentUpdateInput {
   createdAt: DateTime
   documentType: String
-  reduction: Float
   products: DocumentProductRelateToManyForUpdateInput
   creator: UserRelateToOneForUpdateInput
   paymentPlan: PaymentPlanRelateToOneForUpdateInput
@@ -510,7 +495,6 @@ input DocumentUpdateArgs {
 input DocumentCreateInput {
   createdAt: DateTime
   documentType: String
-  reduction: Float
   products: DocumentProductRelateToManyForCreateInput
   creator: UserRelateToOneForCreateInput
   paymentPlan: PaymentPlanRelateToOneForCreateInput
@@ -531,7 +515,7 @@ type DocumentProduct {
   id: ID!
   amount: Float
   product: Product
-  tax: Float
+  price: Float
   document: Document
 }
 
@@ -546,7 +530,7 @@ input DocumentProductWhereInput {
   id: IDFilter
   amount: FloatFilter
   product: ProductWhereInput
-  tax: FloatFilter
+  price: FloatFilter
   document: DocumentWhereInput
 }
 
@@ -564,13 +548,13 @@ input FloatFilter {
 input DocumentProductOrderByInput {
   id: OrderDirection
   amount: OrderDirection
-  tax: OrderDirection
+  price: OrderDirection
 }
 
 input DocumentProductUpdateInput {
   amount: Float
   product: ProductRelateToOneForUpdateInput
-  tax: Float
+  price: Float
   document: DocumentRelateToOneForUpdateInput
 }
 
@@ -588,7 +572,7 @@ input DocumentProductUpdateArgs {
 input DocumentProductCreateInput {
   amount: Float
   product: ProductRelateToOneForCreateInput
-  tax: Float
+  price: Float
   document: DocumentRelateToOneForCreateInput
 }
 
@@ -617,7 +601,7 @@ type WorkOrder {
   finishedAt: String
   car: Car
   customer: User
-  reduction: Float
+  total: Float
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
 }
@@ -644,7 +628,6 @@ input WorkOrderWhereInput {
   notifications: NotificationManyRelationFilter
   car: CarWhereInput
   customer: UserWhereInput
-  reduction: FloatNullableFilter
   applications: ApplicationManyRelationFilter
 }
 
@@ -667,7 +650,6 @@ input WorkOrderOrderByInput {
   qcDone: OrderDirection
   checkDate: OrderDirection
   checkDone: OrderDirection
-  reduction: OrderDirection
 }
 
 input WorkOrderUpdateInput {
@@ -684,7 +666,6 @@ input WorkOrderUpdateInput {
   notifications: NotificationRelateToManyForUpdateInput
   car: CarRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
-  reduction: Float
   applications: ApplicationRelateToManyForUpdateInput
 }
 
@@ -727,7 +708,6 @@ input WorkOrderCreateInput {
   notifications: NotificationRelateToManyForCreateInput
   car: CarRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
-  reduction: Float
   applications: ApplicationRelateToManyForCreateInput
 }
 
@@ -791,6 +771,17 @@ input ApplicationWhereInput {
   creator: UserWhereInput
   type: ApplicationTypeWhereInput
   stockMovements: StockMovementManyRelationFilter
+}
+
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
 }
 
 input ApplicationOrderByInput {
@@ -973,7 +964,6 @@ type Product {
   stockMovementsCount(where: StockMovementWhereInput! = {}): Int
   documentProducts(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
   documentProductsCount(where: DocumentProductWhereInput! = {}): Int
-  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -1008,7 +998,6 @@ input ProductWhereInput {
   applicationType: ApplicationTypeWhereInput
   stockMovements: StockMovementManyRelationFilter
   documentProducts: DocumentProductManyRelationFilter
-  tax: FloatFilter
   warrantyType: StringFilter
   warrantyTimeScale: StringFilter
   warrantyTime: FloatNullableFilter
@@ -1030,7 +1019,6 @@ input ProductOrderByInput {
   code: OrderDirection
   ean: OrderDirection
   pricedBy: OrderDirection
-  tax: OrderDirection
   warrantyType: OrderDirection
   warrantyTimeScale: OrderDirection
   warrantyTime: OrderDirection
@@ -1057,7 +1045,6 @@ input ProductUpdateInput {
   applicationType: ApplicationTypeRelateToOneForUpdateInput
   stockMovements: StockMovementRelateToManyForUpdateInput
   documentProducts: DocumentProductRelateToManyForUpdateInput
-  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -1095,7 +1082,6 @@ input ProductCreateInput {
   applicationType: ApplicationTypeRelateToOneForCreateInput
   stockMovements: StockMovementRelateToManyForCreateInput
   documentProducts: DocumentProductRelateToManyForCreateInput
-  tax: Float
   warrantyType: String
   warrantyTimeScale: String
   warrantyTime: Float
@@ -1593,9 +1579,11 @@ type PaymentPlan {
   document: Document
   periods: Float
   periodDuration: Float
+  periodPayment: Float
   periodDurationScale: String
+  total: Float
+  paid: Float
   toPay: Float
-  nextPayment: Float
   nextPaymentDate: String
   completed: Boolean
   notifications(where: NotificationWhereInput! = {}, orderBy: [NotificationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NotificationWhereUniqueInput): [Notification!]
@@ -1617,6 +1605,7 @@ input PaymentPlanWhereInput {
   document: DocumentWhereInput
   periods: FloatFilter
   periodDuration: FloatFilter
+  periodPayment: FloatFilter
   periodDurationScale: StringFilter
   notifications: NotificationManyRelationFilter
 }
@@ -1632,6 +1621,7 @@ input PaymentPlanOrderByInput {
   name: OrderDirection
   periods: OrderDirection
   periodDuration: OrderDirection
+  periodPayment: OrderDirection
   periodDurationScale: OrderDirection
 }
 
@@ -1642,6 +1632,7 @@ input PaymentPlanUpdateInput {
   document: DocumentRelateToOneForUpdateInput
   periods: Float
   periodDuration: Float
+  periodPayment: Float
   periodDurationScale: String
   notifications: NotificationRelateToManyForUpdateInput
 }
@@ -1665,6 +1656,7 @@ input PaymentPlanCreateInput {
   document: DocumentRelateToOneForCreateInput
   periods: Float
   periodDuration: Float
+  periodPayment: Float
   periodDurationScale: String
   notifications: NotificationRelateToManyForCreateInput
 }

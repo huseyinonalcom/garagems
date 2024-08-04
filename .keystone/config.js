@@ -244,11 +244,10 @@ var lists = {
       }),
       documentType: (0, import_fields.select)({
         type: "string",
-        options: ["fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
-        defaultValue: "di\u011Fer",
+        options: ["sat\u0131\u015F", "fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
+        defaultValue: "sat\u0131\u015F",
         validation: { isRequired: true }
       }),
-      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       products: (0, import_fields.relationship)({
         ref: "DocumentProduct.document",
         many: true
@@ -295,8 +294,8 @@ var lists = {
       operation: {
         create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
+        update: isEmployee,
+        delete: isManager
       }
     },
     fields: {
@@ -305,7 +304,7 @@ var lists = {
         ref: "Product.documentProducts",
         many: false
       }),
-      tax: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       document: (0, import_fields.relationship)({
         ref: "Document.products",
         many: false
@@ -430,7 +429,26 @@ var lists = {
         ref: "User.clientOrders",
         many: false
       }),
-      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "price"
+              });
+              let total = 0;
+              applications.forEach((app) => {
+                total += app.price;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
       applications: (0, import_fields.relationship)({
         ref: "Application.workOrder",
         many: true
@@ -720,7 +738,6 @@ var lists = {
         ref: "DocumentProduct.product",
         many: true
       }),
-      tax: (0, import_fields.float)({ validation: { isRequired: true, min: 0 }, defaultValue: 0 }),
       warrantyType: (0, import_fields.select)({
         type: "string",
         options: ["\xF6m\xFCr", "garanti", "\xF6mur_boyu", "yok"],
@@ -1000,67 +1017,65 @@ var lists = {
       }),
       periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
+      periodPayment: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDurationScale: (0, import_fields.select)({
         type: "string",
         options: ["g\xFCn", "hafta", "ay"],
         defaultValue: "ay",
         validation: { isRequired: true }
       }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "total"
+              });
+              const document = await context.query.Document.findOne({
+                where: { id: item.documentId },
+                query: "total"
+              });
+              let total = 0;
+              if (workOrder) {
+                total = workOrder.total;
+              } else if (document) {
+                total = document.total;
+              }
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
+      paid: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount"
+              });
+              let total = 0;
+              payments.forEach((payment) => {
+                total += payment.amount;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
       toPay: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findOne({
-                where: { id: item.workOrderId },
-                query: "applications { price }"
-              });
-              let total = 0;
-              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
-              let paymentTotal = 0;
-              const payments = await context.query.Payment.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount date"
-              });
-              if (payments && payments.length > 0) {
-                payments.forEach((payment) => {
-                  paymentTotal += payment.amount;
-                });
-              }
-              return total - paymentTotal;
-            } catch (e) {
-              console.log(e);
-              return 123456;
-            }
-          }
-        })
-      }),
-      nextPayment: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const workOrder = await context.query.WorkOrder.findOne({
-                where: { id: item.workOrderId },
-                query: "applications { price }"
-              });
-              let total = 0;
-              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
-              let paymentTotal = 0;
-              const payments = await context.query.Payment.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount date"
-              });
-              if (payments && payments.length > 0) {
-                payments.forEach((payment) => {
-                  paymentTotal += payment.amount;
-                });
-              }
-              if (item.periods <= payments.length) {
-                return total - paymentTotal;
-              } else {
-                return (total - paymentTotal) / (item.periods - payments.length);
-              }
+              return item.total - item.paid;
             } catch (e) {
               console.log(e);
               return 123456;
@@ -1100,34 +1115,7 @@ var lists = {
           type: import_core.graphql.Boolean,
           async resolve(item, args, context) {
             try {
-              const payments = await context.query.Payment.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "amount"
-              });
-              const workOrder = await context.query.WorkOrder.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "applications { price }"
-              });
-              console.log(workOrder);
-              const document = await context.query.Document.findMany({
-                where: { paymentPlan: { id: { equals: item.id } } },
-                query: "total"
-              });
-              let total = 0;
-              if (workOrder) {
-                workOrder.forEach((order) => {
-                  total += order.applications.reduce((acc, app) => acc + app.price, 0);
-                });
-              } else if (document) {
-                document.forEach((doc) => {
-                  total += doc.total;
-                });
-              }
-              let paymentTotal = 0;
-              payments.forEach((payment) => {
-                paymentTotal += payment.amount;
-              });
-              return total <= paymentTotal;
+              return item.total <= item.paid;
             } catch (e) {
               return false;
             }
