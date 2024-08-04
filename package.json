@@ -4,7 +4,7 @@
   "private": true,
   "author": {
     "name": "Hüseyin Önal",
-    "email": "contact@huseyiononal.com"
+    "email": "contact@huseyinonal.com"
   },
   "scripts": {
     "dev": "keystone dev",
