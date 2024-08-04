@@ -7,8 +7,8 @@
     "email": "contact@huseyinonal.com"
   },
   "scripts": {
-    "dev": "PORT=3333 keystone dev",
-    "start": "PORT=3333 keystone start",
+    "dev": "keystone dev",
+    "start": "keystone start",
     "build": "keystone build",
     "postinstall": "keystone build --no-ui --frozen"
   },

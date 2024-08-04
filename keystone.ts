@@ -9,6 +9,7 @@ export default withAuth(
       url: "file:./keystone.db",
     },
     server: {
+      port: 3333,
       cors: {
         origin: ["http://localhost:8081"],
         credentials: true,
