@@ -993,7 +993,7 @@ export const lists: Lists = {
       }),
       periods: float({ validation: { isRequired: true, min: 1 } }),
       periodDuration: float({ validation: { isRequired: true, min: 1 } }),
-      periodPayment: float({ validation: { isRequired: true, min: 1 } }),
+      periodPayment: float({ validation: { isRequired: true, min: 1 }, defaultValue: 0 }),
       periodDurationScale: select({
         type: "string",
         options: ["gün", "hafta", "ay"],
