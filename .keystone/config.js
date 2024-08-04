@@ -854,9 +854,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -876,9 +874,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -899,6 +895,12 @@ var lists = {
       }),
       periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
+      periodDurationScale: (0, import_fields.select)({
+        type: "string",
+        options: ["g\xFCn", "hafta", "ay"],
+        defaultValue: "ay",
+        validation: { isRequired: true }
+      }),
       toPay: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.Float,
@@ -909,10 +911,7 @@ var lists = {
                 query: "status applications { price }"
               });
               let total = 0;
-              total += workOrder.applications.reduce(
-                (acc, app) => acc + app.price,
-                0
-              );
+              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -941,10 +940,7 @@ var lists = {
                 query: "status applications { price }"
               });
               let total = 0;
-              total += workOrder.applications.reduce(
-                (acc, app) => acc + app.price,
-                0
-              );
+              total += workOrder.applications.reduce((acc, app) => acc + app.price, 0);
               let paymentTotal = 0;
               const payments = await context.query.Payment.findMany({
                 where: { paymentPlan: { id: { equals: item.id } } },
@@ -1009,10 +1005,7 @@ var lists = {
               });
               let total = 0;
               workOrder.forEach((order) => {
-                total += order.applications.reduce(
-                  (acc, app) => acc + app.price,
-                  0
-                );
+                total += order.applications.reduce((acc, app) => acc + app.price, 0);
               });
               let paymentTotal = 0;
               payments.forEach((payment) => {
@@ -1052,14 +1045,7 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: [
-          "nakit",
-          "kredi kart\u0131",
-          "havale",
-          "\xE7ek",
-          "senet",
-          "banka kart\u0131"
-        ],
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

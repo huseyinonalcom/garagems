@@ -239,14 +239,15 @@ model ApplicationLocation {
 }
 
 model PaymentPlan {
-  id             String         @id @default(cuid())
-  name           String         @default("")
-  workOrder      WorkOrder?     @relation("PaymentPlan_workOrder", fields: [workOrderId], references: [id])
-  workOrderId    String?        @unique @map("workOrder")
-  payments       Payment[]      @relation("Payment_paymentPlan")
-  periods        Float
-  periodDuration Float
-  notifications  Notification[] @relation("Notification_paymentPlan")
+  id                  String         @id @default(cuid())
+  name                String         @default("")
+  workOrder           WorkOrder?     @relation("PaymentPlan_workOrder", fields: [workOrderId], references: [id])
+  workOrderId         String?        @unique @map("workOrder")
+  payments            Payment[]      @relation("Payment_paymentPlan")
+  periods             Float
+  periodDuration      Float
+  periodDurationScale String         @default("ay")
+  notifications       Notification[] @relation("Notification_paymentPlan")
 }
 
 model Payment {
