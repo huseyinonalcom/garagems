@@ -414,13 +414,15 @@ input ProductRelateToOneForCreateInput {
 type Document {
   id: ID!
   createdAt: DateTime
+  total: Float
   documentType: String
+  creator: User
+  customer: User
+  number: String
+  invoiced: Boolean
   products(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
   productsCount(where: DocumentProductWhereInput! = {}): Int
-  creator: User
   paymentPlan: PaymentPlan
-  customer: User
-  total: Float
 }
 
 scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
@@ -436,10 +438,12 @@ input DocumentWhereInput {
   id: IDFilter
   createdAt: DateTimeNullableFilter
   documentType: StringFilter
-  products: DocumentProductManyRelationFilter
   creator: UserWhereInput
-  paymentPlan: PaymentPlanWhereInput
   customer: UserWhereInput
+  number: StringFilter
+  invoiced: BooleanFilter
+  products: DocumentProductManyRelationFilter
+  paymentPlan: PaymentPlanWhereInput
 }
 
 input DateTimeNullableFilter {
@@ -463,15 +467,19 @@ input DocumentOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   documentType: OrderDirection
+  number: OrderDirection
+  invoiced: OrderDirection
 }
 
 input DocumentUpdateInput {
   createdAt: DateTime
   documentType: String
-  products: DocumentProductRelateToManyForUpdateInput
   creator: UserRelateToOneForUpdateInput
-  paymentPlan: PaymentPlanRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
+  number: String
+  invoiced: Boolean
+  products: DocumentProductRelateToManyForUpdateInput
+  paymentPlan: PaymentPlanRelateToOneForUpdateInput
 }
 
 input DocumentProductRelateToManyForUpdateInput {
@@ -495,10 +503,12 @@ input DocumentUpdateArgs {
 input DocumentCreateInput {
   createdAt: DateTime
   documentType: String
-  products: DocumentProductRelateToManyForCreateInput
   creator: UserRelateToOneForCreateInput
-  paymentPlan: PaymentPlanRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
+  number: String
+  invoiced: Boolean
+  products: DocumentProductRelateToManyForCreateInput
+  paymentPlan: PaymentPlanRelateToOneForCreateInput
 }
 
 input DocumentProductRelateToManyForCreateInput {

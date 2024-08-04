@@ -248,6 +248,8 @@ export const lists: Lists = {
         ref: "User.customerDocuments",
         many: false,
       }),
+      number: text({}),
+      invoiced: checkbox({ defaultValue: false }),
       products: relationship({
         ref: "DocumentProduct.document",
         many: true,

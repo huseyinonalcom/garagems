@@ -263,28 +263,6 @@ var lists = {
           update: import_access.denyAll
         }
       }),
-      documentType: (0, import_fields.select)({
-        type: "string",
-        options: ["sat\u0131\u015F", "fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
-        defaultValue: "sat\u0131\u015F",
-        validation: { isRequired: true }
-      }),
-      products: (0, import_fields.relationship)({
-        ref: "DocumentProduct.document",
-        many: true
-      }),
-      creator: (0, import_fields.relationship)({
-        ref: "User.documents",
-        many: false
-      }),
-      paymentPlan: (0, import_fields.relationship)({
-        ref: "PaymentPlan.document",
-        many: false
-      }),
-      customer: (0, import_fields.relationship)({
-        ref: "User.customerDocuments",
-        many: false
-      }),
       total: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.Float,
@@ -304,6 +282,30 @@ var lists = {
             }
           }
         })
+      }),
+      documentType: (0, import_fields.select)({
+        type: "string",
+        options: ["sat\u0131\u015F", "fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
+        defaultValue: "sat\u0131\u015F",
+        validation: { isRequired: true }
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.documents",
+        many: false
+      }),
+      customer: (0, import_fields.relationship)({
+        ref: "User.customerDocuments",
+        many: false
+      }),
+      number: (0, import_fields.text)({}),
+      invoiced: (0, import_fields.checkbox)({ defaultValue: false }),
+      products: (0, import_fields.relationship)({
+        ref: "DocumentProduct.document",
+        many: true
+      }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.document",
+        many: false
       })
     }
   }),
@@ -1038,7 +1040,7 @@ var lists = {
       }),
       periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
       periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
-      periodPayment: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
+      periodPayment: (0, import_fields.float)({ validation: { isRequired: true, min: 1 }, defaultValue: 0 }),
       periodDurationScale: (0, import_fields.select)({
         type: "string",
         options: ["g\xFCn", "hafta", "ay"],
