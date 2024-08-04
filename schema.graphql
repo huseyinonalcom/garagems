@@ -418,6 +418,7 @@ type Document {
   documentType: String
   creator: User
   customer: User
+  isDeleted: Boolean
   number: String
   invoiced: Boolean
   products(where: DocumentProductWhereInput! = {}, orderBy: [DocumentProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentProductWhereUniqueInput): [DocumentProduct!]
@@ -440,6 +441,7 @@ input DocumentWhereInput {
   documentType: StringFilter
   creator: UserWhereInput
   customer: UserWhereInput
+  isDeleted: BooleanFilter
   number: StringFilter
   invoiced: BooleanFilter
   products: DocumentProductManyRelationFilter
@@ -467,6 +469,7 @@ input DocumentOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   documentType: OrderDirection
+  isDeleted: OrderDirection
   number: OrderDirection
   invoiced: OrderDirection
 }
@@ -476,6 +479,7 @@ input DocumentUpdateInput {
   documentType: String
   creator: UserRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
+  isDeleted: Boolean
   number: String
   invoiced: Boolean
   products: DocumentProductRelateToManyForUpdateInput
@@ -505,6 +509,7 @@ input DocumentCreateInput {
   documentType: String
   creator: UserRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
+  isDeleted: Boolean
   number: String
   invoiced: Boolean
   products: DocumentProductRelateToManyForCreateInput
@@ -1798,6 +1803,82 @@ input NotificationCreateInput {
   notifyRoles: [NotificationNotifyRoleType!]
 }
 
+type SoftwareVersion {
+  id: ID!
+  version: Int
+  iosLink: String
+  androidLink: String
+  webLink: String
+  windowsLink: String
+  macLink: String
+  date: DateTime
+}
+
+input SoftwareVersionWhereUniqueInput {
+  id: ID
+}
+
+input SoftwareVersionWhereInput {
+  AND: [SoftwareVersionWhereInput!]
+  OR: [SoftwareVersionWhereInput!]
+  NOT: [SoftwareVersionWhereInput!]
+  id: IDFilter
+  version: IntFilter
+  iosLink: StringFilter
+  androidLink: StringFilter
+  webLink: StringFilter
+  windowsLink: StringFilter
+  macLink: StringFilter
+  date: DateTimeNullableFilter
+}
+
+input IntFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntFilter
+}
+
+input SoftwareVersionOrderByInput {
+  id: OrderDirection
+  version: OrderDirection
+  iosLink: OrderDirection
+  androidLink: OrderDirection
+  webLink: OrderDirection
+  windowsLink: OrderDirection
+  macLink: OrderDirection
+  date: OrderDirection
+}
+
+input SoftwareVersionUpdateInput {
+  version: Int
+  iosLink: String
+  androidLink: String
+  webLink: String
+  windowsLink: String
+  macLink: String
+  date: DateTime
+}
+
+input SoftwareVersionUpdateArgs {
+  where: SoftwareVersionWhereUniqueInput! = {id: 1}
+  data: SoftwareVersionUpdateInput!
+}
+
+input SoftwareVersionCreateInput {
+  version: Int
+  iosLink: String
+  androidLink: String
+  webLink: String
+  windowsLink: String
+  macLink: String
+  date: DateTime
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -1924,6 +2005,12 @@ type Mutation {
   updateNotifications(data: [NotificationUpdateArgs!]!): [Notification]
   deleteNotification(where: NotificationWhereUniqueInput!): Notification
   deleteNotifications(where: [NotificationWhereUniqueInput!]!): [Notification]
+  createSoftwareVersion(data: SoftwareVersionCreateInput!): SoftwareVersion
+  createSoftwareVersions(data: [SoftwareVersionCreateInput!]!): [SoftwareVersion]
+  updateSoftwareVersion(where: SoftwareVersionWhereUniqueInput! = {id: 1}, data: SoftwareVersionUpdateInput!): SoftwareVersion
+  updateSoftwareVersions(data: [SoftwareVersionUpdateArgs!]!): [SoftwareVersion]
+  deleteSoftwareVersion(where: SoftwareVersionWhereUniqueInput! = {id: 1}): SoftwareVersion
+  deleteSoftwareVersions(where: [SoftwareVersionWhereUniqueInput!]!): [SoftwareVersion]
   endSession: Boolean!
   authenticateUserWithPassword(username: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -2009,6 +2096,9 @@ type Query {
   notifications(where: NotificationWhereInput! = {}, orderBy: [NotificationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NotificationWhereUniqueInput): [Notification!]
   notification(where: NotificationWhereUniqueInput!): Notification
   notificationsCount(where: NotificationWhereInput! = {}): Int
+  softwareVersions(where: SoftwareVersionWhereInput! = {id: {equals: 1}}, orderBy: [SoftwareVersionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SoftwareVersionWhereUniqueInput): [SoftwareVersion!]
+  softwareVersion(where: SoftwareVersionWhereUniqueInput! = {id: 1}): SoftwareVersion
+  softwareVersionsCount(where: SoftwareVersionWhereInput! = {id: {equals: 1}}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

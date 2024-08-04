@@ -72,6 +72,7 @@ model Document {
   creatorId     String?           @map("creator")
   customer      User?             @relation("Document_customer", fields: [customerId], references: [id])
   customerId    String?           @map("customer")
+  isDeleted     Boolean           @default(false)
   number        String            @default("")
   invoiced      Boolean           @default(false)
   products      DocumentProduct[] @relation("DocumentProduct_document")
@@ -311,4 +312,15 @@ model Notification {
 
   @@index([paymentPlanId])
   @@index([workOrderId])
+}
+
+model SoftwareVersion {
+  id          Int       @id
+  version     Int
+  iosLink     String    @default("")
+  androidLink String    @default("")
+  webLink     String    @default("")
+  windowsLink String    @default("")
+  macLink     String    @default("")
+  date        DateTime? @default(now())
 }

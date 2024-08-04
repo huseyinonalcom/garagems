@@ -297,6 +297,7 @@ var lists = {
         ref: "User.customerDocuments",
         many: false
       }),
+      isDeleted: (0, import_fields.checkbox)({ defaultValue: false }),
       number: (0, import_fields.text)({}),
       invoiced: (0, import_fields.checkbox)({ defaultValue: false }),
       products: (0, import_fields.relationship)({
@@ -1221,6 +1222,29 @@ var lists = {
       notifyRoles: (0, import_fields.multiselect)({
         type: "enum",
         options: ["admin", "customer", "employee", "manager"]
+      })
+    }
+  }),
+  SoftwareVersion: (0, import_core.list)({
+    isSingleton: true,
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isUser,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      version: (0, import_fields.integer)({ validation: { isRequired: true } }),
+      iosLink: (0, import_fields.text)({}),
+      androidLink: (0, import_fields.text)({}),
+      webLink: (0, import_fields.text)({}),
+      windowsLink: (0, import_fields.text)({}),
+      macLink: (0, import_fields.text)({}),
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
       })
     }
   })
