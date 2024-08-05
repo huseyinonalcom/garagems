@@ -1010,9 +1010,9 @@ export const lists: Lists = {
         ref: "Document.paymentPlan",
         many: false,
       }),
-      periods: float({ validation: { isRequired: true, min: 1 } }),
-      periodDuration: float({ validation: { isRequired: true, min: 1 } }),
-      periodPayment: float({ validation: { isRequired: true, min: 1 }, defaultValue: 0 }),
+      periods: float({ validation: { isRequired: true, min: 1 }, defaultValue: 1 }),
+      periodDuration: float({ validation: { isRequired: true, min: 1 }, defaultValue: 1 }),
+      periodPayment: float({ validation: { isRequired: true, min: 1 }, defaultValue: 1 }),
       periodDurationScale: select({
         type: "string",
         options: ["gün", "hafta", "ay"],
@@ -1143,10 +1143,6 @@ export const lists: Lists = {
 
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment!.date;
-
-              item.periods;
-              item.periodDuration;
-              item.periodDurationScale;
 
               let dates = [];
 

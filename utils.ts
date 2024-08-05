@@ -4,6 +4,9 @@ export const calculateDate = ({ number, unit, startDate }: { number: number; uni
     case "gün":
       date.setDate(date.getDate() + number);
       break;
+    case "hafta":
+      date.setDate(date.getDate() + number * 7);
+      break;
     case "ay":
       date.setMonth(date.getMonth() + number);
       break;
