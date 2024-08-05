@@ -265,6 +265,38 @@ export const lists: Lists = {
     ui: {
       labelField: "amount",
     },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const movements = await context.query.StockMovement.findMany({
+            where: { documentProduct: { id: { equals: item.id } } },
+            query: "id",
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id },
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id",
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0)!.id } },
+              amount: item.amount,
+              movementType: "çıkış",
+              documentProduct: { connect: { id: item.id } },
+            },
+          });
+        }
+      },
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -275,6 +307,10 @@ export const lists: Lists = {
     },
     fields: {
       amount: float({ validation: { isRequired: true, min: 0 } }),
+      stockMovements: relationship({
+        ref: "StockMovement.documentProduct",
+        many: true,
+      }),
       product: relationship({
         ref: "Product.documentProducts",
         many: false,
@@ -757,26 +793,6 @@ export const lists: Lists = {
       }),
     },
   }),
-  DocumentType: list({
-    ui: {
-      labelField: "name",
-    },
-    access: {
-      operation: {
-        create: isAdmin,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin,
-      },
-    },
-    fields: {
-      name: text({ validation: { isRequired: true } }),
-      stockMovements: relationship({
-        ref: "StockMovement.documentType",
-        many: true,
-      }),
-    },
-  }),
   StockMovement: list({
     ui: {
       labelField: "movementType",
@@ -805,8 +821,8 @@ export const lists: Lists = {
         defaultValue: "giriş",
         validation: { isRequired: true },
       }),
-      documentType: relationship({
-        ref: "DocumentType.stockMovements",
+      documentProduct: relationship({
+        ref: "DocumentProduct.stockMovements",
         many: false,
       }),
       note: text({}),
