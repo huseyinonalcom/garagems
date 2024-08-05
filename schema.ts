@@ -1043,6 +1043,7 @@ export const lists: Lists = {
 
               return total;
             } catch (e) {
+              console.log(e);
               return 0;
             }
           },
@@ -1063,6 +1064,7 @@ export const lists: Lists = {
               });
               return total;
             } catch (e) {
+              console.log(e);
               return 0;
             }
           },
@@ -1131,6 +1133,7 @@ export const lists: Lists = {
             try {
               return item.total <= item.paid;
             } catch (e) {
+              console.log(e);
               return false;
             }
           },
