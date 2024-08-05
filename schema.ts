@@ -1159,7 +1159,7 @@ export const lists: Lists = {
                 return "-";
               }
 
-              return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
+              return new Date(nextPaymentDate).toLocaleString("tr-TR").split(" ")[0];
             } catch (e) {
               console.log(e);
               return "-";
