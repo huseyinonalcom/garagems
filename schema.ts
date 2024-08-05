@@ -1147,7 +1147,7 @@ export const lists: Lists = {
               let dates = [];
 
               for (let i = 1; i < item.periods; i++) {
-                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: firstPaymentDate }));
+                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: new Date(firstPaymentDate) }));
               }
 
               console.log(dates);
