@@ -1153,7 +1153,7 @@ export const lists: Lists = {
               console.log(dates);
 
               const now = new Date();
-              const nextPaymentDate = dates.find((date) => date > now) || "-";
+              const nextPaymentDate = dates.find((date) => date.getTime() > now.getTime()) || "-";
 
               if (nextPaymentDate === "-") {
                 return "-";
