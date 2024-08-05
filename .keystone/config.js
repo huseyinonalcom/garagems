@@ -314,6 +314,38 @@ var lists = {
     ui: {
       labelField: "amount"
     },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const movements = await context.query.StockMovement.findMany({
+            where: { documentProduct: { id: { equals: item.id } } },
+            query: "id"
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id }
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id"
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0).id } },
+              amount: item.amount,
+              movementType: "\xE7\u0131k\u0131\u015F",
+              documentProduct: { connect: { id: item.id } }
+            }
+          });
+        }
+      }
+    },
     access: {
       operation: {
         create: isEmployee,
@@ -324,6 +356,10 @@ var lists = {
     },
     fields: {
       amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.documentProduct",
+        many: true
+      }),
       product: (0, import_fields.relationship)({
         ref: "Product.documentProducts",
         many: false
@@ -804,26 +840,6 @@ var lists = {
       })
     }
   }),
-  DocumentType: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isAdmin,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      stockMovements: (0, import_fields.relationship)({
-        ref: "StockMovement.documentType",
-        many: true
-      })
-    }
-  }),
   StockMovement: (0, import_core.list)({
     ui: {
       labelField: "movementType"
@@ -852,8 +868,8 @@ var lists = {
         defaultValue: "giri\u015F",
         validation: { isRequired: true }
       }),
-      documentType: (0, import_fields.relationship)({
-        ref: "DocumentType.stockMovements",
+      documentProduct: (0, import_fields.relationship)({
+        ref: "DocumentProduct.stockMovements",
         many: false
       }),
       note: (0, import_fields.text)({}),

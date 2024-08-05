@@ -84,13 +84,14 @@ model Document {
 }
 
 model DocumentProduct {
-  id         String    @id @default(cuid())
-  amount     Float
-  product    Product?  @relation("DocumentProduct_product", fields: [productId], references: [id])
-  productId  String?   @map("product")
-  price      Float
-  document   Document? @relation("DocumentProduct_document", fields: [documentId], references: [id])
-  documentId String?   @map("document")
+  id             String          @id @default(cuid())
+  amount         Float
+  stockMovements StockMovement[] @relation("StockMovement_documentProduct")
+  product        Product?        @relation("DocumentProduct_product", fields: [productId], references: [id])
+  productId      String?         @map("product")
+  price          Float
+  document       Document?       @relation("DocumentProduct_document", fields: [documentId], references: [id])
+  documentId     String?         @map("document")
 
   @@index([productId])
   @@index([documentId])
@@ -201,33 +202,27 @@ model Storage {
   stockMovements StockMovement[] @relation("StockMovement_storage")
 }
 
-model DocumentType {
-  id             String          @id @default(cuid())
-  name           String          @default("")
-  stockMovements StockMovement[] @relation("StockMovement_documentType")
-}
-
 model StockMovement {
-  id             String        @id @default(cuid())
-  product        Product?      @relation("StockMovement_product", fields: [productId], references: [id])
-  productId      String?       @map("product")
-  storage        Storage?      @relation("StockMovement_storage", fields: [storageId], references: [id])
-  storageId      String?       @map("storage")
-  amount         Float
-  movementType   String        @default("giriş")
-  documentType   DocumentType? @relation("StockMovement_documentType", fields: [documentTypeId], references: [id])
-  documentTypeId String?       @map("documentType")
-  note           String        @default("")
-  customer       User?         @relation("StockMovement_customer", fields: [customerId], references: [id])
-  customerId     String?       @map("customer")
-  date           DateTime?     @default(now())
-  application    Application?  @relation("StockMovement_application", fields: [applicationId], references: [id])
-  applicationId  String?       @map("application")
-  createdAt      DateTime?     @default(now())
+  id                String           @id @default(cuid())
+  product           Product?         @relation("StockMovement_product", fields: [productId], references: [id])
+  productId         String?          @map("product")
+  storage           Storage?         @relation("StockMovement_storage", fields: [storageId], references: [id])
+  storageId         String?          @map("storage")
+  amount            Float
+  movementType      String           @default("giriş")
+  documentProduct   DocumentProduct? @relation("StockMovement_documentProduct", fields: [documentProductId], references: [id])
+  documentProductId String?          @map("documentProduct")
+  note              String           @default("")
+  customer          User?            @relation("StockMovement_customer", fields: [customerId], references: [id])
+  customerId        String?          @map("customer")
+  date              DateTime?        @default(now())
+  application       Application?     @relation("StockMovement_application", fields: [applicationId], references: [id])
+  applicationId     String?          @map("application")
+  createdAt         DateTime?        @default(now())
 
   @@index([productId])
   @@index([storageId])
-  @@index([documentTypeId])
+  @@index([documentProductId])
   @@index([customerId])
   @@index([applicationId])
 }

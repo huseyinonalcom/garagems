@@ -529,6 +529,8 @@ input PaymentPlanRelateToOneForCreateInput {
 type DocumentProduct {
   id: ID!
   amount: Float
+  stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
+  stockMovementsCount(where: StockMovementWhereInput! = {}): Int
   product: Product
   price: Float
   document: Document
@@ -544,6 +546,7 @@ input DocumentProductWhereInput {
   NOT: [DocumentProductWhereInput!]
   id: IDFilter
   amount: FloatFilter
+  stockMovements: StockMovementManyRelationFilter
   product: ProductWhereInput
   price: FloatFilter
   document: DocumentWhereInput
@@ -568,6 +571,7 @@ input DocumentProductOrderByInput {
 
 input DocumentProductUpdateInput {
   amount: Float
+  stockMovements: StockMovementRelateToManyForUpdateInput
   product: ProductRelateToOneForUpdateInput
   price: Float
   document: DocumentRelateToOneForUpdateInput
@@ -586,6 +590,7 @@ input DocumentProductUpdateArgs {
 
 input DocumentProductCreateInput {
   amount: Float
+  stockMovements: StockMovementRelateToManyForCreateInput
   product: ProductRelateToOneForCreateInput
   price: Float
   document: DocumentRelateToOneForCreateInput
@@ -1154,53 +1159,13 @@ input StorageCreateInput {
   stockMovements: StockMovementRelateToManyForCreateInput
 }
 
-type DocumentType {
-  id: ID!
-  name: String
-  stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
-  stockMovementsCount(where: StockMovementWhereInput! = {}): Int
-}
-
-input DocumentTypeWhereUniqueInput {
-  id: ID
-}
-
-input DocumentTypeWhereInput {
-  AND: [DocumentTypeWhereInput!]
-  OR: [DocumentTypeWhereInput!]
-  NOT: [DocumentTypeWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  stockMovements: StockMovementManyRelationFilter
-}
-
-input DocumentTypeOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-}
-
-input DocumentTypeUpdateInput {
-  name: String
-  stockMovements: StockMovementRelateToManyForUpdateInput
-}
-
-input DocumentTypeUpdateArgs {
-  where: DocumentTypeWhereUniqueInput!
-  data: DocumentTypeUpdateInput!
-}
-
-input DocumentTypeCreateInput {
-  name: String
-  stockMovements: StockMovementRelateToManyForCreateInput
-}
-
 type StockMovement {
   id: ID!
   product: Product
   storage: Storage
   amount: Float
   movementType: String
-  documentType: DocumentType
+  documentProduct: DocumentProduct
   note: String
   customer: User
   date: DateTime
@@ -1221,7 +1186,7 @@ input StockMovementWhereInput {
   storage: StorageWhereInput
   amount: FloatFilter
   movementType: StringFilter
-  documentType: DocumentTypeWhereInput
+  documentProduct: DocumentProductWhereInput
   note: StringFilter
   customer: UserWhereInput
   date: DateTimeNullableFilter
@@ -1243,7 +1208,7 @@ input StockMovementUpdateInput {
   storage: StorageRelateToOneForUpdateInput
   amount: Float
   movementType: String
-  documentType: DocumentTypeRelateToOneForUpdateInput
+  documentProduct: DocumentProductRelateToOneForUpdateInput
   note: String
   customer: UserRelateToOneForUpdateInput
   date: DateTime
@@ -1257,9 +1222,9 @@ input StorageRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input DocumentTypeRelateToOneForUpdateInput {
-  create: DocumentTypeCreateInput
-  connect: DocumentTypeWhereUniqueInput
+input DocumentProductRelateToOneForUpdateInput {
+  create: DocumentProductCreateInput
+  connect: DocumentProductWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -1273,7 +1238,7 @@ input StockMovementCreateInput {
   storage: StorageRelateToOneForCreateInput
   amount: Float
   movementType: String
-  documentType: DocumentTypeRelateToOneForCreateInput
+  documentProduct: DocumentProductRelateToOneForCreateInput
   note: String
   customer: UserRelateToOneForCreateInput
   date: DateTime
@@ -1286,9 +1251,9 @@ input StorageRelateToOneForCreateInput {
   connect: StorageWhereUniqueInput
 }
 
-input DocumentTypeRelateToOneForCreateInput {
-  create: DocumentTypeCreateInput
-  connect: DocumentTypeWhereUniqueInput
+input DocumentProductRelateToOneForCreateInput {
+  create: DocumentProductCreateInput
+  connect: DocumentProductWhereUniqueInput
 }
 
 type ProductBrand {
@@ -1945,12 +1910,6 @@ type Mutation {
   updateStorages(data: [StorageUpdateArgs!]!): [Storage]
   deleteStorage(where: StorageWhereUniqueInput!): Storage
   deleteStorages(where: [StorageWhereUniqueInput!]!): [Storage]
-  createDocumentType(data: DocumentTypeCreateInput!): DocumentType
-  createDocumentTypes(data: [DocumentTypeCreateInput!]!): [DocumentType]
-  updateDocumentType(where: DocumentTypeWhereUniqueInput!, data: DocumentTypeUpdateInput!): DocumentType
-  updateDocumentTypes(data: [DocumentTypeUpdateArgs!]!): [DocumentType]
-  deleteDocumentType(where: DocumentTypeWhereUniqueInput!): DocumentType
-  deleteDocumentTypes(where: [DocumentTypeWhereUniqueInput!]!): [DocumentType]
   createStockMovement(data: StockMovementCreateInput!): StockMovement
   createStockMovements(data: [StockMovementCreateInput!]!): [StockMovement]
   updateStockMovement(where: StockMovementWhereUniqueInput!, data: StockMovementUpdateInput!): StockMovement
@@ -2066,9 +2025,6 @@ type Query {
   storages(where: StorageWhereInput! = {}, orderBy: [StorageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StorageWhereUniqueInput): [Storage!]
   storage(where: StorageWhereUniqueInput!): Storage
   storagesCount(where: StorageWhereInput! = {}): Int
-  documentTypes(where: DocumentTypeWhereInput! = {}, orderBy: [DocumentTypeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DocumentTypeWhereUniqueInput): [DocumentType!]
-  documentType(where: DocumentTypeWhereUniqueInput!): DocumentType
-  documentTypesCount(where: DocumentTypeWhereInput! = {}): Int
   stockMovements(where: StockMovementWhereInput! = {}, orderBy: [StockMovementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StockMovementWhereUniqueInput): [StockMovement!]
   stockMovement(where: StockMovementWhereUniqueInput!): StockMovement
   stockMovementsCount(where: StockMovementWhereInput! = {}): Int
