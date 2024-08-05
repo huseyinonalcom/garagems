@@ -1075,7 +1075,50 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              return item.total - item.paid;
+              const total = async () => {
+                try {
+                  const workOrder = await context.query.WorkOrder.findOne({
+                    where: { id: item.workOrderId },
+                    query: "total",
+                  });
+                  const document = await context.query.Document.findOne({
+                    where: { id: item.documentId },
+                    query: "total",
+                  });
+
+                  let total = 0;
+
+                  if (workOrder) {
+                    total = workOrder.total;
+                  } else if (document) {
+                    total = document.total;
+                  }
+
+                  return total;
+                } catch (e) {
+                  console.log(e);
+                  return 0;
+                }
+              };
+
+              const paid = async () => {
+                try {
+                  const payments = await context.query.Payment.findMany({
+                    where: { paymentPlan: { id: { equals: item.id } } },
+                    query: "amount",
+                  });
+                  let total = 0;
+                  payments.forEach((payment) => {
+                    total += payment.amount;
+                  });
+                  return total;
+                } catch (e) {
+                  console.log(e);
+                  return 0;
+                }
+              };
+
+              return (await total()) - (await paid());
             } catch (e) {
               console.log(e);
               return 123456;
