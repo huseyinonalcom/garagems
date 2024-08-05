@@ -1147,8 +1147,10 @@ export const lists: Lists = {
               let dates = [];
 
               for (let i = 1; i < item.periods; i++) {
-                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: new Date(firstPaymentDate) }));
+                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: firstPaymentDate }));
               }
+
+              console.log(dates);
 
               const now = new Date();
               const nextPaymentDate = dates.find((date) => date > now) || "-";
