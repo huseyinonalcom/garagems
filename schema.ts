@@ -1228,7 +1228,33 @@ export const lists: Lists = {
           type: graphql.Boolean,
           async resolve(item, args, context) {
             try {
-              return item.total <= item.paid;
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "total",
+              });
+              const document = await context.query.Document.findOne({
+                where: { id: item.documentId },
+                query: "total",
+              });
+
+              let total = 0;
+
+              if (workOrder) {
+                total = workOrder.total;
+              } else if (document) {
+                total = document.total;
+              }
+
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount",
+              });
+              let paid = 0;
+              payments.forEach((payment) => {
+                total += payment.amount;
+              });
+
+              return total <= paid;
             } catch (e) {
               console.log(e);
               return false;
