@@ -1251,7 +1251,7 @@ export const lists: Lists = {
               });
               let paid = 0;
               payments.forEach((payment) => {
-                total += payment.amount;
+                paid += payment.amount;
               });
 
               return total <= paid;
