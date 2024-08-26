@@ -274,9 +274,9 @@ model PaymentPlan {
   workOrderId         String?        @unique @map("workOrder")
   payments            Payment[]      @relation("Payment_paymentPlan")
   document            Document?      @relation("Document_paymentPlan")
-  periods             Float
-  periodDuration      Float
-  periodPayment       Float          @default(0)
+  periods             Float          @default(1)
+  periodDuration      Float          @default(1)
+  periodPayment       Float          @default(1)
   periodDurationScale String         @default("ay")
   notifications       Notification[] @relation("Notification_paymentPlan")
 }

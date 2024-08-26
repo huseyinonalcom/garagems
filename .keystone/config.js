@@ -58,9 +58,13 @@ var import_core = require("@keystone-6/core");
 // utils.ts
 var calculateDate = ({ number, unit, startDate }) => {
   const date = startDate;
+  console.log("date", date);
   switch (unit.toLowerCase()) {
     case "g\xFCn":
       date.setDate(date.getDate() + number);
+      break;
+    case "hafta":
+      date.setDate(date.getDate() + number * 7);
       break;
     case "ay":
       date.setMonth(date.getMonth() + number);
@@ -1012,7 +1016,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1032,7 +1038,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1055,9 +1063,18 @@ var lists = {
         ref: "Document.paymentPlan",
         many: false
       }),
-      periods: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
-      periodDuration: (0, import_fields.float)({ validation: { isRequired: true, min: 1 } }),
-      periodPayment: (0, import_fields.float)({ validation: { isRequired: true, min: 1 }, defaultValue: 0 }),
+      periods: (0, import_fields.float)({
+        validation: { isRequired: true, min: 0 },
+        defaultValue: 1
+      }),
+      periodDuration: (0, import_fields.float)({
+        validation: { isRequired: true, min: 0 },
+        defaultValue: 1
+      }),
+      periodPayment: (0, import_fields.float)({
+        validation: { isRequired: true, min: 0 },
+        defaultValue: 1
+      }),
       periodDurationScale: (0, import_fields.select)({
         type: "string",
         options: ["g\xFCn", "hafta", "ay"],
@@ -1085,6 +1102,7 @@ var lists = {
               }
               return total;
             } catch (e) {
+              console.log(e);
               return 0;
             }
           }
@@ -1105,6 +1123,7 @@ var lists = {
               });
               return total;
             } catch (e) {
+              console.log(e);
               return 0;
             }
           }
@@ -1115,7 +1134,45 @@ var lists = {
           type: import_core.graphql.Float,
           async resolve(item, args, context) {
             try {
-              return item.total - item.paid;
+              const total = async () => {
+                try {
+                  const workOrder = await context.query.WorkOrder.findOne({
+                    where: { id: item.workOrderId },
+                    query: "total"
+                  });
+                  const document = await context.query.Document.findOne({
+                    where: { id: item.documentId },
+                    query: "total"
+                  });
+                  let total2 = 0;
+                  if (workOrder) {
+                    total2 = workOrder.total;
+                  } else if (document) {
+                    total2 = document.total;
+                  }
+                  return total2;
+                } catch (e) {
+                  console.log(e);
+                  return 0;
+                }
+              };
+              const paid = async () => {
+                try {
+                  const payments = await context.query.Payment.findMany({
+                    where: { paymentPlan: { id: { equals: item.id } } },
+                    query: "amount"
+                  });
+                  let total2 = 0;
+                  payments.forEach((payment) => {
+                    total2 += payment.amount;
+                  });
+                  return total2;
+                } catch (e) {
+                  console.log(e);
+                  return 0;
+                }
+              };
+              return await total() - await paid();
             } catch (e) {
               console.log(e);
               return 123456;
@@ -1138,19 +1195,23 @@ var lists = {
               }
               const firstPayment = payments.at(0);
               const firstPaymentDate = firstPayment.date;
-              item.periods;
-              item.periodDuration;
-              item.periodDurationScale;
               let dates = [];
               for (let i = 1; i < item.periods; i++) {
-                dates.push(calculateDate({ number: i, unit: item.periodDurationScale, startDate: new Date(firstPaymentDate) }));
+                dates.push(
+                  calculateDate({
+                    number: i * item.periodDuration,
+                    unit: item.periodDurationScale,
+                    startDate: new Date(firstPaymentDate)
+                  })
+                );
               }
+              console.log(dates);
               const now = /* @__PURE__ */ new Date();
-              const nextPaymentDate = dates.find((date) => date > now) || "-";
+              const nextPaymentDate = dates.find((date) => date.getTime() > now.getTime()) || "-";
               if (nextPaymentDate === "-") {
                 return "-";
               }
-              return new Date(nextPaymentDate).toLocaleString("tr-TR").slice(0, -3);
+              return new Date(nextPaymentDate).toLocaleString("tr-TR").split(" ")[0];
             } catch (e) {
               console.log(e);
               return "-";
@@ -1163,8 +1224,31 @@ var lists = {
           type: import_core.graphql.Boolean,
           async resolve(item, args, context) {
             try {
-              return item.total <= item.paid;
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "total"
+              });
+              const document = await context.query.Document.findOne({
+                where: { id: item.documentId },
+                query: "total"
+              });
+              let total = 0;
+              if (workOrder) {
+                total = workOrder.total;
+              } else if (document) {
+                total = document.total;
+              }
+              const payments = await context.query.Payment.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "amount"
+              });
+              let paid = 0;
+              payments.forEach((payment) => {
+                paid += payment.amount;
+              });
+              return total <= paid;
             } catch (e) {
+              console.log(e);
               return false;
             }
           }
@@ -1197,7 +1281,14 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        options: [
+          "nakit",
+          "kredi kart\u0131",
+          "havale",
+          "\xE7ek",
+          "senet",
+          "banka kart\u0131"
+        ],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),
