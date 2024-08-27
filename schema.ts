@@ -87,6 +87,13 @@ export const lists: Lists = {
         if (operation === "create") {
           const existingUsers = await context.query.User.findMany({
             query: "id",
+            where: {
+              OR: [
+                { role: { equals: "employee" } },
+                { role: { equals: "admin" } },
+                { role: { equals: "manager" } },
+              ],
+            },
           });
           if (existingUsers.length > 14) {
             throw new Error("User limit reached");
