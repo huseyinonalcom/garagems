@@ -372,7 +372,7 @@ export const lists: Lists = {
         many: false,
       }),
       qcDone: checkbox({ defaultValue: false }),
-      reduction: float({ validation: { isRequired: false, min: 0 } }),
+      reduction: float({ defaultValue: 0 }),
       qcUser: relationship({
         ref: "User.qcWorkOrders",
         many: false,
