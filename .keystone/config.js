@@ -116,7 +116,10 @@ var lists = {
       beforeOperation: async ({ operation, item, inputData, context }) => {
         if (operation === "create") {
           const existingUsers = await context.query.User.findMany({
-            query: "id"
+            query: "id",
+            where: {
+              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
+            }
           });
           if (existingUsers.length > 14) {
             throw new Error("User limit reached");
@@ -422,6 +425,7 @@ var lists = {
         many: false
       }),
       qcDone: (0, import_fields.checkbox)({ defaultValue: false }),
+      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       qcUser: (0, import_fields.relationship)({
         ref: "User.qcWorkOrders",
         many: false
@@ -1016,9 +1020,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1038,9 +1040,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1281,14 +1281,7 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: [
-          "nakit",
-          "kredi kart\u0131",
-          "havale",
-          "\xE7ek",
-          "senet",
-          "banka kart\u0131"
-        ],
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

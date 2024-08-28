@@ -107,6 +107,7 @@ model WorkOrder {
   status        String         @default("pasif")
   paymentPlan   PaymentPlan?   @relation("PaymentPlan_workOrder")
   qcDone        Boolean        @default(false)
+  reduction     Float?
   qcUser        User?          @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])
   qcUserId      String?        @map("qcUser")
   checkDate     DateTime?

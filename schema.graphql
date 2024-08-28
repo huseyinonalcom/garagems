@@ -612,6 +612,7 @@ type WorkOrder {
   status: String
   paymentPlan: PaymentPlan
   qcDone: Boolean
+  reduction: Float
   qcUser: User
   checkDate: DateTime
   checkDone: Boolean
@@ -642,6 +643,7 @@ input WorkOrderWhereInput {
   status: StringFilter
   paymentPlan: PaymentPlanWhereInput
   qcDone: BooleanFilter
+  reduction: FloatNullableFilter
   qcUser: UserWhereInput
   checkDate: DateTimeNullableFilter
   checkDone: BooleanFilter
@@ -657,6 +659,17 @@ input FileManyRelationFilter {
   none: FileWhereInput
 }
 
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
+}
+
 input NotificationManyRelationFilter {
   every: NotificationWhereInput
   some: NotificationWhereInput
@@ -668,6 +681,7 @@ input WorkOrderOrderByInput {
   createdAt: OrderDirection
   status: OrderDirection
   qcDone: OrderDirection
+  reduction: OrderDirection
   checkDate: OrderDirection
   checkDone: OrderDirection
 }
@@ -680,6 +694,7 @@ input WorkOrderUpdateInput {
   status: String
   paymentPlan: PaymentPlanRelateToOneForUpdateInput
   qcDone: Boolean
+  reduction: Float
   qcUser: UserRelateToOneForUpdateInput
   checkDate: DateTime
   checkDone: Boolean
@@ -722,6 +737,7 @@ input WorkOrderCreateInput {
   status: String
   paymentPlan: PaymentPlanRelateToOneForCreateInput
   qcDone: Boolean
+  reduction: Float
   qcUser: UserRelateToOneForCreateInput
   checkDate: DateTime
   checkDone: Boolean
@@ -791,17 +807,6 @@ input ApplicationWhereInput {
   creator: UserWhereInput
   type: ApplicationTypeWhereInput
   stockMovements: StockMovementManyRelationFilter
-}
-
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
 }
 
 input ApplicationOrderByInput {
