@@ -362,17 +362,16 @@ export const lists: Lists = {
         type: "string",
         options: ["aktif", "pasif", "tamamlandı", "iptal", "teklif"],
         defaultValue: "pasif",
-        validation: { isRequired: true },
         access: {
           update: isManager,
         },
       }),
+      reduction: float({ defaultValue: 0 }),
       paymentPlan: relationship({
         ref: "PaymentPlan.workOrder",
         many: false,
       }),
       qcDone: checkbox({ defaultValue: false }),
-      reduction: float({ defaultValue: 0 }),
       qcUser: relationship({
         ref: "User.qcWorkOrders",
         many: false,

@@ -415,17 +415,16 @@ var lists = {
         type: "string",
         options: ["aktif", "pasif", "tamamland\u0131", "iptal", "teklif"],
         defaultValue: "pasif",
-        validation: { isRequired: true },
         access: {
           update: isManager
         }
       }),
+      reduction: (0, import_fields.float)({ defaultValue: 0 }),
       paymentPlan: (0, import_fields.relationship)({
         ref: "PaymentPlan.workOrder",
         many: false
       }),
       qcDone: (0, import_fields.checkbox)({ defaultValue: false }),
-      reduction: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
       qcUser: (0, import_fields.relationship)({
         ref: "User.qcWorkOrders",
         many: false
