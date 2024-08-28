@@ -610,9 +610,9 @@ type WorkOrder {
   notes(where: NoteWhereInput! = {}, orderBy: [NoteOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NoteWhereUniqueInput): [Note!]
   notesCount(where: NoteWhereInput! = {}): Int
   status: String
+  reduction: Float
   paymentPlan: PaymentPlan
   qcDone: Boolean
-  reduction: Float
   qcUser: User
   checkDate: DateTime
   checkDone: Boolean
@@ -640,10 +640,10 @@ input WorkOrderWhereInput {
   createdAt: DateTimeNullableFilter
   images: FileManyRelationFilter
   notes: NoteManyRelationFilter
-  status: StringFilter
+  status: StringNullableFilter
+  reduction: FloatNullableFilter
   paymentPlan: PaymentPlanWhereInput
   qcDone: BooleanFilter
-  reduction: FloatNullableFilter
   qcUser: UserWhereInput
   checkDate: DateTimeNullableFilter
   checkDone: BooleanFilter
@@ -657,6 +657,20 @@ input FileManyRelationFilter {
   every: FileWhereInput
   some: FileWhereInput
   none: FileWhereInput
+}
+
+input StringNullableFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: StringNullableFilter
 }
 
 input FloatNullableFilter {
@@ -680,8 +694,8 @@ input WorkOrderOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   status: OrderDirection
-  qcDone: OrderDirection
   reduction: OrderDirection
+  qcDone: OrderDirection
   checkDate: OrderDirection
   checkDone: OrderDirection
 }
@@ -692,9 +706,9 @@ input WorkOrderUpdateInput {
   images: FileRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
   status: String
+  reduction: Float
   paymentPlan: PaymentPlanRelateToOneForUpdateInput
   qcDone: Boolean
-  reduction: Float
   qcUser: UserRelateToOneForUpdateInput
   checkDate: DateTime
   checkDone: Boolean
@@ -735,9 +749,9 @@ input WorkOrderCreateInput {
   images: FileRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
   status: String
+  reduction: Float
   paymentPlan: PaymentPlanRelateToOneForCreateInput
   qcDone: Boolean
-  reduction: Float
   qcUser: UserRelateToOneForCreateInput
   checkDate: DateTime
   checkDone: Boolean

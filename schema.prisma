@@ -104,10 +104,10 @@ model WorkOrder {
   createdAt     DateTime?      @default(now())
   images        File[]         @relation("File_workOrder")
   notes         Note[]         @relation("Note_workOrder")
-  status        String         @default("pasif")
+  status        String?        @default("pasif")
+  reduction     Float?         @default(0)
   paymentPlan   PaymentPlan?   @relation("PaymentPlan_workOrder")
   qcDone        Boolean        @default(false)
-  reduction     Float?
   qcUser        User?          @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])
   qcUserId      String?        @map("qcUser")
   checkDate     DateTime?
