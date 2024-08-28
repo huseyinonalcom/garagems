@@ -366,7 +366,7 @@ export const lists: Lists = {
           update: isManager,
         },
       }),
-      reduction: float({ defaultValue: 0 }),
+      reduction: float({}),
       paymentPlan: relationship({
         ref: "PaymentPlan.workOrder",
         many: false,

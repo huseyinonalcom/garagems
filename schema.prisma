@@ -105,7 +105,7 @@ model WorkOrder {
   images        File[]         @relation("File_workOrder")
   notes         Note[]         @relation("Note_workOrder")
   status        String?        @default("pasif")
-  reduction     Float?         @default(0)
+  reduction     Float?
   paymentPlan   PaymentPlan?   @relation("PaymentPlan_workOrder")
   qcDone        Boolean        @default(false)
   qcUser        User?          @relation("WorkOrder_qcUser", fields: [qcUserId], references: [id])

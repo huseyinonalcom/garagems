@@ -419,7 +419,7 @@ var lists = {
           update: isManager
         }
       }),
-      reduction: (0, import_fields.float)({ defaultValue: 0 }),
+      reduction: (0, import_fields.float)({}),
       paymentPlan: (0, import_fields.relationship)({
         ref: "PaymentPlan.workOrder",
         many: false
