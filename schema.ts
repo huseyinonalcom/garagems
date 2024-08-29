@@ -9,6 +9,7 @@ import {
   virtual,
   checkbox,
   integer,
+  json,
 } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
@@ -830,6 +831,7 @@ export const lists: Lists = {
       depth: float({}),
       weight: float({}),
       thickness: float({}),
+      extraFields: json({}),
     },
   }),
   Storage: list({
