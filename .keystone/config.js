@@ -685,7 +685,25 @@ var lists = {
       finishedAt: (0, import_fields.timestamp)(),
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       description: (0, import_fields.text)({}),
-      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      value: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      price: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "reduction"
+              });
+              let total = item.value;
+              total -= total * (workOrder.reduction ?? 0) / 100;
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
       amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
       wastage: (0, import_fields.float)({
         validation: { isRequired: false, min: 0 },

@@ -134,7 +134,7 @@ model Application {
   finishedAt     DateTime?
   name           String               @default("")
   description    String               @default("")
-  price          Float
+  value          Float
   amount         Float
   wastage        Float?               @default(0)
   location       ApplicationLocation? @relation("Application_location", fields: [locationId], references: [id])

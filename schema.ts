@@ -666,7 +666,26 @@ export const lists: Lists = {
       finishedAt: timestamp(),
       name: text({ validation: { isRequired: true } }),
       description: text({}),
-      price: float({ validation: { isRequired: true, min: 0 } }),
+      value: float({ validation: { isRequired: true, min: 0 } }),
+      price: virtual({
+        field: graphql.field({
+          type: graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "reduction",
+              });
+              let total = item.value;
+
+              total -= (total * (workOrder.reduction ?? 0)) / 100;
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          },
+        }),
+      }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
       wastage: float({
         validation: { isRequired: false, min: 0 },

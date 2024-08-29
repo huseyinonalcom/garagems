@@ -786,6 +786,7 @@ type Application {
   finishedAt: DateTime
   name: String
   description: String
+  value: Float
   price: Float
   amount: Float
   wastage: Float
@@ -813,7 +814,7 @@ input ApplicationWhereInput {
   finishedAt: DateTimeNullableFilter
   name: StringFilter
   description: StringFilter
-  price: FloatFilter
+  value: FloatFilter
   amount: FloatFilter
   wastage: FloatNullableFilter
   location: ApplicationLocationWhereInput
@@ -830,7 +831,7 @@ input ApplicationOrderByInput {
   finishedAt: OrderDirection
   name: OrderDirection
   description: OrderDirection
-  price: OrderDirection
+  value: OrderDirection
   amount: OrderDirection
   wastage: OrderDirection
 }
@@ -842,7 +843,7 @@ input ApplicationUpdateInput {
   finishedAt: DateTime
   name: String
   description: String
-  price: Float
+  value: Float
   amount: Float
   wastage: Float
   location: ApplicationLocationRelateToOneForUpdateInput
@@ -877,7 +878,7 @@ input ApplicationCreateInput {
   finishedAt: DateTime
   name: String
   description: String
-  price: Float
+  value: Float
   amount: Float
   wastage: Float
   location: ApplicationLocationRelateToOneForCreateInput
