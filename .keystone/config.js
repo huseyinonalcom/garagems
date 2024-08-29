@@ -118,7 +118,11 @@ var lists = {
           const existingUsers = await context.query.User.findMany({
             query: "id",
             where: {
-              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
+              OR: [
+                { role: { equals: "employee" } },
+                { role: { equals: "admin" } },
+                { role: { equals: "manager" } }
+              ]
             }
           });
           if (existingUsers.length > 14) {
@@ -496,6 +500,26 @@ var lists = {
         ref: "User.clientOrders",
         many: false
       }),
+      value: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "price"
+              });
+              let total = 0;
+              applications.forEach((app) => {
+                total += app.price;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
       total: (0, import_fields.virtual)({
         field: import_core.graphql.field({
           type: import_core.graphql.Float,
@@ -509,6 +533,7 @@ var lists = {
               applications.forEach((app) => {
                 total += app.price;
               });
+              total -= total * (item.reduction ?? 0) / 100;
               return total;
             } catch (e) {
               return 0;
@@ -824,7 +849,8 @@ var lists = {
       height: (0, import_fields.float)({}),
       depth: (0, import_fields.float)({}),
       weight: (0, import_fields.float)({}),
-      thickness: (0, import_fields.float)({})
+      thickness: (0, import_fields.float)({}),
+      extraFields: (0, import_fields.json)({})
     }
   }),
   Storage: (0, import_core.list)({
@@ -1019,7 +1045,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1039,7 +1067,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1280,7 +1310,14 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        options: [
+          "nakit",
+          "kredi kart\u0131",
+          "havale",
+          "\xE7ek",
+          "senet",
+          "banka kart\u0131"
+        ],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

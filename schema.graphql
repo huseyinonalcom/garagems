@@ -622,6 +622,7 @@ type WorkOrder {
   finishedAt: String
   car: Car
   customer: User
+  value: Float
   total: Float
   applications(where: ApplicationWhereInput! = {}, orderBy: [ApplicationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ApplicationWhereUniqueInput): [Application!]
   applicationsCount(where: ApplicationWhereInput! = {}): Int
@@ -1013,6 +1014,7 @@ type Product {
   depth: Float
   weight: Float
   thickness: Float
+  extraFields: JSON
 }
 
 input ProductWhereUniqueInput {
@@ -1094,6 +1096,7 @@ input ProductUpdateInput {
   depth: Float
   weight: Float
   thickness: Float
+  extraFields: JSON
 }
 
 input ProductBrandRelateToOneForUpdateInput {
@@ -1131,6 +1134,7 @@ input ProductCreateInput {
   depth: Float
   weight: Float
   thickness: Float
+  extraFields: JSON
 }
 
 input ProductBrandRelateToOneForCreateInput {

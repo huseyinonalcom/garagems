@@ -192,6 +192,7 @@ model Product {
   depth             Float?
   weight            Float?
   thickness         Float?
+  extraFields       String?
 
   @@index([productBrandId])
   @@index([applicationTypeId])
