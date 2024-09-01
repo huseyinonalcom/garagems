@@ -478,7 +478,7 @@ export const lists: Lists = {
               applications.forEach((app) => {
                 total += app.price;
               });
-              total -= (total * (item.reduction ?? 0)) / 100;
+              // total-= (total * (item.reduction ?? 0)) / 100;
               return total;
             } catch (e) {
               return 0;
