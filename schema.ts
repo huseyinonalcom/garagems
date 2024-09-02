@@ -357,6 +357,13 @@ export const lists: Lists = {
         delete: isAdmin,
       },
     },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+        console.log(item);
+        }
+      },
+    },
     fields: {
       creator: relationship({
         ref: "User.workOrders",
