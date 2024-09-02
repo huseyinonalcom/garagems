@@ -212,6 +212,11 @@ export const lists: Lists = {
               where: { id: app.id },
             });
           });
+          if (item.paymentPlanId) {
+            await context.query.PaymentPlan.deleteOne({
+              where: { id: item.paymentPlanId },
+            });
+          }
         }
       },
     },
@@ -376,6 +381,13 @@ export const lists: Lists = {
               where: { id: app.id },
             });
           });
+          try {
+            if (item.paymentPlanId) {
+              await context.query.PaymentPlan.deleteOne({
+                where: { id: item.paymentPlanId },
+              });
+            }
+          } catch (e) {}
         }
       },
     },
@@ -1052,6 +1064,19 @@ export const lists: Lists = {
       },
     },
     hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const payments = await context.query.Payment.findMany({
+            where: { paymentPlan: { id: { equals: item.id } } },
+            query: "id",
+          });
+          payments.forEach(async (payment) => {
+            await context.query.Payment.deleteOne({
+              where: { id: payment.id },
+            });
+          });
+        }
+      },
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
           for (let i = 1; i < item.periods; i++) {
