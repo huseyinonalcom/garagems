@@ -224,11 +224,11 @@ export const lists: Lists = {
             try {
               const products = await context.query.DocumentProduct.findMany({
                 where: { document: { id: { equals: item.id } } },
-                query: "amount product { price }",
+                query: "amount product { total }",
               });
               let total = 0;
               products.forEach((product) => {
-                total += product.amount * product.product.price;
+                total += product.amount * product.product.total;
               });
               return total;
             } catch (e) {
