@@ -418,6 +418,7 @@ type Document {
   documentType: String
   creator: User
   customer: User
+  reduction: Float
   isDeleted: Boolean
   number: String
   invoiced: Boolean
@@ -441,6 +442,7 @@ input DocumentWhereInput {
   documentType: StringFilter
   creator: UserWhereInput
   customer: UserWhereInput
+  reduction: FloatNullableFilter
   isDeleted: BooleanFilter
   number: StringFilter
   invoiced: BooleanFilter
@@ -459,6 +461,17 @@ input DateTimeNullableFilter {
   not: DateTimeNullableFilter
 }
 
+input FloatNullableFilter {
+  equals: Float
+  in: [Float!]
+  notIn: [Float!]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: FloatNullableFilter
+}
+
 input DocumentProductManyRelationFilter {
   every: DocumentProductWhereInput
   some: DocumentProductWhereInput
@@ -469,6 +482,7 @@ input DocumentOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   documentType: OrderDirection
+  reduction: OrderDirection
   isDeleted: OrderDirection
   number: OrderDirection
   invoiced: OrderDirection
@@ -479,6 +493,7 @@ input DocumentUpdateInput {
   documentType: String
   creator: UserRelateToOneForUpdateInput
   customer: UserRelateToOneForUpdateInput
+  reduction: Float
   isDeleted: Boolean
   number: String
   invoiced: Boolean
@@ -509,6 +524,7 @@ input DocumentCreateInput {
   documentType: String
   creator: UserRelateToOneForCreateInput
   customer: UserRelateToOneForCreateInput
+  reduction: Float
   isDeleted: Boolean
   number: String
   invoiced: Boolean
@@ -533,6 +549,7 @@ type DocumentProduct {
   stockMovementsCount(where: StockMovementWhereInput! = {}): Int
   product: Product
   price: Float
+  total: Float
   document: Document
 }
 
@@ -672,17 +689,6 @@ input StringNullableFilter {
   startsWith: String
   endsWith: String
   not: StringNullableFilter
-}
-
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
 }
 
 input NotificationManyRelationFilter {

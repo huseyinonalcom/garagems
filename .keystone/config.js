@@ -118,11 +118,7 @@ var lists = {
           const existingUsers = await context.query.User.findMany({
             query: "id",
             where: {
-              OR: [
-                { role: { equals: "employee" } },
-                { role: { equals: "admin" } },
-                { role: { equals: "manager" } }
-              ]
+              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
             }
           });
           if (existingUsers.length > 14) {
@@ -308,6 +304,7 @@ var lists = {
         ref: "User.customerDocuments",
         many: false
       }),
+      reduction: (0, import_fields.float)({ defaultValue: 0 }),
       isDeleted: (0, import_fields.checkbox)({ defaultValue: false }),
       number: (0, import_fields.text)({}),
       invoiced: (0, import_fields.checkbox)({ defaultValue: false }),
@@ -376,6 +373,24 @@ var lists = {
         many: false
       }),
       price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const document = await context.query.Document.findOne({
+                where: { id: item.documentId },
+                query: "reduction"
+              });
+              let total = item.price * item.amount;
+              total -= total * (document.reduction ?? 0) / 100;
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
       document: (0, import_fields.relationship)({
         ref: "Document.products",
         many: false
@@ -533,7 +548,6 @@ var lists = {
               applications.forEach((app) => {
                 total += app.price;
               });
-              total -= total * (item.reduction ?? 0) / 100;
               return total;
             } catch (e) {
               return 0;
@@ -998,7 +1012,11 @@ var lists = {
       }
     },
     fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      name: (0, import_fields.text)({
+        validation: { isRequired: true },
+        isFilterable: true,
+        isIndexed: true
+      }),
       cars: (0, import_fields.relationship)({ ref: "Car.carModel", many: true }),
       carBrand: (0, import_fields.relationship)({ ref: "CarBrand.carModels", many: false })
     }
@@ -1016,7 +1034,11 @@ var lists = {
       }
     },
     fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      name: (0, import_fields.text)({
+        validation: { isRequired: true },
+        isFilterable: true,
+        isIndexed: true
+      }),
       carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
     }
   }),
@@ -1063,9 +1085,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1085,9 +1105,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1328,14 +1346,7 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: [
-          "nakit",
-          "kredi kart\u0131",
-          "havale",
-          "\xE7ek",
-          "senet",
-          "banka kart\u0131"
-        ],
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

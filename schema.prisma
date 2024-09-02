@@ -72,6 +72,7 @@ model Document {
   creatorId     String?           @map("creator")
   customer      User?             @relation("Document_customer", fields: [customerId], references: [id])
   customerId    String?           @map("customer")
+  reduction     Float?            @default(0)
   isDeleted     Boolean           @default(false)
   number        String            @default("")
   invoiced      Boolean           @default(false)
@@ -253,6 +254,7 @@ model CarModel {
   carBrand   CarBrand? @relation("CarModel_carBrand", fields: [carBrandId], references: [id])
   carBrandId String?   @map("carBrand")
 
+  @@index([name])
   @@index([carBrandId])
 }
 
@@ -260,6 +262,8 @@ model CarBrand {
   id        String     @id @default(cuid())
   name      String     @default("")
   carModels CarModel[] @relation("CarModel_carBrand")
+
+  @@index([name])
 }
 
 model ApplicationLocation {
