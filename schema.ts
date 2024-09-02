@@ -15,40 +15,32 @@ export type Session = {
 };
 
 function isAdmin({ session }: { session?: Session }) {
-  // you need to have a session to do this
   if (!session) return false;
 
-  // admins can do anything
   if (session.data.role == "admin") return true;
 
   return !session.data.isBlocked;
 }
 
 function isManager({ session }: { session?: Session }) {
-  // you need to have a session to do this
   if (!session) return false;
 
-  // admins can do anything
   if (session.data.role == "admin" || session.data.role == "manager") return true;
 
   return !session.data.isBlocked;
 }
 
 function isEmployee({ session }: { session?: Session }) {
-  // you need to have a session to do this
   if (!session) return false;
 
-  // admins can do anything
   if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager") return true;
 
   return !session.data.isBlocked;
 }
 
 function isUser({ session }: { session?: Session }) {
-  // you need to have a session to do this
   if (!session) return false;
 
-  // admins can do anything
   if (session.data.role == "employee" || session.data.role == "admin" || session.data.role == "manager" || session.data.role == "customer") return true;
 
   return !session.data.isBlocked;
@@ -528,7 +520,6 @@ export const lists: Lists = {
               applications.forEach((app) => {
                 total += app.price;
               });
-              // total-= (total * (item.reduction ?? 0)) / 100;
               return total;
             } catch (e) {
               return 0;
