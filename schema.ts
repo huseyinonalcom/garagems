@@ -76,9 +76,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isManager,
         query: isUser,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -151,7 +151,7 @@ export const lists: Lists = {
       operation: {
         create: isEmployee,
         query: isEmployee,
-        update: isManager,
+        update: isAdmin,
         delete: isAdmin,
       },
     },
@@ -204,8 +204,23 @@ export const lists: Lists = {
       operation: {
         create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin,
+        update: isManager,
+        delete: isManager,
+      },
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const products = await context.query.DocumentProduct.findMany({
+            where: { document: { id: { equals: item.id } } },
+            query: "id",
+          });
+          products.forEach(async (app) => {
+            await context.query.Application.deleteOne({
+              where: { id: app.id },
+            });
+          });
+        }
       },
     },
     fields: {
@@ -354,13 +369,21 @@ export const lists: Lists = {
         create: isEmployee,
         query: isEmployee,
         update: isEmployee,
-        delete: isAdmin,
+        delete: isManager,
       },
     },
     hooks: {
       beforeOperation: async ({ operation, item, inputData, context }) => {
         if (operation === "delete") {
-        console.log(item);
+          const applications = await context.query.Application.findMany({
+            where: { workOrder: { id: { equals: item.id } } },
+            query: "id",
+          });
+          applications.forEach(async (app) => {
+            await context.query.Application.deleteOne({
+              where: { id: app.id },
+            });
+          });
         }
       },
     },
@@ -714,9 +737,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isManager,
         query: isEmployee,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -742,10 +765,10 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isManager,
         query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin,
+        update: isManager,
+        delete: isManager,
       },
     },
     fields: {
@@ -925,9 +948,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
+        update: isEmployee,
         delete: isAdmin,
       },
     },
@@ -964,9 +987,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -986,9 +1009,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -1007,9 +1030,9 @@ export const lists: Lists = {
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isManager,
         query: isEmployee,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -1033,7 +1056,7 @@ export const lists: Lists = {
       operation: {
         create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
+        update: isManager,
         delete: isAdmin,
       },
     },
@@ -1131,7 +1154,6 @@ export const lists: Lists = {
 
               return total;
             } catch (e) {
-              console.log(e);
               return 0;
             }
           },
@@ -1152,7 +1174,6 @@ export const lists: Lists = {
               });
               return total;
             } catch (e) {
-              console.log(e);
               return 0;
             }
           },
@@ -1184,7 +1205,6 @@ export const lists: Lists = {
 
                   return total;
                 } catch (e) {
-                  console.log(e);
                   return 0;
                 }
               };
@@ -1201,14 +1221,12 @@ export const lists: Lists = {
                   });
                   return total;
                 } catch (e) {
-                  console.log(e);
                   return 0;
                 }
               };
 
               return (await total()) - (await paid());
             } catch (e) {
-              console.log(e);
               return 123456;
             }
           },
@@ -1244,8 +1262,6 @@ export const lists: Lists = {
                 );
               }
 
-              console.log(dates);
-
               const now = new Date();
               const nextPaymentDate = dates.find((date) => date.getTime() > now.getTime()) || "-";
 
@@ -1255,7 +1271,6 @@ export const lists: Lists = {
 
               return new Date(nextPaymentDate).toLocaleString("tr-TR").split(" ")[0];
             } catch (e) {
-              console.log(e);
               return "-";
             }
           },
@@ -1294,7 +1309,6 @@ export const lists: Lists = {
 
               return total <= paid;
             } catch (e) {
-              console.log(e);
               return false;
             }
           },
