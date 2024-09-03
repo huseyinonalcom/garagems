@@ -268,11 +268,16 @@ var lists = {
             where: { document: { id: { equals: item.id } } },
             query: "id"
           });
-          products.forEach(async (app) => {
-            await context.query.Application.deleteOne({
-              where: { id: app.id }
+          products.forEach(async (dp) => {
+            await context.query.DocumentProduct.deleteOne({
+              where: { id: dp.id }
             });
           });
+          if (item.paymentPlanId) {
+            await context.query.PaymentPlan.deleteOne({
+              where: { id: item.paymentPlanId }
+            });
+          }
         }
       }
     },
@@ -436,6 +441,14 @@ var lists = {
               where: { id: app.id }
             });
           });
+          try {
+            if (item.paymentPlanId) {
+              await context.query.PaymentPlan.deleteOne({
+                where: { id: item.paymentPlanId }
+              });
+            }
+          } catch (e) {
+          }
         }
       }
     },
@@ -1109,6 +1122,19 @@ var lists = {
       }
     },
     hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const payments = await context.query.Payment.findMany({
+            where: { paymentPlan: { id: { equals: item.id } } },
+            query: "id"
+          });
+          payments.forEach(async (payment) => {
+            await context.query.Payment.deleteOne({
+              where: { id: payment.id }
+            });
+          });
+        }
+      },
       afterOperation: async ({ operation, item, context }) => {
         if (operation === "create") {
           for (let i = 1; i < item.periods; i++) {
