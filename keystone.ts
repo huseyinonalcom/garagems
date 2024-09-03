@@ -15,7 +15,6 @@ export default withAuth(
         credentials: true,
       },
     },
-
     lists,
     session,
     graphql: {

@@ -1,6 +1,5 @@
 export const calculateDate = ({ number, unit, startDate }: { number: number; unit: string; startDate: Date }) => {
   const date = startDate;
-  console.log("date", date);
   switch (unit.toLowerCase()) {
     case "gün":
       date.setDate(date.getDate() + number);

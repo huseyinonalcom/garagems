@@ -58,7 +58,6 @@ var import_core = require("@keystone-6/core");
 // utils.ts
 var calculateDate = ({ number, unit, startDate }) => {
   const date = startDate;
-  console.log("date", date);
   switch (unit.toLowerCase()) {
     case "g\xFCn":
       date.setDate(date.getDate() + number);
