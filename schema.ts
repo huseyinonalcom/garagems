@@ -1151,14 +1151,20 @@ export const lists: Lists = {
           type: graphql.Float,
           async resolve(item, args, context) {
             try {
-              const workOrder = await context.query.WorkOrder.findOne({
-                where: { id: item.workOrderId },
-                query: "total",
-              });
-              const document = await context.query.Document.findOne({
-                where: { id: item.documentId },
-                query: "total",
-              });
+              let workOrder;
+              if (item.workOrderId) {
+                workOrder = await context.query.WorkOrder.findOne({
+                  where: { id: item.workOrderId },
+                  query: "total",
+                });
+              }
+              let document;
+              if (item.documentId) {
+                document = await context.query.Document.findOne({
+                  where: { id: item.documentId },
+                  query: "total",
+                });
+              }
 
               let total = 0;
 
@@ -1202,14 +1208,20 @@ export const lists: Lists = {
             try {
               const total = async () => {
                 try {
-                  const workOrder = await context.query.WorkOrder.findOne({
-                    where: { id: item.workOrderId },
-                    query: "total",
-                  });
-                  const document = await context.query.Document.findOne({
-                    where: { id: item.documentId },
-                    query: "total",
-                  });
+                  let workOrder;
+                  if (item.workOrderId) {
+                    workOrder = await context.query.WorkOrder.findOne({
+                      where: { id: item.workOrderId },
+                      query: "total",
+                    });
+                  }
+                  let document;
+                  if (item.documentId) {
+                    document = await context.query.Document.findOne({
+                      where: { id: item.documentId },
+                      query: "total",
+                    });
+                  }
 
                   let total = 0;
 
