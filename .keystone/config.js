@@ -441,9 +441,14 @@ var lists = {
             });
           });
           try {
-            if (item.paymentPlanId) {
+            let paymentPlan;
+            paymentPlan = await context.query.PaymentPlan.findMany({
+              where: { workOrder: { id: { equals: item.id } } },
+              query: "id"
+            }).then((plans) => plans.at(0));
+            if (paymentPlan) {
               await context.query.PaymentPlan.deleteOne({
-                where: { id: item.paymentPlanId }
+                where: { id: paymentPlan.id }
               });
             }
           } catch (e) {
@@ -1214,12 +1219,10 @@ var lists = {
                 });
               }
               let document;
-              if (item.documentId) {
-                document = await context.query.Document.findOne({
-                  where: { id: item.documentId },
-                  query: "total"
-                });
-              }
+              document = await context.query.Document.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
+                query: "total"
+              }).then((docs) => docs.at(0));
               let total = 0;
               if (workOrder) {
                 total = workOrder.total;
@@ -1268,12 +1271,10 @@ var lists = {
                     });
                   }
                   let document;
-                  if (item.documentId) {
-                    document = await context.query.Document.findOne({
-                      where: { id: item.documentId },
-                      query: "total"
-                    });
-                  }
+                  document = await context.query.Document.findMany({
+                    where: { paymentPlan: { id: { equals: item.id } } },
+                    query: "total"
+                  }).then((docs) => docs.at(0));
                   let total2 = 0;
                   if (workOrder) {
                     total2 = workOrder.total;
@@ -1353,10 +1354,11 @@ var lists = {
                 where: { id: item.workOrderId },
                 query: "total"
               });
-              const document = await context.query.Document.findOne({
-                where: { id: item.documentId },
+              let document;
+              document = await context.query.Document.findMany({
+                where: { paymentPlan: { id: { equals: item.id } } },
                 query: "total"
-              });
+              }).then((docs) => docs.at(0));
               let total = 0;
               if (workOrder) {
                 total = workOrder.total;
