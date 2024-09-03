@@ -207,9 +207,9 @@ export const lists: Lists = {
             where: { document: { id: { equals: item.id } } },
             query: "id",
           });
-          products.forEach(async (app) => {
-            await context.query.Application.deleteOne({
-              where: { id: app.id },
+          products.forEach(async (dp) => {
+            await context.query.DocumentProduct.deleteOne({
+              where: { id: dp.id },
             });
           });
           if (item.paymentPlanId) {
