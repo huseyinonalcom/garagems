@@ -1486,7 +1486,7 @@ var keystone_default = withAuth(
     server: {
       port: 3333,
       cors: {
-        origin: ["http://localhost:8081"],
+        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com"],
         credentials: true
       }
     },
