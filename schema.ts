@@ -872,7 +872,11 @@ export const lists: Lists = {
       depth: float({}),
       weight: float({}),
       thickness: float({}),
-      extraFields: json({}),
+      extraFields: json({
+        defaultValue: {
+          colorWarranty: false,
+        },
+      }),
     },
   }),
   Storage: list({
