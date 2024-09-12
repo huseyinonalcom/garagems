@@ -193,7 +193,7 @@ model Product {
   depth             Float?
   weight            Float?
   thickness         Float?
-  extraFields       String?
+  extraFields       String?           @default("{\"colorWarranty\":false}")
 
   @@index([productBrandId])
   @@index([applicationTypeId])

@@ -929,7 +929,11 @@ var lists = {
       depth: (0, import_fields.float)({}),
       weight: (0, import_fields.float)({}),
       thickness: (0, import_fields.float)({}),
-      extraFields: (0, import_fields.json)({})
+      extraFields: (0, import_fields.json)({
+        defaultValue: {
+          colorWarranty: false
+        }
+      })
     }
   }),
   Storage: (0, import_core.list)({
@@ -1486,7 +1490,7 @@ var keystone_default = withAuth(
     server: {
       port: 3333,
       cors: {
-        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com"],
+        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com", "https://web.dmkotofilm.com"],
         credentials: true
       }
     },
