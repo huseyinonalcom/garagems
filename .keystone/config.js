@@ -117,7 +117,11 @@ var lists = {
           const existingUsers = await context.query.User.findMany({
             query: "id",
             where: {
-              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
+              OR: [
+                { role: { equals: "employee" } },
+                { role: { equals: "admin" } },
+                { role: { equals: "manager" } }
+              ]
             }
           });
           if (existingUsers.length > 14) {
@@ -931,7 +935,17 @@ var lists = {
       thickness: (0, import_fields.float)({}),
       extraFields: (0, import_fields.json)({
         defaultValue: {
-          colorWarranty: false
+          colorWarranty: false,
+          customPricing: {
+            sideWindow: "",
+            windshield: "",
+            sunroof: "",
+            glassTop: "",
+            hood: "",
+            hoodFender: "",
+            hoodFenderBumper: "",
+            complete: ""
+          }
         }
       })
     }
@@ -1149,7 +1163,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1169,7 +1185,9 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
+                date: new Date(
+                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
+                ),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1411,7 +1429,14 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        options: [
+          "nakit",
+          "kredi kart\u0131",
+          "havale",
+          "\xE7ek",
+          "senet",
+          "banka kart\u0131"
+        ],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),

@@ -193,7 +193,7 @@ model Product {
   depth             Float?
   weight            Float?
   thickness         Float?
-  extraFields       String?           @default("{\"colorWarranty\":false}")
+  extraFields       String?           @default("{\"colorWarranty\":false,\"customPricing\":{\"sideWindow\":\"\",\"windshield\":\"\",\"sunroof\":\"\",\"glassTop\":\"\",\"hood\":\"\",\"hoodFender\":\"\",\"hoodFenderBumper\":\"\",\"complete\":\"\"}}")
 
   @@index([productBrandId])
   @@index([applicationTypeId])
