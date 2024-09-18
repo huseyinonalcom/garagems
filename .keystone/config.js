@@ -573,11 +573,11 @@ var lists = {
             try {
               const applications = await context.query.Application.findMany({
                 where: { workOrder: { id: { equals: item.id } } },
-                query: "price"
+                query: "value"
               });
               let total = 0;
               applications.forEach((app) => {
-                total += app.price;
+                total += app.value;
               });
               return total;
             } catch (e) {
