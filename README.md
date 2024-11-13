@@ -1,1 +1,1 @@
-# Keystone Project Starter
+# Garage Management System built with KeystoneJS
