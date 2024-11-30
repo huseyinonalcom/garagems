@@ -334,6 +334,10 @@ var lists = {
       paymentPlan: (0, import_fields.relationship)({
         ref: "PaymentPlan.document",
         many: false
+      }),
+      supplier: (0, import_fields.relationship)({
+        ref: "Supplier.documents",
+        many: false
       })
     }
   }),
@@ -1079,7 +1083,7 @@ var lists = {
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
       products: (0, import_fields.relationship)({ ref: "Product.suppliers", many: true }),
-      payments: (0, import_fields.relationship)({ ref: "Payment.supplier", many: true })
+      documents: (0, import_fields.relationship)({ ref: "Document.supplier", many: true })
     }
   }),
   CarModel: (0, import_core.list)({
@@ -1450,10 +1454,6 @@ var lists = {
       date: (0, import_fields.timestamp)({
         defaultValue: { kind: "now" },
         isOrderable: true
-      }),
-      supplier: (0, import_fields.relationship)({
-        ref: "Supplier.payments",
-        many: false
       })
     }
   }),

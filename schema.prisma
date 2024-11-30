@@ -79,9 +79,12 @@ model Document {
   products      DocumentProduct[] @relation("DocumentProduct_document")
   paymentPlan   PaymentPlan?      @relation("Document_paymentPlan", fields: [paymentPlanId], references: [id])
   paymentPlanId String?           @unique @map("paymentPlan")
+  supplier      Supplier?         @relation("Document_supplier", fields: [supplierId], references: [id])
+  supplierId    String?           @map("supplier")
 
   @@index([creatorId])
   @@index([customerId])
+  @@index([supplierId])
 }
 
 model DocumentProduct {
@@ -249,10 +252,10 @@ model Car {
 }
 
 model Supplier {
-  id       String    @id @default(cuid())
-  name     String    @default("")
-  products Product[] @relation("Product_suppliers")
-  payments Payment[] @relation("Payment_supplier")
+  id        String     @id @default(cuid())
+  name      String     @default("")
+  products  Product[]  @relation("Product_suppliers")
+  documents Document[] @relation("Document_supplier")
 }
 
 model CarModel {
@@ -303,11 +306,8 @@ model Payment {
   reference     String       @default("")
   type          String       @default("nakit")
   date          DateTime?    @default(now())
-  supplier      Supplier?    @relation("Payment_supplier", fields: [supplierId], references: [id])
-  supplierId    String?      @map("supplier")
 
   @@index([paymentPlanId])
-  @@index([supplierId])
 }
 
 model Notification {

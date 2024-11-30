@@ -275,6 +275,10 @@ export const lists: Lists = {
         ref: "PaymentPlan.document",
         many: false,
       }),
+      supplier: relationship({
+        ref: "Supplier.documents",
+        many: false,
+      }),
     },
   }),
   DocumentProduct: list({
@@ -1022,7 +1026,7 @@ export const lists: Lists = {
     fields: {
       name: text({ validation: { isRequired: true } }),
       products: relationship({ ref: "Product.suppliers", many: true }),
-      payments: relationship({ ref: "Payment.supplier", many: true }),
+      documents: relationship({ ref: "Document.supplier", many: true }),
     },
   }),
   CarModel: list({
@@ -1414,10 +1418,6 @@ export const lists: Lists = {
       date: timestamp({
         defaultValue: { kind: "now" },
         isOrderable: true,
-      }),
-      supplier: relationship({
-        ref: "Supplier.payments",
-        many: false,
       }),
     },
   }),
