@@ -997,6 +997,8 @@ type Product {
   description: String
   price: Float
   currentStock: Int
+  suppliers(where: SupplierWhereInput! = {}, orderBy: [SupplierOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SupplierWhereUniqueInput): [Supplier!]
+  suppliersCount(where: SupplierWhereInput! = {}): Int
   status: String
   images(where: FileWhereInput! = {}, orderBy: [FileOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: FileWhereUniqueInput): [File!]
   imagesCount(where: FileWhereInput! = {}): Int
@@ -1036,6 +1038,7 @@ input ProductWhereInput {
   name: StringFilter
   description: StringFilter
   price: FloatFilter
+  suppliers: SupplierManyRelationFilter
   status: StringFilter
   images: FileManyRelationFilter
   code: StringFilter
@@ -1056,6 +1059,12 @@ input ProductWhereInput {
   depth: FloatNullableFilter
   weight: FloatNullableFilter
   thickness: FloatNullableFilter
+}
+
+input SupplierManyRelationFilter {
+  every: SupplierWhereInput
+  some: SupplierWhereInput
+  none: SupplierWhereInput
 }
 
 input ProductOrderByInput {
@@ -1083,6 +1092,7 @@ input ProductUpdateInput {
   name: String
   description: String
   price: Float
+  suppliers: SupplierRelateToManyForUpdateInput
   status: String
   images: FileRelateToManyForUpdateInput
   code: String
@@ -1106,6 +1116,13 @@ input ProductUpdateInput {
   extraFields: JSON
 }
 
+input SupplierRelateToManyForUpdateInput {
+  disconnect: [SupplierWhereUniqueInput!]
+  set: [SupplierWhereUniqueInput!]
+  create: [SupplierCreateInput!]
+  connect: [SupplierWhereUniqueInput!]
+}
+
 input ProductBrandRelateToOneForUpdateInput {
   create: ProductBrandCreateInput
   connect: ProductBrandWhereUniqueInput
@@ -1121,6 +1138,7 @@ input ProductCreateInput {
   name: String
   description: String
   price: Float
+  suppliers: SupplierRelateToManyForCreateInput
   status: String
   images: FileRelateToManyForCreateInput
   code: String
@@ -1142,6 +1160,11 @@ input ProductCreateInput {
   weight: Float
   thickness: Float
   extraFields: JSON
+}
+
+input SupplierRelateToManyForCreateInput {
+  create: [SupplierCreateInput!]
+  connect: [SupplierWhereUniqueInput!]
 }
 
 input ProductBrandRelateToOneForCreateInput {
@@ -1386,6 +1409,69 @@ input CarModelRelateToOneForCreateInput {
   connect: CarModelWhereUniqueInput
 }
 
+type Supplier {
+  id: ID!
+  name: String
+  products(where: ProductWhereInput! = {}, orderBy: [ProductOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductWhereUniqueInput): [Product!]
+  productsCount(where: ProductWhereInput! = {}): Int
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  paymentsCount(where: PaymentWhereInput! = {}): Int
+}
+
+input SupplierWhereUniqueInput {
+  id: ID
+}
+
+input SupplierWhereInput {
+  AND: [SupplierWhereInput!]
+  OR: [SupplierWhereInput!]
+  NOT: [SupplierWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  products: ProductManyRelationFilter
+  payments: PaymentManyRelationFilter
+}
+
+input PaymentManyRelationFilter {
+  every: PaymentWhereInput
+  some: PaymentWhereInput
+  none: PaymentWhereInput
+}
+
+input SupplierOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+}
+
+input SupplierUpdateInput {
+  name: String
+  products: ProductRelateToManyForUpdateInput
+  payments: PaymentRelateToManyForUpdateInput
+}
+
+input PaymentRelateToManyForUpdateInput {
+  disconnect: [PaymentWhereUniqueInput!]
+  set: [PaymentWhereUniqueInput!]
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
+input SupplierUpdateArgs {
+  where: SupplierWhereUniqueInput!
+  data: SupplierUpdateInput!
+}
+
+input SupplierCreateInput {
+  name: String
+  products: ProductRelateToManyForCreateInput
+  payments: PaymentRelateToManyForCreateInput
+}
+
+input PaymentRelateToManyForCreateInput {
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
 type CarModel {
   id: ID!
   name: String
@@ -1620,12 +1706,6 @@ input PaymentPlanWhereInput {
   notifications: NotificationManyRelationFilter
 }
 
-input PaymentManyRelationFilter {
-  every: PaymentWhereInput
-  some: PaymentWhereInput
-  none: PaymentWhereInput
-}
-
 input PaymentPlanOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -1647,13 +1727,6 @@ input PaymentPlanUpdateInput {
   notifications: NotificationRelateToManyForUpdateInput
 }
 
-input PaymentRelateToManyForUpdateInput {
-  disconnect: [PaymentWhereUniqueInput!]
-  set: [PaymentWhereUniqueInput!]
-  create: [PaymentCreateInput!]
-  connect: [PaymentWhereUniqueInput!]
-}
-
 input PaymentPlanUpdateArgs {
   where: PaymentPlanWhereUniqueInput!
   data: PaymentPlanUpdateInput!
@@ -1671,11 +1744,6 @@ input PaymentPlanCreateInput {
   notifications: NotificationRelateToManyForCreateInput
 }
 
-input PaymentRelateToManyForCreateInput {
-  create: [PaymentCreateInput!]
-  connect: [PaymentWhereUniqueInput!]
-}
-
 type Payment {
   id: ID!
   amount: Float
@@ -1683,6 +1751,7 @@ type Payment {
   reference: String
   type: String
   date: DateTime
+  supplier: Supplier
 }
 
 input PaymentWhereUniqueInput {
@@ -1699,6 +1768,7 @@ input PaymentWhereInput {
   reference: StringFilter
   type: StringFilter
   date: DateTimeNullableFilter
+  supplier: SupplierWhereInput
 }
 
 input PaymentOrderByInput {
@@ -1715,6 +1785,13 @@ input PaymentUpdateInput {
   reference: String
   type: String
   date: DateTime
+  supplier: SupplierRelateToOneForUpdateInput
+}
+
+input SupplierRelateToOneForUpdateInput {
+  create: SupplierCreateInput
+  connect: SupplierWhereUniqueInput
+  disconnect: Boolean
 }
 
 input PaymentUpdateArgs {
@@ -1728,6 +1805,12 @@ input PaymentCreateInput {
   reference: String
   type: String
   date: DateTime
+  supplier: SupplierRelateToOneForCreateInput
+}
+
+input SupplierRelateToOneForCreateInput {
+  create: SupplierCreateInput
+  connect: SupplierWhereUniqueInput
 }
 
 type Notification {
@@ -1958,6 +2041,12 @@ type Mutation {
   updateCars(data: [CarUpdateArgs!]!): [Car]
   deleteCar(where: CarWhereUniqueInput!): Car
   deleteCars(where: [CarWhereUniqueInput!]!): [Car]
+  createSupplier(data: SupplierCreateInput!): Supplier
+  createSuppliers(data: [SupplierCreateInput!]!): [Supplier]
+  updateSupplier(where: SupplierWhereUniqueInput!, data: SupplierUpdateInput!): Supplier
+  updateSuppliers(data: [SupplierUpdateArgs!]!): [Supplier]
+  deleteSupplier(where: SupplierWhereUniqueInput!): Supplier
+  deleteSuppliers(where: [SupplierWhereUniqueInput!]!): [Supplier]
   createCarModel(data: CarModelCreateInput!): CarModel
   createCarModels(data: [CarModelCreateInput!]!): [CarModel]
   updateCarModel(where: CarModelWhereUniqueInput!, data: CarModelUpdateInput!): CarModel
@@ -2064,6 +2153,9 @@ type Query {
   cars(where: CarWhereInput! = {}, orderBy: [CarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarWhereUniqueInput): [Car!]
   car(where: CarWhereUniqueInput!): Car
   carsCount(where: CarWhereInput! = {}): Int
+  suppliers(where: SupplierWhereInput! = {}, orderBy: [SupplierOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SupplierWhereUniqueInput): [Supplier!]
+  supplier(where: SupplierWhereUniqueInput!): Supplier
+  suppliersCount(where: SupplierWhereInput! = {}): Int
   carModels(where: CarModelWhereInput! = {}, orderBy: [CarModelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CarModelWhereUniqueInput): [CarModel!]
   carModel(where: CarModelWhereUniqueInput!): CarModel
   carModelsCount(where: CarModelWhereInput! = {}): Int

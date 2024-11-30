@@ -117,11 +117,7 @@ var lists = {
           const existingUsers = await context.query.User.findMany({
             query: "id",
             where: {
-              OR: [
-                { role: { equals: "employee" } },
-                { role: { equals: "admin" } },
-                { role: { equals: "manager" } }
-              ]
+              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
             }
           });
           if (existingUsers.length > 14) {
@@ -875,6 +871,10 @@ var lists = {
           }
         })
       }),
+      suppliers: (0, import_fields.relationship)({
+        ref: "Supplier.products",
+        many: true
+      }),
       status: (0, import_fields.select)({
         type: "string",
         options: ["aktif", "pasif", "iptal"],
@@ -1064,6 +1064,24 @@ var lists = {
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.car", many: true })
     }
   }),
+  Supplier: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isManager,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      products: (0, import_fields.relationship)({ ref: "Product.suppliers", many: true }),
+      payments: (0, import_fields.relationship)({ ref: "Payment.supplier", many: true })
+    }
+  }),
   CarModel: (0, import_core.list)({
     ui: {
       labelField: "name"
@@ -1163,9 +1181,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1185,9 +1201,7 @@ var lists = {
             await context.query.Notification.createOne({
               data: {
                 paymentPlan: { connect: { id: item.id } },
-                date: new Date(
-                  (/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3
-                ),
+                date: new Date((/* @__PURE__ */ new Date()).getTime() + i * item.periodDuration * 24 * 60 * 60 * 1e3),
                 message: "\xD6deme tarihi",
                 notifyRoles: ["admin"]
               }
@@ -1429,20 +1443,17 @@ var lists = {
       reference: (0, import_fields.text)({}),
       type: (0, import_fields.select)({
         type: "string",
-        options: [
-          "nakit",
-          "kredi kart\u0131",
-          "havale",
-          "\xE7ek",
-          "senet",
-          "banka kart\u0131"
-        ],
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
         defaultValue: "nakit",
         validation: { isRequired: true }
       }),
       date: (0, import_fields.timestamp)({
         defaultValue: { kind: "now" },
         isOrderable: true
+      }),
+      supplier: (0, import_fields.relationship)({
+        ref: "Supplier.payments",
+        many: false
       })
     }
   }),

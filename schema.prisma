@@ -171,6 +171,7 @@ model Product {
   name              String            @default("")
   description       String            @default("")
   price             Float
+  suppliers         Supplier[]        @relation("Product_suppliers")
   status            String            @default("aktif")
   images            File[]            @relation("File_product")
   code              String            @default("")
@@ -247,6 +248,13 @@ model Car {
   @@index([carModelId])
 }
 
+model Supplier {
+  id       String    @id @default(cuid())
+  name     String    @default("")
+  products Product[] @relation("Product_suppliers")
+  payments Payment[] @relation("Payment_supplier")
+}
+
 model CarModel {
   id         String    @id @default(cuid())
   name       String    @default("")
@@ -295,8 +303,11 @@ model Payment {
   reference     String       @default("")
   type          String       @default("nakit")
   date          DateTime?    @default(now())
+  supplier      Supplier?    @relation("Payment_supplier", fields: [supplierId], references: [id])
+  supplierId    String?      @map("supplier")
 
   @@index([paymentPlanId])
+  @@index([supplierId])
 }
 
 model Notification {
