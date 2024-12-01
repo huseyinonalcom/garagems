@@ -1,7 +1,7 @@
 import { text, relationship, password, timestamp, select, float, multiselect, virtual, checkbox, integer, json } from "@keystone-6/core/fields";
 import { denyAll } from "@keystone-6/core/access";
-import type { Lists } from ".keystone/types";
 import { graphql, list } from "@keystone-6/core";
+import type { Lists } from ".keystone/types";
 import { calculateDate } from "./utils";
 
 export type Session = {
@@ -47,6 +47,223 @@ function isUser({ session }: { session?: Session }) {
 }
 
 export const lists: Lists = {
+  Application: list({
+    ui: {
+      labelField: "name",
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "update") {
+          if (inputData.startedAt) {
+            if (item.startedAt) {
+              throw new Error("Application already started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+          }
+          if (inputData.finishedAt) {
+            if (!item.startedAt) {
+              throw new Error("Application not started");
+            }
+            if (!inputData.applicant) {
+              throw new Error("Applicant is required");
+            }
+            if (item.finishedAt) {
+              throw new Error("Application already finished");
+            }
+            if (inputData.finishedAt < item.startedAt) {
+              throw new Error("Finish date cannot be before start date");
+            }
+            if (inputData.applicant.connect?.id != item.applicantId) {
+              throw new Error("Applicant cannot be changed");
+            }
+          }
+          if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id",
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id",
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0)!.id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "giriş",
+                application: { connect: { id: item.id } },
+              },
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0)!.id } },
+                amount: inputData.wastage - (item.wastage ?? 0),
+                movementType: "çıkış",
+                application: { connect: { id: item.id } },
+              },
+            });
+          } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
+            const generalStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Genel" } },
+              query: "id",
+            });
+            const wastageStorage = await context.query.Storage.findMany({
+              where: { name: { equals: "Fire" } },
+              query: "id",
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: wastageStorage.at(0)!.id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "çıkış",
+                application: { connect: { id: item.id } },
+              },
+            });
+            await context.query.StockMovement.createOne({
+              data: {
+                product: { connect: { id: item.productId } },
+                storage: { connect: { id: generalStorage.at(0)!.id } },
+                amount: item.wastage - inputData.wastage,
+                movementType: "giriş",
+                application: { connect: { id: item.id } },
+              },
+            });
+          }
+        } else if (operation === "delete") {
+          const movements = await context.query.StockMovement.findMany({
+            where: { application: { id: { equals: item.id } } },
+            query: "id",
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id },
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id",
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0)!.id } },
+              amount: item.amount,
+              movementType: "çıkış",
+              application: { connect: { id: item.id } },
+            },
+          });
+        }
+      },
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: isEmployee,
+      },
+    },
+    fields: {
+      workOrder: relationship({
+        ref: "WorkOrder.applications",
+        many: false,
+      }),
+      images: relationship({
+        ref: "File.application",
+        many: true,
+      }),
+      startedAt: timestamp(),
+      finishedAt: timestamp(),
+      name: text({ validation: { isRequired: true } }),
+      description: text({}),
+      value: float({ validation: { isRequired: true, min: 0 } }),
+      price: virtual({
+        field: graphql.field({
+          type: graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const workOrder = await context.query.WorkOrder.findOne({
+                where: { id: item.workOrderId },
+                query: "reduction",
+              });
+              let total = item.value;
+
+              total -= (total * (workOrder.reduction ?? 0)) / 100;
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          },
+        }),
+      }),
+      amount: float({ validation: { isRequired: true, min: 0 } }),
+      wastage: float({
+        validation: { isRequired: false, min: 0 },
+        defaultValue: 0,
+      }),
+      location: relationship({
+        ref: "ApplicationLocation.applications",
+        many: false,
+      }),
+      product: relationship({
+        ref: "Product.applications",
+        many: false,
+      }),
+      applicant: relationship({
+        ref: "User.applicationsToApply",
+        many: false,
+      }),
+      creator: relationship({
+        ref: "User.applications",
+        many: false,
+      }),
+      type: relationship({
+        ref: "ApplicationType.applications",
+        many: false,
+      }),
+      stockMovements: relationship({
+        ref: "StockMovement.application",
+        many: true,
+      }),
+    },
+  }),
+  ApplicationType: list({
+    ui: {
+      labelField: "name",
+    },
+    access: {
+      operation: {
+        create: isManager,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin,
+      },
+    },
+    fields: {
+      name: text({ validation: { isRequired: true } }),
+      applications: relationship({
+        ref: "Application.type",
+        many: true,
+      }),
+      products: relationship({
+        ref: "Product.applicationType",
+        many: true,
+      }),
+      locations: relationship({
+        ref: "ApplicationLocation.applicationTypes",
+        many: true,
+      }),
+    },
+  }),
   User: list({
     ui: {
       labelField: "firstname",
@@ -550,223 +767,6 @@ export const lists: Lists = {
       }),
       applications: relationship({
         ref: "Application.workOrder",
-        many: true,
-      }),
-    },
-  }),
-  Application: list({
-    ui: {
-      labelField: "name",
-    },
-    hooks: {
-      beforeOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "update") {
-          if (inputData.startedAt) {
-            if (item.startedAt) {
-              throw new Error("Application already started");
-            }
-            if (!inputData.applicant) {
-              throw new Error("Applicant is required");
-            }
-          }
-          if (inputData.finishedAt) {
-            if (!item.startedAt) {
-              throw new Error("Application not started");
-            }
-            if (!inputData.applicant) {
-              throw new Error("Applicant is required");
-            }
-            if (item.finishedAt) {
-              throw new Error("Application already finished");
-            }
-            if (inputData.finishedAt < item.startedAt) {
-              throw new Error("Finish date cannot be before start date");
-            }
-            if (inputData.applicant.connect?.id != item.applicantId) {
-              throw new Error("Applicant cannot be changed");
-            }
-          }
-          if (inputData.wastage && inputData.wastage > (item.wastage ?? 0)) {
-            const generalStorage = await context.query.Storage.findMany({
-              where: { name: { equals: "Genel" } },
-              query: "id",
-            });
-            const wastageStorage = await context.query.Storage.findMany({
-              where: { name: { equals: "Fire" } },
-              query: "id",
-            });
-            await context.query.StockMovement.createOne({
-              data: {
-                product: { connect: { id: item.productId } },
-                storage: { connect: { id: wastageStorage.at(0)!.id } },
-                amount: inputData.wastage - (item.wastage ?? 0),
-                movementType: "giriş",
-                application: { connect: { id: item.id } },
-              },
-            });
-            await context.query.StockMovement.createOne({
-              data: {
-                product: { connect: { id: item.productId } },
-                storage: { connect: { id: generalStorage.at(0)!.id } },
-                amount: inputData.wastage - (item.wastage ?? 0),
-                movementType: "çıkış",
-                application: { connect: { id: item.id } },
-              },
-            });
-          } else if (inputData.wastage && item.wastage && inputData.wastage < item.wastage) {
-            const generalStorage = await context.query.Storage.findMany({
-              where: { name: { equals: "Genel" } },
-              query: "id",
-            });
-            const wastageStorage = await context.query.Storage.findMany({
-              where: { name: { equals: "Fire" } },
-              query: "id",
-            });
-            await context.query.StockMovement.createOne({
-              data: {
-                product: { connect: { id: item.productId } },
-                storage: { connect: { id: wastageStorage.at(0)!.id } },
-                amount: item.wastage - inputData.wastage,
-                movementType: "çıkış",
-                application: { connect: { id: item.id } },
-              },
-            });
-            await context.query.StockMovement.createOne({
-              data: {
-                product: { connect: { id: item.productId } },
-                storage: { connect: { id: generalStorage.at(0)!.id } },
-                amount: item.wastage - inputData.wastage,
-                movementType: "giriş",
-                application: { connect: { id: item.id } },
-              },
-            });
-          }
-        } else if (operation === "delete") {
-          const movements = await context.query.StockMovement.findMany({
-            where: { application: { id: { equals: item.id } } },
-            query: "id",
-          });
-          movements.forEach(async (movement) => {
-            await context.query.StockMovement.deleteOne({
-              where: { id: movement.id },
-            });
-          });
-        }
-      },
-      afterOperation: async ({ operation, item, context }) => {
-        if (operation === "create") {
-          const generalStorage = await context.query.Storage.findMany({
-            where: { name: { equals: "Genel" } },
-            query: "id",
-          });
-          await context.query.StockMovement.createOne({
-            data: {
-              product: { connect: { id: item.productId } },
-              storage: { connect: { id: generalStorage.at(0)!.id } },
-              amount: item.amount,
-              movementType: "çıkış",
-              application: { connect: { id: item.id } },
-            },
-          });
-        }
-      },
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isEmployee,
-        delete: isEmployee,
-      },
-    },
-    fields: {
-      workOrder: relationship({
-        ref: "WorkOrder.applications",
-        many: false,
-      }),
-      images: relationship({
-        ref: "File.application",
-        many: true,
-      }),
-      startedAt: timestamp(),
-      finishedAt: timestamp(),
-      name: text({ validation: { isRequired: true } }),
-      description: text({}),
-      value: float({ validation: { isRequired: true, min: 0 } }),
-      price: virtual({
-        field: graphql.field({
-          type: graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const workOrder = await context.query.WorkOrder.findOne({
-                where: { id: item.workOrderId },
-                query: "reduction",
-              });
-              let total = item.value;
-
-              total -= (total * (workOrder.reduction ?? 0)) / 100;
-              return total;
-            } catch (e) {
-              return 0;
-            }
-          },
-        }),
-      }),
-      amount: float({ validation: { isRequired: true, min: 0 } }),
-      wastage: float({
-        validation: { isRequired: false, min: 0 },
-        defaultValue: 0,
-      }),
-      location: relationship({
-        ref: "ApplicationLocation.applications",
-        many: false,
-      }),
-      product: relationship({
-        ref: "Product.applications",
-        many: false,
-      }),
-      applicant: relationship({
-        ref: "User.applicationsToApply",
-        many: false,
-      }),
-      creator: relationship({
-        ref: "User.applications",
-        many: false,
-      }),
-      type: relationship({
-        ref: "ApplicationType.applications",
-        many: false,
-      }),
-      stockMovements: relationship({
-        ref: "StockMovement.application",
-        many: true,
-      }),
-    },
-  }),
-  ApplicationType: list({
-    ui: {
-      labelField: "name",
-    },
-    access: {
-      operation: {
-        create: isManager,
-        query: isEmployee,
-        update: isManager,
-        delete: isAdmin,
-      },
-    },
-    fields: {
-      name: text({ validation: { isRequired: true } }),
-      applications: relationship({
-        ref: "Application.type",
-        many: true,
-      }),
-      products: relationship({
-        ref: "Product.applicationType",
-        many: true,
-      }),
-      locations: relationship({
-        ref: "ApplicationLocation.applicationTypes",
         many: true,
       }),
     },
