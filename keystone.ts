@@ -11,7 +11,7 @@ export default withAuth(
     server: {
       port: 3333,
       cors: {
-        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com", "https://web.dmkotofilm.com"],
+        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com", "https://web.dmkotofilm.com", "https://test.dmkgarage.pages.dev"],
         credentials: true,
       },
     },
