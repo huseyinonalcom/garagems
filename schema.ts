@@ -634,7 +634,7 @@ export const lists: Lists = {
               .query.Payment.findMany({
                 query: "id totalToDate",
                 orderBy: {
-                  createdAt: "desc",
+                  creationDate: "desc",
                 },
                 take: 1,
               })
