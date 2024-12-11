@@ -694,19 +694,15 @@ var lists = {
               },
               take: 1
             }).then((payments) => {
-              console.log(payments);
               let totalToDate = payments.at(0)?.totalToDate ?? 0;
-              console.log(totalToDate);
               if (resolvedData.out) {
                 totalToDate -= resolvedData.amount;
               } else {
                 totalToDate += resolvedData.amount;
               }
-              console.log(totalToDate);
               resolvedData.totalToDate = totalToDate;
             });
-          } catch (e) {
-            console.log(e);
+          } catch (_) {
           }
           resolvedData.creationDate = /* @__PURE__ */ new Date();
         }
