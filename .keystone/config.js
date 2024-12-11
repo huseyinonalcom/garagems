@@ -107,511 +107,6 @@ function isUser({ session: session2 }) {
   return !session2.data.isBlocked;
 }
 var lists = {
-  User: (0, import_core.list)({
-    ui: {
-      labelField: "firstname"
-    },
-    hooks: {
-      beforeOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "create") {
-          const existingUsers = await context.query.User.findMany({
-            query: "id",
-            where: {
-              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
-            }
-          });
-          if (existingUsers.length > 14) {
-            throw new Error("User limit reached");
-          }
-        }
-      }
-    },
-    access: {
-      operation: {
-        create: isManager,
-        query: isUser,
-        update: isManager,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      username: (0, import_fields.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
-      email: (0, import_fields.text)({
-        isIndexed: "unique"
-      }),
-      isBlocked: (0, import_fields.checkbox)({ defaultValue: false }),
-      phone: (0, import_fields.text)({ validation: { isRequired: false } }),
-      firstname: (0, import_fields.text)({ validation: { isRequired: true } }),
-      lastname: (0, import_fields.text)({ validation: { isRequired: false } }),
-      role: (0, import_fields.select)({
-        type: "string",
-        options: ["admin", "customer", "employee", "manager"],
-        defaultValue: "customer",
-        validation: { isRequired: true },
-        isIndexed: true,
-        access: {
-          update: isAdmin
-        }
-      }),
-      permissions: (0, import_fields.multiselect)({
-        type: "enum",
-        options: [
-          { label: "Warranty", value: "warranty" },
-          { label: "Price", value: "price" }
-        ],
-        access: {
-          update: isAdmin
-        }
-      }),
-      ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
-      password: (0, import_fields.password)({
-        validation: {
-          isRequired: true,
-          length: {
-            min: 6
-          }
-        }
-      }),
-      qcWorkOrders: (0, import_fields.relationship)({
-        ref: "WorkOrder.qcUser",
-        many: true
-      }),
-      workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
-      clientOrders: (0, import_fields.relationship)({ ref: "WorkOrder.customer", many: true }),
-      applicationsToApply: (0, import_fields.relationship)({
-        ref: "Application.applicant",
-        many: true
-      }),
-      applications: (0, import_fields.relationship)({
-        ref: "Application.creator",
-        many: true
-      }),
-      notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true }),
-      documents: (0, import_fields.relationship)({ ref: "Document.creator", many: true }),
-      customerDocuments: (0, import_fields.relationship)({ ref: "Document.customer", many: true }),
-      customerMovements: (0, import_fields.relationship)({
-        ref: "StockMovement.customer",
-        many: true
-      })
-    }
-  }),
-  Note: (0, import_core.list)({
-    ui: {
-      labelField: "note"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      note: (0, import_fields.text)({ validation: { isRequired: true } }),
-      workOrder: (0, import_fields.relationship)({
-        ref: "WorkOrder.notes",
-        many: false
-      }),
-      creator: (0, import_fields.relationship)({
-        ref: "User.notes",
-        many: false
-      })
-    }
-  }),
-  File: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      url: (0, import_fields.text)(),
-      application: (0, import_fields.relationship)({
-        ref: "Application.images",
-        many: false
-      }),
-      workOrder: (0, import_fields.relationship)({
-        ref: "WorkOrder.images",
-        many: false
-      }),
-      product: (0, import_fields.relationship)({
-        ref: "Product.images",
-        many: false
-      })
-    }
-  }),
-  Document: (0, import_core.list)({
-    ui: {
-      labelField: "createdAt"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isManager,
-        delete: isManager
-      }
-    },
-    hooks: {
-      beforeOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "delete") {
-          const products = await context.query.DocumentProduct.findMany({
-            where: { document: { id: { equals: item.id } } },
-            query: "id"
-          });
-          products.forEach(async (dp) => {
-            await context.query.DocumentProduct.deleteOne({
-              where: { id: dp.id }
-            });
-          });
-          if (item.paymentPlanId) {
-            await context.query.PaymentPlan.deleteOne({
-              where: { id: item.paymentPlanId }
-            });
-          }
-        }
-      }
-    },
-    fields: {
-      createdAt: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true,
-        access: {
-          create: import_access.denyAll,
-          update: import_access.denyAll
-        }
-      }),
-      total: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const products = await context.query.DocumentProduct.findMany({
-                where: { document: { id: { equals: item.id } } },
-                query: "amount product { price }"
-              });
-              let total = 0;
-              products.forEach((product) => {
-                total += product.amount * product.product.price;
-              });
-              return total - total * (item.reduction ?? 0) / 100;
-            } catch (e) {
-              return 0;
-            }
-          }
-        })
-      }),
-      documentType: (0, import_fields.select)({
-        type: "string",
-        options: ["sat\u0131\u015F", "fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
-        defaultValue: "sat\u0131\u015F",
-        validation: { isRequired: true }
-      }),
-      creator: (0, import_fields.relationship)({
-        ref: "User.documents",
-        many: false
-      }),
-      customer: (0, import_fields.relationship)({
-        ref: "User.customerDocuments",
-        many: false
-      }),
-      reduction: (0, import_fields.float)({ defaultValue: 0 }),
-      isDeleted: (0, import_fields.checkbox)({ defaultValue: false }),
-      number: (0, import_fields.text)({}),
-      invoiced: (0, import_fields.checkbox)({ defaultValue: false }),
-      products: (0, import_fields.relationship)({
-        ref: "DocumentProduct.document",
-        many: true
-      }),
-      paymentPlan: (0, import_fields.relationship)({
-        ref: "PaymentPlan.document",
-        many: false
-      }),
-      supplier: (0, import_fields.relationship)({
-        ref: "Supplier.documents",
-        many: false
-      })
-    }
-  }),
-  DocumentProduct: (0, import_core.list)({
-    ui: {
-      labelField: "amount"
-    },
-    hooks: {
-      beforeOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "delete") {
-          const movements = await context.query.StockMovement.findMany({
-            where: { documentProduct: { id: { equals: item.id } } },
-            query: "id"
-          });
-          movements.forEach(async (movement) => {
-            await context.query.StockMovement.deleteOne({
-              where: { id: movement.id }
-            });
-          });
-        }
-      },
-      afterOperation: async ({ operation, item, context }) => {
-        if (operation === "create") {
-          const generalStorage = await context.query.Storage.findMany({
-            where: { name: { equals: "Genel" } },
-            query: "id"
-          });
-          await context.query.StockMovement.createOne({
-            data: {
-              product: { connect: { id: item.productId } },
-              storage: { connect: { id: generalStorage.at(0).id } },
-              amount: item.amount,
-              movementType: "\xE7\u0131k\u0131\u015F",
-              documentProduct: { connect: { id: item.id } }
-            }
-          });
-        }
-      }
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isEmployee,
-        delete: isManager
-      }
-    },
-    fields: {
-      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      stockMovements: (0, import_fields.relationship)({
-        ref: "StockMovement.documentProduct",
-        many: true
-      }),
-      product: (0, import_fields.relationship)({
-        ref: "Product.documentProducts",
-        many: false
-      }),
-      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      total: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const document = await context.query.Document.findOne({
-                where: { id: item.documentId },
-                query: "reduction"
-              });
-              let total = item.price * item.amount;
-              total -= total * (document.reduction ?? 0) / 100;
-              return total;
-            } catch (e) {
-              return 0;
-            }
-          }
-        })
-      }),
-      document: (0, import_fields.relationship)({
-        ref: "Document.products",
-        many: false
-      })
-    }
-  }),
-  WorkOrder: (0, import_core.list)({
-    ui: {
-      labelField: "createdAt"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isEmployee,
-        delete: isManager
-      }
-    },
-    hooks: {
-      beforeOperation: async ({ operation, item, inputData, context }) => {
-        if (operation === "delete") {
-          const applications = await context.query.Application.findMany({
-            where: { workOrder: { id: { equals: item.id } } },
-            query: "id"
-          });
-          applications.forEach(async (app) => {
-            await context.query.Application.deleteOne({
-              where: { id: app.id }
-            });
-          });
-          try {
-            let paymentPlan;
-            paymentPlan = await context.query.PaymentPlan.findMany({
-              where: { workOrder: { id: { equals: item.id } } },
-              query: "id"
-            }).then((plans) => plans.at(0));
-            if (paymentPlan) {
-              await context.query.PaymentPlan.deleteOne({
-                where: { id: paymentPlan.id }
-              });
-            }
-          } catch (e) {
-          }
-        }
-      }
-    },
-    fields: {
-      creator: (0, import_fields.relationship)({
-        ref: "User.workOrders",
-        many: false
-      }),
-      createdAt: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true,
-        access: {
-          create: import_access.denyAll,
-          update: import_access.denyAll
-        }
-      }),
-      images: (0, import_fields.relationship)({
-        ref: "File.workOrder",
-        many: true
-      }),
-      notes: (0, import_fields.relationship)({
-        ref: "Note.workOrder",
-        many: true
-      }),
-      status: (0, import_fields.select)({
-        type: "string",
-        options: ["aktif", "pasif", "tamamland\u0131", "iptal", "teklif"],
-        defaultValue: "pasif",
-        access: {
-          update: isManager
-        }
-      }),
-      reduction: (0, import_fields.float)({}),
-      paymentPlan: (0, import_fields.relationship)({
-        ref: "PaymentPlan.workOrder",
-        many: false
-      }),
-      qcDone: (0, import_fields.checkbox)({ defaultValue: false }),
-      qcUser: (0, import_fields.relationship)({
-        ref: "User.qcWorkOrders",
-        many: false
-      }),
-      checkDate: (0, import_fields.timestamp)({
-        validation: { isRequired: false }
-      }),
-      checkDone: (0, import_fields.checkbox)({ defaultValue: false }),
-      notifications: (0, import_fields.relationship)({
-        ref: "Notification.workOrder",
-        many: true
-      }),
-      startedAt: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.String,
-          async resolve(item, args, context) {
-            try {
-              const applications = await context.query.Application.findMany({
-                where: { workOrder: { id: { equals: item.id } } },
-                query: "startedAt"
-              });
-              let earliestStart = applications.at(0).startedAt;
-              applications.forEach((app) => {
-                if (app.startedAt < earliestStart) {
-                  earliestStart = app.startedAt;
-                }
-              });
-              if (!earliestStart) {
-                return null;
-              }
-              return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
-            } catch (e) {
-              return null;
-            }
-          }
-        })
-      }),
-      finishedAt: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.String,
-          async resolve(item, args, context) {
-            try {
-              const applications = await context.query.Application.findMany({
-                where: { workOrder: { id: { equals: item.id } } },
-                query: "finishedAt"
-              });
-              if (applications.every((app) => app.finishedAt)) {
-                let latestFinish = applications.at(0).finishedAt;
-                applications.forEach((app) => {
-                  if (app.finishedAt > latestFinish) {
-                    latestFinish = app.finishedAt;
-                  }
-                });
-                return new Date(latestFinish).toLocaleString("tr-TR").slice(0, -3);
-              } else {
-                return null;
-              }
-            } catch (e) {
-              return null;
-            }
-          }
-        })
-      }),
-      car: (0, import_fields.relationship)({
-        ref: "Car.workOrders",
-        many: false
-      }),
-      customer: (0, import_fields.relationship)({
-        ref: "User.clientOrders",
-        many: false
-      }),
-      value: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const applications = await context.query.Application.findMany({
-                where: { workOrder: { id: { equals: item.id } } },
-                query: "value"
-              });
-              let total = 0;
-              applications.forEach((app) => {
-                total += app.value;
-              });
-              return total;
-            } catch (e) {
-              return 0;
-            }
-          }
-        })
-      }),
-      total: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Float,
-          async resolve(item, args, context) {
-            try {
-              const applications = await context.query.Application.findMany({
-                where: { workOrder: { id: { equals: item.id } } },
-                query: "price"
-              });
-              let total = 0;
-              applications.forEach((app) => {
-                total += app.price;
-              });
-              return total;
-            } catch (e) {
-              return 0;
-            }
-          }
-        })
-      }),
-      applications: (0, import_fields.relationship)({
-        ref: "Application.workOrder",
-        many: true
-      })
-    }
-  }),
   Application: (0, import_core.list)({
     ui: {
       labelField: "name"
@@ -800,6 +295,30 @@ var lists = {
       })
     }
   }),
+  ApplicationLocation: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isManager,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      applicationTypes: (0, import_fields.relationship)({
+        ref: "ApplicationType.locations",
+        many: true
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.location",
+        many: true
+      })
+    }
+  }),
   ApplicationType: (0, import_core.list)({
     ui: {
       labelField: "name"
@@ -828,224 +347,6 @@ var lists = {
       })
     }
   }),
-  Product: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isManager,
-        query: isEmployee,
-        update: isManager,
-        delete: isManager
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      description: (0, import_fields.text)({}),
-      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      currentStock: (0, import_fields.virtual)({
-        field: import_core.graphql.field({
-          type: import_core.graphql.Int,
-          async resolve(item, args, context) {
-            try {
-              const generalStorage = await context.query.Storage.findMany({
-                where: { name: { equals: "Genel" } },
-                query: "id"
-              });
-              const movements = await context.query.StockMovement.findMany({
-                where: {
-                  product: { id: { equals: item.id } },
-                  storage: { id: { equals: generalStorage.at(0).id } }
-                },
-                query: "amount movementType"
-              });
-              let stock = 0;
-              movements.forEach((movement) => {
-                if (movement.movementType == "giri\u015F") {
-                  stock += movement.amount;
-                } else {
-                  stock -= movement.amount;
-                }
-              });
-              return stock;
-            } catch (e) {
-              return 0;
-            }
-          }
-        })
-      }),
-      suppliers: (0, import_fields.relationship)({
-        ref: "Supplier.products",
-        many: true
-      }),
-      status: (0, import_fields.select)({
-        type: "string",
-        options: ["aktif", "pasif", "iptal"],
-        defaultValue: "aktif",
-        validation: { isRequired: true }
-      }),
-      images: (0, import_fields.relationship)({
-        ref: "File.product",
-        many: true
-      }),
-      code: (0, import_fields.text)({}),
-      ean: (0, import_fields.text)({}),
-      productBrand: (0, import_fields.relationship)({
-        ref: "ProductBrand.products",
-        many: false
-      }),
-      pricedBy: (0, import_fields.select)({
-        type: "string",
-        options: ["amount", "length"],
-        defaultValue: "amount",
-        validation: { isRequired: true }
-      }),
-      applications: (0, import_fields.relationship)({
-        ref: "Application.product",
-        many: true
-      }),
-      applicationType: (0, import_fields.relationship)({
-        ref: "ApplicationType.products",
-        many: false
-      }),
-      stockMovements: (0, import_fields.relationship)({
-        ref: "StockMovement.product",
-        many: true
-      }),
-      documentProducts: (0, import_fields.relationship)({
-        ref: "DocumentProduct.product",
-        many: true
-      }),
-      warrantyType: (0, import_fields.select)({
-        type: "string",
-        options: ["\xF6m\xFCr", "garanti", "\xF6mur_boyu", "yok"],
-        defaultValue: "yok",
-        validation: { isRequired: true }
-      }),
-      warrantyTimeScale: (0, import_fields.select)({
-        type: "string",
-        options: ["g\xFCn", "ay", "y\u0131l"],
-        defaultValue: "y\u0131l",
-        validation: { isRequired: true }
-      }),
-      warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
-      color: (0, import_fields.text)({}),
-      width: (0, import_fields.float)({}),
-      length: (0, import_fields.float)({}),
-      height: (0, import_fields.float)({}),
-      depth: (0, import_fields.float)({}),
-      weight: (0, import_fields.float)({}),
-      thickness: (0, import_fields.float)({}),
-      extraFields: (0, import_fields.json)({
-        defaultValue: {
-          colorWarranty: false,
-          customPricing: {
-            sideWindow: "",
-            windshield: "",
-            sunroof: "",
-            glassTop: "",
-            hood: "",
-            hoodFender: "",
-            hoodFenderBumper: "",
-            complete: ""
-          }
-        }
-      })
-    }
-  }),
-  Storage: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isAdmin,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      stockMovements: (0, import_fields.relationship)({
-        ref: "StockMovement.storage",
-        many: true
-      })
-    }
-  }),
-  StockMovement: (0, import_core.list)({
-    ui: {
-      labelField: "movementType"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isAdmin,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      product: (0, import_fields.relationship)({
-        ref: "Product.stockMovements",
-        many: false
-      }),
-      storage: (0, import_fields.relationship)({
-        ref: "Storage.stockMovements",
-        many: false
-      }),
-      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      movementType: (0, import_fields.select)({
-        type: "string",
-        options: ["giri\u015F", "\xE7\u0131k\u0131\u015F"],
-        defaultValue: "giri\u015F",
-        validation: { isRequired: true }
-      }),
-      documentProduct: (0, import_fields.relationship)({
-        ref: "DocumentProduct.stockMovements",
-        many: false
-      }),
-      note: (0, import_fields.text)({}),
-      customer: (0, import_fields.relationship)({
-        ref: "User.customerMovements",
-        many: false
-      }),
-      date: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true
-      }),
-      application: (0, import_fields.relationship)({
-        ref: "Application.stockMovements",
-        many: false
-      }),
-      createdAt: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true,
-        access: {
-          create: import_access.denyAll,
-          update: import_access.denyAll
-        }
-      })
-    }
-  }),
-  ProductBrand: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isEmployee,
-        query: isEmployee,
-        update: isEmployee,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      products: (0, import_fields.relationship)({ ref: "Product.productBrand", many: true })
-    }
-  }),
   Car: (0, import_core.list)({
     ui: {
       labelField: "licensePlate"
@@ -1068,22 +369,25 @@ var lists = {
       workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.car", many: true })
     }
   }),
-  Supplier: (0, import_core.list)({
+  CarBrand: (0, import_core.list)({
     ui: {
       labelField: "name"
     },
     access: {
       operation: {
-        create: isManager,
+        create: isEmployee,
         query: isEmployee,
         update: isManager,
         delete: isAdmin
       }
     },
     fields: {
-      name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      products: (0, import_fields.relationship)({ ref: "Product.suppliers", many: true }),
-      documents: (0, import_fields.relationship)({ ref: "Document.supplier", many: true })
+      name: (0, import_fields.text)({
+        validation: { isRequired: true },
+        isFilterable: true,
+        isIndexed: true
+      }),
+      carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
     }
   }),
   CarModel: (0, import_core.list)({
@@ -1108,7 +412,179 @@ var lists = {
       carBrand: (0, import_fields.relationship)({ ref: "CarBrand.carModels", many: false })
     }
   }),
-  CarBrand: (0, import_core.list)({
+  Document: (0, import_core.list)({
+    ui: {
+      labelField: "createdAt"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isManager
+      }
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const products = await context.query.DocumentProduct.findMany({
+            where: { document: { id: { equals: item.id } } },
+            query: "id"
+          });
+          products.forEach(async (dp) => {
+            await context.query.DocumentProduct.deleteOne({
+              where: { id: dp.id }
+            });
+          });
+          if (item.paymentPlanId) {
+            await context.query.PaymentPlan.deleteOne({
+              where: { id: item.paymentPlanId }
+            });
+          }
+        }
+      }
+    },
+    fields: {
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
+      }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const products = await context.query.DocumentProduct.findMany({
+                where: { document: { id: { equals: item.id } } },
+                query: "amount product { price }"
+              });
+              let total = 0;
+              products.forEach((product) => {
+                total += product.amount * product.product.price;
+              });
+              return total - total * (item.reduction ?? 0) / 100;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
+      documentType: (0, import_fields.select)({
+        type: "string",
+        options: ["sat\u0131\u015F", "fatura", "irsaliye", "s\xF6zle\u015Fme", "di\u011Fer"],
+        defaultValue: "sat\u0131\u015F",
+        validation: { isRequired: true }
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.documents",
+        many: false
+      }),
+      customer: (0, import_fields.relationship)({
+        ref: "User.customerDocuments",
+        many: false
+      }),
+      reduction: (0, import_fields.float)({ defaultValue: 0 }),
+      isDeleted: (0, import_fields.checkbox)({ defaultValue: false }),
+      number: (0, import_fields.text)({}),
+      invoiced: (0, import_fields.checkbox)({ defaultValue: false }),
+      products: (0, import_fields.relationship)({
+        ref: "DocumentProduct.document",
+        many: true
+      }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.document",
+        many: false
+      }),
+      supplier: (0, import_fields.relationship)({
+        ref: "Supplier.documents",
+        many: false
+      })
+    }
+  }),
+  DocumentProduct: (0, import_core.list)({
+    ui: {
+      labelField: "amount"
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const movements = await context.query.StockMovement.findMany({
+            where: { documentProduct: { id: { equals: item.id } } },
+            query: "id"
+          });
+          movements.forEach(async (movement) => {
+            await context.query.StockMovement.deleteOne({
+              where: { id: movement.id }
+            });
+          });
+        }
+      },
+      afterOperation: async ({ operation, item, context }) => {
+        if (operation === "create") {
+          const generalStorage = await context.query.Storage.findMany({
+            where: { name: { equals: "Genel" } },
+            query: "id"
+          });
+          await context.query.StockMovement.createOne({
+            data: {
+              product: { connect: { id: item.productId } },
+              storage: { connect: { id: generalStorage.at(0).id } },
+              amount: item.amount,
+              movementType: "\xE7\u0131k\u0131\u015F",
+              documentProduct: { connect: { id: item.id } }
+            }
+          });
+        }
+      }
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: isManager
+      }
+    },
+    fields: {
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.documentProduct",
+        many: true
+      }),
+      product: (0, import_fields.relationship)({
+        ref: "Product.documentProducts",
+        many: false
+      }),
+      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const document = await context.query.Document.findOne({
+                where: { id: item.documentId },
+                query: "reduction"
+              });
+              let total = item.price * item.amount;
+              total -= total * (document.reduction ?? 0) / 100;
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
+      document: (0, import_fields.relationship)({
+        ref: "Document.products",
+        many: false
+      })
+    }
+  }),
+  File: (0, import_core.list)({
     ui: {
       labelField: "name"
     },
@@ -1116,40 +592,140 @@ var lists = {
       operation: {
         create: isEmployee,
         query: isEmployee,
-        update: isManager,
-        delete: isAdmin
-      }
-    },
-    fields: {
-      name: (0, import_fields.text)({
-        validation: { isRequired: true },
-        isFilterable: true,
-        isIndexed: true
-      }),
-      carModels: (0, import_fields.relationship)({ ref: "CarModel.carBrand", many: true })
-    }
-  }),
-  ApplicationLocation: (0, import_core.list)({
-    ui: {
-      labelField: "name"
-    },
-    access: {
-      operation: {
-        create: isManager,
-        query: isEmployee,
-        update: isManager,
+        update: isAdmin,
         delete: isAdmin
       }
     },
     fields: {
       name: (0, import_fields.text)({ validation: { isRequired: true } }),
-      applicationTypes: (0, import_fields.relationship)({
-        ref: "ApplicationType.locations",
-        many: true
+      url: (0, import_fields.text)(),
+      application: (0, import_fields.relationship)({
+        ref: "Application.images",
+        many: false
       }),
-      applications: (0, import_fields.relationship)({
-        ref: "Application.location",
-        many: true
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.images",
+        many: false
+      }),
+      product: (0, import_fields.relationship)({
+        ref: "Product.images",
+        many: false
+      })
+    }
+  }),
+  Note: (0, import_core.list)({
+    ui: {
+      labelField: "note"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      note: (0, import_fields.text)({ validation: { isRequired: true } }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.notes",
+        many: false
+      }),
+      creator: (0, import_fields.relationship)({
+        ref: "User.notes",
+        many: false
+      })
+    }
+  }),
+  Notification: (0, import_core.list)({
+    ui: {
+      labelField: "date"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
+      }),
+      message: (0, import_fields.text)({ validation: { isRequired: true } }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.notifications",
+        many: false
+      }),
+      workOrder: (0, import_fields.relationship)({
+        ref: "WorkOrder.notifications",
+        many: false
+      }),
+      link: (0, import_fields.text)({}),
+      handled: (0, import_fields.checkbox)({ defaultValue: false }),
+      notifyRoles: (0, import_fields.multiselect)({
+        type: "enum",
+        options: ["admin", "customer", "employee", "manager"]
+      })
+    }
+  }),
+  Payment: (0, import_core.list)({
+    ui: {
+      labelField: "date"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isManager,
+        delete: isManager
+      }
+    },
+    hooks: {
+      beforeOperation: async ({ context, operation, item, resolvedData }) => {
+        if (operation == "create") {
+          try {
+            await context.sudo().query.Payment.findMany({
+              query: "id totalToDate",
+              orderBy: {
+                createdAt: "desc"
+              },
+              take: 1
+            }).then((payments) => {
+              const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+              resolvedData.totalToDate = totalToDate;
+            });
+          } catch (_) {
+          }
+          resolvedData.creationDate = /* @__PURE__ */ new Date();
+        }
+      }
+    },
+    fields: {
+      creationDate: (0, import_fields.timestamp)({
+        isOrderable: true
+      }),
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.payments",
+        many: false
+      }),
+      reference: (0, import_fields.text)({}),
+      totalToDate: (0, import_fields.float)({}),
+      type: (0, import_fields.select)({
+        type: "string",
+        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
+        defaultValue: "nakit",
+        validation: { isRequired: true }
+      }),
+      out: (0, import_fields.checkbox)({
+        defaultValue: false
+      }),
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
       })
     }
   }),
@@ -1426,69 +1002,147 @@ var lists = {
       })
     }
   }),
-  Payment: (0, import_core.list)({
+  Product: (0, import_core.list)({
     ui: {
-      labelField: "date"
+      labelField: "name"
     },
     access: {
       operation: {
-        create: isEmployee,
+        create: isManager,
         query: isEmployee,
         update: isManager,
         delete: isManager
       }
     },
     fields: {
-      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
-      paymentPlan: (0, import_fields.relationship)({
-        ref: "PaymentPlan.payments",
-        many: false
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      description: (0, import_fields.text)({}),
+      price: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      currentStock: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Int,
+          async resolve(item, args, context) {
+            try {
+              const generalStorage = await context.query.Storage.findMany({
+                where: { name: { equals: "Genel" } },
+                query: "id"
+              });
+              const movements = await context.query.StockMovement.findMany({
+                where: {
+                  product: { id: { equals: item.id } },
+                  storage: { id: { equals: generalStorage.at(0).id } }
+                },
+                query: "amount movementType"
+              });
+              let stock = 0;
+              movements.forEach((movement) => {
+                if (movement.movementType == "giri\u015F") {
+                  stock += movement.amount;
+                } else {
+                  stock -= movement.amount;
+                }
+              });
+              return stock;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
       }),
-      reference: (0, import_fields.text)({}),
-      type: (0, import_fields.select)({
+      suppliers: (0, import_fields.relationship)({
+        ref: "Supplier.products",
+        many: true
+      }),
+      status: (0, import_fields.select)({
         type: "string",
-        options: ["nakit", "kredi kart\u0131", "havale", "\xE7ek", "senet", "banka kart\u0131"],
-        defaultValue: "nakit",
+        options: ["aktif", "pasif", "iptal"],
+        defaultValue: "aktif",
         validation: { isRequired: true }
       }),
-      date: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true
+      images: (0, import_fields.relationship)({
+        ref: "File.product",
+        many: true
+      }),
+      code: (0, import_fields.text)({}),
+      ean: (0, import_fields.text)({}),
+      productBrand: (0, import_fields.relationship)({
+        ref: "ProductBrand.products",
+        many: false
+      }),
+      pricedBy: (0, import_fields.select)({
+        type: "string",
+        options: ["amount", "length"],
+        defaultValue: "amount",
+        validation: { isRequired: true }
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.product",
+        many: true
+      }),
+      applicationType: (0, import_fields.relationship)({
+        ref: "ApplicationType.products",
+        many: false
+      }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.product",
+        many: true
+      }),
+      documentProducts: (0, import_fields.relationship)({
+        ref: "DocumentProduct.product",
+        many: true
+      }),
+      warrantyType: (0, import_fields.select)({
+        type: "string",
+        options: ["\xF6m\xFCr", "garanti", "\xF6mur_boyu", "yok"],
+        defaultValue: "yok",
+        validation: { isRequired: true }
+      }),
+      warrantyTimeScale: (0, import_fields.select)({
+        type: "string",
+        options: ["g\xFCn", "ay", "y\u0131l"],
+        defaultValue: "y\u0131l",
+        validation: { isRequired: true }
+      }),
+      warrantyTime: (0, import_fields.float)({ validation: { isRequired: false, min: 0 } }),
+      color: (0, import_fields.text)({}),
+      width: (0, import_fields.float)({}),
+      length: (0, import_fields.float)({}),
+      height: (0, import_fields.float)({}),
+      depth: (0, import_fields.float)({}),
+      weight: (0, import_fields.float)({}),
+      thickness: (0, import_fields.float)({}),
+      extraFields: (0, import_fields.json)({
+        defaultValue: {
+          colorWarranty: false,
+          customPricing: {
+            sideWindow: "",
+            windshield: "",
+            sunroof: "",
+            glassTop: "",
+            hood: "",
+            hoodFender: "",
+            hoodFenderBumper: "",
+            complete: ""
+          }
+        }
       })
     }
   }),
-  Notification: (0, import_core.list)({
+  ProductBrand: (0, import_core.list)({
     ui: {
-      labelField: "date"
+      labelField: "name"
     },
     access: {
       operation: {
-        create: isAdmin,
+        create: isEmployee,
         query: isEmployee,
-        update: isAdmin,
+        update: isEmployee,
         delete: isAdmin
       }
     },
     fields: {
-      date: (0, import_fields.timestamp)({
-        defaultValue: { kind: "now" },
-        isOrderable: true
-      }),
-      message: (0, import_fields.text)({ validation: { isRequired: true } }),
-      paymentPlan: (0, import_fields.relationship)({
-        ref: "PaymentPlan.notifications",
-        many: false
-      }),
-      workOrder: (0, import_fields.relationship)({
-        ref: "WorkOrder.notifications",
-        many: false
-      }),
-      link: (0, import_fields.text)({}),
-      handled: (0, import_fields.checkbox)({ defaultValue: false }),
-      notifyRoles: (0, import_fields.multiselect)({
-        type: "enum",
-        options: ["admin", "customer", "employee", "manager"]
-      })
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      products: (0, import_fields.relationship)({ ref: "Product.productBrand", many: true })
     }
   }),
   SoftwareVersion: (0, import_core.list)({
@@ -1513,6 +1167,379 @@ var lists = {
         isOrderable: true
       })
     }
+  }),
+  StockMovement: (0, import_core.list)({
+    ui: {
+      labelField: "movementType"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      product: (0, import_fields.relationship)({
+        ref: "Product.stockMovements",
+        many: false
+      }),
+      storage: (0, import_fields.relationship)({
+        ref: "Storage.stockMovements",
+        many: false
+      }),
+      amount: (0, import_fields.float)({ validation: { isRequired: true, min: 0 } }),
+      movementType: (0, import_fields.select)({
+        type: "string",
+        options: ["giri\u015F", "\xE7\u0131k\u0131\u015F"],
+        defaultValue: "giri\u015F",
+        validation: { isRequired: true }
+      }),
+      documentProduct: (0, import_fields.relationship)({
+        ref: "DocumentProduct.stockMovements",
+        many: false
+      }),
+      note: (0, import_fields.text)({}),
+      customer: (0, import_fields.relationship)({
+        ref: "User.customerMovements",
+        many: false
+      }),
+      date: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true
+      }),
+      application: (0, import_fields.relationship)({
+        ref: "Application.stockMovements",
+        many: false
+      }),
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
+      })
+    }
+  }),
+  Storage: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isAdmin,
+        query: isEmployee,
+        update: isAdmin,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      stockMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.storage",
+        many: true
+      })
+    }
+  }),
+  Supplier: (0, import_core.list)({
+    ui: {
+      labelField: "name"
+    },
+    access: {
+      operation: {
+        create: isManager,
+        query: isEmployee,
+        update: isManager,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      name: (0, import_fields.text)({ validation: { isRequired: true } }),
+      products: (0, import_fields.relationship)({ ref: "Product.suppliers", many: true }),
+      documents: (0, import_fields.relationship)({ ref: "Document.supplier", many: true })
+    }
+  }),
+  User: (0, import_core.list)({
+    ui: {
+      labelField: "firstname"
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "create") {
+          const existingUsers = await context.query.User.findMany({
+            query: "id",
+            where: {
+              OR: [{ role: { equals: "employee" } }, { role: { equals: "admin" } }, { role: { equals: "manager" } }]
+            }
+          });
+          if (existingUsers.length > 14) {
+            throw new Error("User limit reached");
+          }
+        }
+      }
+    },
+    access: {
+      operation: {
+        create: isManager,
+        query: isUser,
+        update: isManager,
+        delete: isAdmin
+      }
+    },
+    fields: {
+      username: (0, import_fields.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
+      email: (0, import_fields.text)({
+        isIndexed: "unique"
+      }),
+      isBlocked: (0, import_fields.checkbox)({ defaultValue: false }),
+      phone: (0, import_fields.text)({ validation: { isRequired: false } }),
+      firstname: (0, import_fields.text)({ validation: { isRequired: true } }),
+      lastname: (0, import_fields.text)({ validation: { isRequired: false } }),
+      role: (0, import_fields.select)({
+        type: "string",
+        options: ["admin", "customer", "employee", "manager"],
+        defaultValue: "customer",
+        validation: { isRequired: true },
+        isIndexed: true,
+        access: {
+          update: isAdmin
+        }
+      }),
+      permissions: (0, import_fields.multiselect)({
+        type: "enum",
+        options: [
+          { label: "Warranty", value: "warranty" },
+          { label: "Price", value: "price" }
+        ],
+        access: {
+          update: isAdmin
+        }
+      }),
+      ssid: (0, import_fields.text)({ validation: { isRequired: false } }),
+      password: (0, import_fields.password)({
+        validation: {
+          isRequired: true,
+          length: {
+            min: 6
+          }
+        }
+      }),
+      qcWorkOrders: (0, import_fields.relationship)({
+        ref: "WorkOrder.qcUser",
+        many: true
+      }),
+      workOrders: (0, import_fields.relationship)({ ref: "WorkOrder.creator", many: true }),
+      clientOrders: (0, import_fields.relationship)({ ref: "WorkOrder.customer", many: true }),
+      applicationsToApply: (0, import_fields.relationship)({
+        ref: "Application.applicant",
+        many: true
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.creator",
+        many: true
+      }),
+      notes: (0, import_fields.relationship)({ ref: "Note.creator", many: true }),
+      documents: (0, import_fields.relationship)({ ref: "Document.creator", many: true }),
+      customerDocuments: (0, import_fields.relationship)({ ref: "Document.customer", many: true }),
+      customerMovements: (0, import_fields.relationship)({
+        ref: "StockMovement.customer",
+        many: true
+      })
+    }
+  }),
+  WorkOrder: (0, import_core.list)({
+    ui: {
+      labelField: "createdAt"
+    },
+    access: {
+      operation: {
+        create: isEmployee,
+        query: isEmployee,
+        update: isEmployee,
+        delete: isManager
+      }
+    },
+    hooks: {
+      beforeOperation: async ({ operation, item, inputData, context }) => {
+        if (operation === "delete") {
+          const applications = await context.query.Application.findMany({
+            where: { workOrder: { id: { equals: item.id } } },
+            query: "id"
+          });
+          applications.forEach(async (app) => {
+            await context.query.Application.deleteOne({
+              where: { id: app.id }
+            });
+          });
+          try {
+            let paymentPlan;
+            paymentPlan = await context.query.PaymentPlan.findMany({
+              where: { workOrder: { id: { equals: item.id } } },
+              query: "id"
+            }).then((plans) => plans.at(0));
+            if (paymentPlan) {
+              await context.query.PaymentPlan.deleteOne({
+                where: { id: paymentPlan.id }
+              });
+            }
+          } catch (e) {
+          }
+        }
+      }
+    },
+    fields: {
+      creator: (0, import_fields.relationship)({
+        ref: "User.workOrders",
+        many: false
+      }),
+      createdAt: (0, import_fields.timestamp)({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+        access: {
+          create: import_access.denyAll,
+          update: import_access.denyAll
+        }
+      }),
+      images: (0, import_fields.relationship)({
+        ref: "File.workOrder",
+        many: true
+      }),
+      notes: (0, import_fields.relationship)({
+        ref: "Note.workOrder",
+        many: true
+      }),
+      status: (0, import_fields.select)({
+        type: "string",
+        options: ["aktif", "pasif", "tamamland\u0131", "iptal", "teklif"],
+        defaultValue: "pasif",
+        access: {
+          update: isManager
+        }
+      }),
+      reduction: (0, import_fields.float)({}),
+      paymentPlan: (0, import_fields.relationship)({
+        ref: "PaymentPlan.workOrder",
+        many: false
+      }),
+      qcDone: (0, import_fields.checkbox)({ defaultValue: false }),
+      qcUser: (0, import_fields.relationship)({
+        ref: "User.qcWorkOrders",
+        many: false
+      }),
+      checkDate: (0, import_fields.timestamp)({
+        validation: { isRequired: false }
+      }),
+      checkDone: (0, import_fields.checkbox)({ defaultValue: false }),
+      notifications: (0, import_fields.relationship)({
+        ref: "Notification.workOrder",
+        many: true
+      }),
+      startedAt: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.String,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "startedAt"
+              });
+              let earliestStart = applications.at(0).startedAt;
+              applications.forEach((app) => {
+                if (app.startedAt < earliestStart) {
+                  earliestStart = app.startedAt;
+                }
+              });
+              if (!earliestStart) {
+                return null;
+              }
+              return new Date(earliestStart).toLocaleString("tr-TR").slice(0, -3);
+            } catch (e) {
+              return null;
+            }
+          }
+        })
+      }),
+      finishedAt: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.String,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "finishedAt"
+              });
+              if (applications.every((app) => app.finishedAt)) {
+                let latestFinish = applications.at(0).finishedAt;
+                applications.forEach((app) => {
+                  if (app.finishedAt > latestFinish) {
+                    latestFinish = app.finishedAt;
+                  }
+                });
+                return new Date(latestFinish).toLocaleString("tr-TR").slice(0, -3);
+              } else {
+                return null;
+              }
+            } catch (e) {
+              return null;
+            }
+          }
+        })
+      }),
+      car: (0, import_fields.relationship)({
+        ref: "Car.workOrders",
+        many: false
+      }),
+      customer: (0, import_fields.relationship)({
+        ref: "User.clientOrders",
+        many: false
+      }),
+      value: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "value"
+              });
+              let total = 0;
+              applications.forEach((app) => {
+                total += app.value;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
+      total: (0, import_fields.virtual)({
+        field: import_core.graphql.field({
+          type: import_core.graphql.Float,
+          async resolve(item, args, context) {
+            try {
+              const applications = await context.query.Application.findMany({
+                where: { workOrder: { id: { equals: item.id } } },
+                query: "price"
+              });
+              let total = 0;
+              applications.forEach((app) => {
+                total += app.price;
+              });
+              return total;
+            } catch (e) {
+              return 0;
+            }
+          }
+        })
+      }),
+      applications: (0, import_fields.relationship)({
+        ref: "Application.workOrder",
+        many: true
+      })
+    }
   })
 };
 
@@ -1526,7 +1553,7 @@ var keystone_default = withAuth(
     server: {
       port: 3333,
       cors: {
-        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com", "https://web.dmkotofilm.com"],
+        origin: ["http://localhost:8081", "https://dmk.huseyinonal.com", "https://web.dmkotofilm.com", "https://test.dmkgarage.pages.dev"],
         credentials: true
       }
     },

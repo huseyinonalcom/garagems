@@ -626,7 +626,7 @@ export const lists: Lists = {
       },
     },
     hooks: {
-      afterOperation: async ({ context, operation, item }) => {
+      beforeOperation: async ({ context, operation, item, resolvedData }) => {
         if (operation == "create") {
           try {
             await context
@@ -639,11 +639,11 @@ export const lists: Lists = {
                 take: 1,
               })
               .then((payments) => {
-                const totalToDate = payments.at(0)?.totalToDate || item.amount;
-                item.totalToDate = totalToDate;
+                const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+                resolvedData.totalToDate = totalToDate;
               });
           } catch (_) {}
-          item.creationDate = new Date();
+          resolvedData.creationDate = new Date();
         }
       },
     },
