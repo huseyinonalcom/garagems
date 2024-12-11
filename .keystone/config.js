@@ -695,14 +695,14 @@ var lists = {
               take: 1
             }).then((payments) => {
               console.log(payments);
-              let totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
-              print(totalToDate);
+              let totalToDate = payments.at(0)?.totalToDate ?? resolvedData.amount;
+              console.log(totalToDate);
               if (resolvedData.out) {
                 totalToDate -= resolvedData.amount;
               } else {
                 totalToDate += resolvedData.amount;
               }
-              print(totalToDate);
+              console.log(totalToDate);
               resolvedData.totalToDate = totalToDate;
             });
           } catch (e) {
