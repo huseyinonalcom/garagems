@@ -642,6 +642,12 @@ export const lists: Lists = {
                 console.log(payments);
                 const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
                 print(totalToDate);
+                if (resolvedData.out) {
+                  totalToDate -= resolvedData.amount;
+                } else {
+                  totalToDate += resolvedData.amount;
+                }
+                print(totalToDate);
                 resolvedData.totalToDate = totalToDate;
               });
           } catch (e) {
