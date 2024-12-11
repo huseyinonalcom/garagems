@@ -625,13 +625,39 @@ export const lists: Lists = {
         delete: isManager,
       },
     },
+    hooks: {
+      afterOperation: async ({ context, operation, item }) => {
+        if (operation == "create") {
+          try {
+            await context
+              .sudo()
+              .query.Payment.findMany({
+                query: "id totalToDate",
+                orderBy: {
+                  createdAt: "desc",
+                },
+                take: 1,
+              })
+              .then((payments) => {
+                const totalToDate = payments.at(0)?.totalToDate || item.amount;
+                item.totalToDate = totalToDate;
+              });
+          } catch (_) {}
+        }
+      },
+    },
     fields: {
+      createdAt: timestamp({
+        defaultValue: { kind: "now" },
+        isOrderable: true,
+      }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
       paymentPlan: relationship({
         ref: "PaymentPlan.payments",
         many: false,
       }),
       reference: text({}),
+      totalToDate: float({}),
       type: select({
         type: "string",
         options: ["nakit", "kredi kartı", "havale", "çek", "senet", "banka kartı"],
