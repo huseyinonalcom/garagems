@@ -640,6 +640,7 @@ export const lists: Lists = {
               })
               .then((payments) => {
                 const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+                print(totalToDate);
                 resolvedData.totalToDate = totalToDate;
               });
           } catch (_) {}
