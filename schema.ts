@@ -649,7 +649,6 @@ export const lists: Lists = {
     fields: {
       createdAt: timestamp({
         defaultValue: { kind: "now" },
-        isOrderable: true,
       }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
       paymentPlan: relationship({
