@@ -695,7 +695,7 @@ var lists = {
               take: 1
             }).then((payments) => {
               console.log(payments);
-              let totalToDate = payments.at(0)?.totalToDate ?? resolvedData.amount;
+              let totalToDate = payments.at(0)?.totalToDate ?? 0;
               console.log(totalToDate);
               if (resolvedData.out) {
                 totalToDate -= resolvedData.amount;
