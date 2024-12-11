@@ -643,13 +643,13 @@ export const lists: Lists = {
                 item.totalToDate = totalToDate;
               });
           } catch (_) {}
+          item.creationDate = new Date();
         }
       },
     },
     fields: {
       creationDate: timestamp({
         isOrderable: true,
-        defaultValue: { kind: "now" },
       }),
       amount: float({ validation: { isRequired: true, min: 0 } }),
       paymentPlan: relationship({
