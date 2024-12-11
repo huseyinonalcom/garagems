@@ -690,14 +690,23 @@ var lists = {
             await context.sudo().query.Payment.findMany({
               query: "id totalToDate",
               orderBy: {
-                createdAt: "desc"
+                creationDate: "desc"
               },
               take: 1
             }).then((payments) => {
-              const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+              console.log(payments);
+              let totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+              print(totalToDate);
+              if (resolvedData.out) {
+                totalToDate -= resolvedData.amount;
+              } else {
+                totalToDate += resolvedData.amount;
+              }
+              print(totalToDate);
               resolvedData.totalToDate = totalToDate;
             });
-          } catch (_) {
+          } catch (e) {
+            console.log(e);
           }
           resolvedData.creationDate = /* @__PURE__ */ new Date();
         }
