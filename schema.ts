@@ -640,7 +640,7 @@ export const lists: Lists = {
               })
               .then((payments) => {
                 console.log(payments);
-                const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
+                let totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
                 print(totalToDate);
                 if (resolvedData.out) {
                   totalToDate -= resolvedData.amount;
