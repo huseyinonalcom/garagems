@@ -1415,6 +1415,9 @@ export const lists: Lists = {
         defaultValue: "nakit",
         validation: { isRequired: true },
       }),
+      out: checkbox({
+        defaultValue: false,
+      }),
       date: timestamp({
         defaultValue: { kind: "now" },
         isOrderable: true,
