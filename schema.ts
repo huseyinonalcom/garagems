@@ -639,11 +639,14 @@ export const lists: Lists = {
                 take: 1,
               })
               .then((payments) => {
+                console.log(payments);
                 const totalToDate = payments.at(0)?.totalToDate || resolvedData.amount;
                 print(totalToDate);
                 resolvedData.totalToDate = totalToDate;
               });
-          } catch (_) {}
+          } catch (e) {
+            console.log(e);
+          }
           resolvedData.creationDate = new Date();
         }
       },
