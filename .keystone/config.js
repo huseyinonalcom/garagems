@@ -471,7 +471,7 @@ var lists = {
               products.forEach((product) => {
                 total += product.amount * product.product.price;
               });
-              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: item.reductionType ?? `straight`, price: total });
+              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: item.reductionType ?? "inverse", price: total });
             } catch (e) {
               return 0;
             }
