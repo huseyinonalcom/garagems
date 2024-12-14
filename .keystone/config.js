@@ -106,6 +106,12 @@ function isUser({ session: session2 }) {
     return true;
   return !session2.data.isBlocked;
 }
+var reducedPrice = ({ reduction, reductionType, price }) => {
+  if (reductionType === "straight")
+    return price - price * (reduction ?? 0) / 100;
+  if (reductionType === "inverse")
+    return price / (1 + (reduction ?? 0 / 100));
+};
 var lists = {
   Application: (0, import_core.list)({
     ui: {
@@ -253,11 +259,10 @@ var lists = {
             try {
               const workOrder = await context.query.WorkOrder.findOne({
                 where: { id: item.workOrderId },
-                query: "reduction"
+                query: "reduction reductionType"
               });
               let total = item.value;
-              total -= total * (workOrder.reduction ?? 0) / 100;
-              return total;
+              return reducedPrice({ reduction: workOrder.reduction, reductionType: workOrder.reductionType, price: total });
             } catch (e) {
               return 0;
             }
@@ -466,7 +471,7 @@ var lists = {
               products.forEach((product) => {
                 total += product.amount * product.product.price;
               });
-              return total - total * (item.reduction ?? 0) / 100;
+              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: item.reductionType ?? `straight`, price: total });
             } catch (e) {
               return 0;
             }
@@ -482,6 +487,11 @@ var lists = {
       creator: (0, import_fields.relationship)({
         ref: "User.documents",
         many: false
+      }),
+      reductionType: (0, import_fields.select)({
+        type: "string",
+        options: ["straight", "inverse"],
+        defaultValue: "inverse"
       }),
       customer: (0, import_fields.relationship)({
         ref: "User.customerDocuments",
@@ -567,11 +577,10 @@ var lists = {
             try {
               const document = await context.query.Document.findOne({
                 where: { id: item.documentId },
-                query: "reduction"
+                query: "reduction reductionType"
               });
               let total = item.price * item.amount;
-              total -= total * (document.reduction ?? 0) / 100;
-              return total;
+              return reducedPrice({ reduction: document.reduction, reductionType: document.reductionType, price: total });
             } catch (e) {
               return 0;
             }

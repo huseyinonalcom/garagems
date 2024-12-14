@@ -653,6 +653,7 @@ type Document {
   total: Float
   documentType: String
   creator: User
+  reductionType: String
   customer: User
   reduction: Float
   isDeleted: Boolean
@@ -676,6 +677,7 @@ input DocumentWhereInput {
   createdAt: DateTimeNullableFilter
   documentType: StringFilter
   creator: UserWhereInput
+  reductionType: StringNullableFilter
   customer: UserWhereInput
   reduction: FloatNullableFilter
   isDeleted: BooleanFilter
@@ -684,6 +686,20 @@ input DocumentWhereInput {
   products: DocumentProductManyRelationFilter
   paymentPlan: PaymentPlanWhereInput
   supplier: SupplierWhereInput
+}
+
+input StringNullableFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: StringNullableFilter
 }
 
 input BooleanFilter {
@@ -701,6 +717,7 @@ input DocumentOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   documentType: OrderDirection
+  reductionType: OrderDirection
   reduction: OrderDirection
   isDeleted: OrderDirection
   number: OrderDirection
@@ -711,6 +728,7 @@ input DocumentUpdateInput {
   createdAt: DateTime
   documentType: String
   creator: UserRelateToOneForUpdateInput
+  reductionType: String
   customer: UserRelateToOneForUpdateInput
   reduction: Float
   isDeleted: Boolean
@@ -749,6 +767,7 @@ input DocumentCreateInput {
   createdAt: DateTime
   documentType: String
   creator: UserRelateToOneForCreateInput
+  reductionType: String
   customer: UserRelateToOneForCreateInput
   reduction: Float
   isDeleted: Boolean
@@ -1894,20 +1913,6 @@ input WorkOrderWhereInput {
   car: CarWhereInput
   customer: UserWhereInput
   applications: ApplicationManyRelationFilter
-}
-
-input StringNullableFilter {
-  equals: String
-  in: [String!]
-  notIn: [String!]
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  contains: String
-  startsWith: String
-  endsWith: String
-  not: StringNullableFilter
 }
 
 input WorkOrderOrderByInput {

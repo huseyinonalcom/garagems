@@ -46,6 +46,11 @@ function isUser({ session }: { session?: Session }) {
   return !session.data.isBlocked;
 }
 
+const reducedPrice = ({ reduction, reductionType, price }: { reduction: number; reductionType: "straight" | "inverse"; price: number }) => {
+  if (reductionType === "straight") return price - (price * (reduction ?? 0)) / 100;
+  if (reductionType === "inverse") return price / (1 + (reduction ?? 0 / 100));
+};
+
 export const lists: Lists = {
   Application: list({
     ui: {
@@ -193,12 +198,11 @@ export const lists: Lists = {
             try {
               const workOrder = await context.query.WorkOrder.findOne({
                 where: { id: item.workOrderId },
-                query: "reduction",
+                query: "reduction reductionType",
               });
               let total = item.value;
 
-              total -= (total * (workOrder.reduction ?? 0)) / 100;
-              return total;
+              return reducedPrice({ reduction: workOrder.reduction, reductionType: workOrder.reductionType, price: total });
             } catch (e) {
               return 0;
             }
@@ -407,7 +411,7 @@ export const lists: Lists = {
               products.forEach((product) => {
                 total += product.amount * product.product.price;
               });
-              return total - (total * (item.reduction ?? 0)) / 100;
+              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: item.reductionType ?? `straight`, price: total });
             } catch (e) {
               return 0;
             }
@@ -423,6 +427,11 @@ export const lists: Lists = {
       creator: relationship({
         ref: "User.documents",
         many: false,
+      }),
+      reductionType: select({
+        type: "string",
+        options: ["straight", "inverse"],
+        defaultValue: "inverse",
       }),
       customer: relationship({
         ref: "User.customerDocuments",
@@ -508,12 +517,11 @@ export const lists: Lists = {
             try {
               const document = await context.query.Document.findOne({
                 where: { id: item.documentId },
-                query: "reduction",
+                query: "reduction reductionType",
               });
               let total = item.price * item.amount;
 
-              total -= (total * (document.reduction ?? 0)) / 100;
-              return total;
+              return reducedPrice({ reduction: document.reduction, reductionType: document.reductionType, price: total });
             } catch (e) {
               return 0;
             }

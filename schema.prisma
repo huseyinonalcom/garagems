@@ -94,6 +94,7 @@ model Document {
   documentType  String            @default("satış")
   creator       User?             @relation("Document_creator", fields: [creatorId], references: [id])
   creatorId     String?           @map("creator")
+  reductionType String?           @default("inverse")
   customer      User?             @relation("Document_customer", fields: [customerId], references: [id])
   customerId    String?           @map("customer")
   reduction     Float?            @default(0)
