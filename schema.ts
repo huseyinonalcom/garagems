@@ -1395,6 +1395,11 @@ export const lists: Lists = {
           update: isManager,
         },
       }),
+      reductionType: select({
+        type: "string",
+        options: ["straight", "inverse"],
+        defaultValue: "inverse",
+      }),
       reduction: float({}),
       paymentPlan: relationship({
         ref: "PaymentPlan.workOrder",

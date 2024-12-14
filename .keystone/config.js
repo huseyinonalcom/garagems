@@ -1432,6 +1432,11 @@ var lists = {
           update: isManager
         }
       }),
+      reductionType: (0, import_fields.select)({
+        type: "string",
+        options: ["straight", "inverse"],
+        defaultValue: "inverse"
+      }),
       reduction: (0, import_fields.float)({}),
       paymentPlan: (0, import_fields.relationship)({
         ref: "PaymentPlan.workOrder",

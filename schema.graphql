@@ -1871,6 +1871,7 @@ type WorkOrder {
   notes(where: NoteWhereInput! = {}, orderBy: [NoteOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: NoteWhereUniqueInput): [Note!]
   notesCount(where: NoteWhereInput! = {}): Int
   status: String
+  reductionType: String
   reduction: Float
   paymentPlan: PaymentPlan
   qcDone: Boolean
@@ -1903,6 +1904,7 @@ input WorkOrderWhereInput {
   images: FileManyRelationFilter
   notes: NoteManyRelationFilter
   status: StringNullableFilter
+  reductionType: StringNullableFilter
   reduction: FloatNullableFilter
   paymentPlan: PaymentPlanWhereInput
   qcDone: BooleanFilter
@@ -1919,6 +1921,7 @@ input WorkOrderOrderByInput {
   id: OrderDirection
   createdAt: OrderDirection
   status: OrderDirection
+  reductionType: OrderDirection
   reduction: OrderDirection
   qcDone: OrderDirection
   checkDate: OrderDirection
@@ -1931,6 +1934,7 @@ input WorkOrderUpdateInput {
   images: FileRelateToManyForUpdateInput
   notes: NoteRelateToManyForUpdateInput
   status: String
+  reductionType: String
   reduction: Float
   paymentPlan: PaymentPlanRelateToOneForUpdateInput
   qcDone: Boolean
@@ -1960,6 +1964,7 @@ input WorkOrderCreateInput {
   images: FileRelateToManyForCreateInput
   notes: NoteRelateToManyForCreateInput
   status: String
+  reductionType: String
   reduction: Float
   paymentPlan: PaymentPlanRelateToOneForCreateInput
   qcDone: Boolean
