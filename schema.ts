@@ -48,7 +48,7 @@ function isUser({ session }: { session?: Session }) {
 
 const reducedPrice = ({ reduction, reductionType, price }: { reduction: number; reductionType: "straight" | "inverse"; price: number }) => {
   if (reductionType === "straight") return price - (price * (reduction ?? 0)) / 100;
-  if (reductionType === "inverse") return price / (1 + (reduction ?? 0 / 100));
+  if (reductionType === "inverse") return price / (1 + (reduction ?? 0) / 100);
 };
 
 export const lists: Lists = {
