@@ -1512,11 +1512,7 @@ export const lists: Lists = {
               applications.forEach((app) => {
                 total += app.price;
               });
-              return reducedPrice({
-                reduction: item.reduction ?? 0,
-                reductionType: item.reductionType ?? "inverse",
-                price: total,
-              });
+              return total;
             } catch (e) {
               return 0;
             }
