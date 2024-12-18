@@ -110,7 +110,7 @@ var reducedPrice = ({ reduction, reductionType, price }) => {
   if (reductionType === "straight")
     return price - price * (reduction ?? 0) / 100;
   if (reductionType === "inverse")
-    return price / (1 + (reduction ?? 0 / 100));
+    return price / (1 + (reduction ?? 0) / 100);
 };
 var lists = {
   Application: (0, import_core.list)({
