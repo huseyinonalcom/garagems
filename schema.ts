@@ -1506,13 +1506,17 @@ export const lists: Lists = {
             try {
               const applications = await context.query.Application.findMany({
                 where: { workOrder: { id: { equals: item.id } } },
-                query: "price workOrder { reduction }",
+                query: "price",
               });
               let total = 0;
               applications.forEach((app) => {
-                total += app.price / (1 + app.workOrder.reduction / 100);
+                total += app.price;
               });
-              return total;
+              return reducedPrice({
+                reduction: item.reduction ?? 0,
+                reductionType: item.reductionType ?? "inverse",
+                price: total,
+              });
             } catch (e) {
               return 0;
             }
