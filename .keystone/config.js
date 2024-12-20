@@ -1134,9 +1134,8 @@ var lists = {
             sunroof: "",
             glassTop: "",
             hood: "",
-            hoodFender: "",
-            hoodFenderBumper: "",
-            complete: ""
+            fender: "",
+            bumper: ""
           }
         }
       })
@@ -1321,6 +1320,7 @@ var lists = {
           update: isAdmin
         }
       }),
+      code: (0, import_fields.text)({}),
       permissions: (0, import_fields.multiselect)({
         type: "enum",
         options: [

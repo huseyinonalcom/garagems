@@ -227,7 +227,7 @@ model Product {
   depth             Float?
   weight            Float?
   thickness         Float?
-  extraFields       String?           @default("{\"colorWarranty\":false,\"customPricing\":{\"sideWindow\":\"\",\"windshield\":\"\",\"sunroof\":\"\",\"glassTop\":\"\",\"hood\":\"\",\"hoodFender\":\"\",\"hoodFenderBumper\":\"\",\"complete\":\"\"}}")
+  extraFields       String?           @default("{\"colorWarranty\":false,\"customPricing\":{\"sideWindow\":\"\",\"windshield\":\"\",\"sunroof\":\"\",\"glassTop\":\"\",\"hood\":\"\",\"fender\":\"\",\"bumper\":\"\"}}")
 
   @@index([productBrandId])
   @@index([applicationTypeId])
@@ -297,6 +297,7 @@ model User {
   firstname           String          @default("")
   lastname            String          @default("")
   role                String          @default("customer")
+  code                String          @default("")
   permissions         String          @default("[]")
   ssid                String          @default("")
   password            String

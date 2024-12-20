@@ -411,7 +411,7 @@ export const lists: Lists = {
               products.forEach((product) => {
                 total += product.amount * product.product.price;
               });
-              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: item.reductionType ?? "inverse", price: total });
+              return reducedPrice({ reduction: item.reduction ?? 0, reductionType: (item.reductionType as "inverse" | "straight") ?? "inverse", price: total });
             } catch (e) {
               return 0;
             }
@@ -1284,6 +1284,7 @@ export const lists: Lists = {
           update: isAdmin,
         },
       }),
+      code: text({}),
       permissions: multiselect({
         type: "enum",
         options: [

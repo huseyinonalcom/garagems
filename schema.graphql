@@ -1721,6 +1721,7 @@ type User {
   firstname: String
   lastname: String
   role: String
+  code: String
   permissions: [UserPermissionType!]
   ssid: String
   password: PasswordState
@@ -1771,6 +1772,7 @@ input UserWhereInput {
   firstname: StringFilter
   lastname: StringFilter
   role: StringFilter
+  code: StringFilter
   ssid: StringFilter
   qcWorkOrders: WorkOrderManyRelationFilter
   workOrders: WorkOrderManyRelationFilter
@@ -1798,6 +1800,7 @@ input UserOrderByInput {
   firstname: OrderDirection
   lastname: OrderDirection
   role: OrderDirection
+  code: OrderDirection
   ssid: OrderDirection
 }
 
@@ -1809,6 +1812,7 @@ input UserUpdateInput {
   firstname: String
   lastname: String
   role: String
+  code: String
   permissions: [UserPermissionType!]
   ssid: String
   password: String
@@ -1843,6 +1847,7 @@ input UserCreateInput {
   firstname: String
   lastname: String
   role: String
+  code: String
   permissions: [UserPermissionType!]
   ssid: String
   password: String
